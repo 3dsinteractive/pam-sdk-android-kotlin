@@ -62,14 +62,21 @@ class PamSDK {
         }
 
         fun userLogin(customerID: String) {
-            this.saveToSharedPref("_contact_id", customerID)
+            this.saveToSharedPref("customer_id", customerID)
             this.saveToSharedPref("_database", this.options!!.loginDbAlias)
-            this.track("login", mutableMapOf())
+            this.track(
+                "login", mutableMapOf(
+                    "form_fields" to mutableMapOf(
+                        "customer" to customerID
+                    )
+                )
+            )
         }
 
         fun userLogout() {
             this.track("logout", mutableMapOf())
             this.removeFromSharedPref("_contact_id")
+            this.removeFromSharedPref("customer_id")
             this.removeFromSharedPref("_database")
         }
 

@@ -3,7 +3,7 @@ package pams.ai.demo
 import android.app.Application
 import pamsdk.PamSDK
 
-class MyApplication : Application() {
+class PamDemoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 

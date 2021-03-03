@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".LoginPage">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="225dp"
+                android:layout_height="200dp"
+                android:src="@mipmap/logo_3digits"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/label_email"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:text="Email"
+                android:textAlignment="textStart"
+                android:textSize="16dp"
+                app:layout_constraintEnd_toEndOf="@id/logo"
+                app:layout_constraintStart_toStartOf="@id/logo"
+                app:layout_constraintTop_toBottomOf="@id/logo" />
+
+            <Spinner
+                android:id="@+id/spinner_user"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/spinner_border"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="10dp"
+                app:layout_constraintEnd_toEndOf="@id/logo"
+                app:layout_constraintStart_toStartOf="@id/logo"
+                app:layout_constraintTop_toBottomOf="@id/label_email" />
+
+            <Button
+                android:id="@+id/btn_login"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Login"
+                app:layout_constraintEnd_toEndOf="@id/logo"
+                app:layout_constraintStart_toStartOf="@id/logo"
+                app:layout_constraintTop_toBottomOf="@id/spinner_user" />
+
+            <Button
+                android:id="@+id/btn_register"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Register"
+                app:layout_constraintEnd_toEndOf="@id/logo"
+                app:layout_constraintStart_toStartOf="@id/logo"
+                app:layout_constraintTop_toBottomOf="@id/btn_login" />
+
+            <Button
+                android:id="@+id/btn_skip"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Skip"
+                app:layout_constraintEnd_toEndOf="@id/logo"
+                app:layout_constraintStart_toStartOf="@id/logo"
+                app:layout_constraintTop_toBottomOf="@id/btn_register" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

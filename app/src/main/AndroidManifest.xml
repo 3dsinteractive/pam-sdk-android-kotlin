@@ -5,28 +5,33 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".MyApplication"
+        android:name=".PamDemoApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="Pam Demo"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PamDemo">
+        <activity android:name=".RegisterPage"></activity>
+        <activity android:name=".TopBar" />
+        <activity android:name=".ProductPage" /> <!-- Configs -->
         <meta-data
             android:name="pam-server"
-            android:value="https:stg.pams.ai"/>
+            android:value="https:stg.pams.ai" />
         <meta-data
             android:name="public-db-alias"
-            android:value="3digits-public"/>
+            android:value="3digits-public" />
         <meta-data
             android:name="login-db-alias"
-            android:value="3digits-login"/>
-
-        <activity android:name=".MainActivity">
+            android:value="3digits-login" /> <!-- Activities -->
+        <activity android:name=".LaunchScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".LoginPage" />
     </application>
+
 </manifest>
