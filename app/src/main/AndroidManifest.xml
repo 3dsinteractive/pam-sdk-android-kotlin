@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PamDemo">
-        <activity android:name=".RegisterPage"></activity>
+        <activity android:name=".ProductDetailPage"></activity>
+        <activity android:name=".RegisterPage" />
         <activity android:name=".TopBar" />
         <activity android:name=".ProductPage" /> <!-- Configs -->
         <meta-data
