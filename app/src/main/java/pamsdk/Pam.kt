@@ -85,19 +85,21 @@ class PamSDK {
             key: String,
             value: Any
         ) {
-            obj["form_fields"].let {
-                val newObj: MutableMap<String, String>
-                if (it == null) {
-                    newObj = mutableMapOf()
-                } else {
-                    newObj = it as MutableMap<String, String>
-                }
+            if (value.toString() != "") {
+                obj["form_fields"].let {
+                    val newObj: MutableMap<String, String>
+                    if (it == null) {
+                        newObj = mutableMapOf()
+                    } else {
+                        newObj = it as MutableMap<String, String>
+                    }
 
-                if (newObj[key] == null) {
-                    newObj[key] = value.toString()
-                }
+                    if (newObj[key] == null) {
+                        newObj[key] = value.toString()
+                    }
 
-                obj["form_fields"] = newObj
+                    obj["form_fields"] = newObj
+                }
             }
         }
 
@@ -113,6 +115,11 @@ class PamSDK {
                 payload,
                 "_contact_id",
                 this.getFromSharedPref("_contact_id", "")
+            )
+            replaceFormFieldsValueIfNull(
+                payload,
+                "customer",
+                this.getFromSharedPref("customer_id", "")
             )
 
             Log.d(PamSDKName, "track payload $payload\n")
