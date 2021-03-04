@@ -2,7 +2,6 @@ package pams.ai.demo
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
@@ -10,15 +9,10 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import models.UserModel
 import pams.ai.demo.databinding.ActivityLoginPageBinding
+import pams.ai.demo.productsPage.ProductPage
 import pamsdk.PamSDK
-import pamsdk.PamSDKName
-
-val users: MutableMap<String, UserModel> = mutableMapOf(
-    "choengchai@3dsinteractive.com" to UserModel(
-        CusID = "1ZYqsLkwMLuo3RIaXo4EwAZlhVP",
-        Email = "choengchai@3dsinteractive.com"
-    )
-)
+import webservices.MockAPI
+import webservices.mockUsers
 
 class LoginPage : AppCompatActivity() {
     var binding: ActivityLoginPageBinding? = null
@@ -41,10 +35,13 @@ class LoginPage : AppCompatActivity() {
         val buttonLogin = binding?.btnLogin
         buttonLogin?.let { btn ->
             btn.setOnClickListener {
-                user?.let {
-                    PamSDK.userLogin(user!!.CusID)
-                    val intent = Intent(this@LoginPage, ProductPage::class.java)
-                    startActivity(intent)
+                user?.let { u ->
+                    val response = MockAPI.getInstance().login(u.Email)
+                    response?.CusID?.let {
+                        PamSDK.userLogin(it)
+                        val intent = Intent(this@LoginPage, ProductPage::class.java)
+                        startActivity(intent)
+                    }
                 }
             }
         }
@@ -62,7 +59,7 @@ class LoginPage : AppCompatActivity() {
 
     private fun registerSpinner() {
         val spinner = binding?.spinnerUser
-        this@LoginPage.user = users[resources.getStringArray(R.array.users)[0]]
+        this@LoginPage.user = mockUsers[resources.getStringArray(R.array.users)[0]]
 
         ArrayAdapter.createFromResource(
             this,
@@ -81,7 +78,7 @@ class LoginPage : AppCompatActivity() {
                 id: Long
             ) {
                 val array = resources.getStringArray(R.array.users)
-                this@LoginPage.user = users[array[position]]
+                this@LoginPage.user = mockUsers[array[position]]
             }
 
             override fun onNothingSelected(parentView: AdapterView<*>?) {

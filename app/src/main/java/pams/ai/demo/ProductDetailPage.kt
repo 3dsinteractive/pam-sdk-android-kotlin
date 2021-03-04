@@ -7,7 +7,7 @@ import com.squareup.picasso.Picasso
 import models.Product
 import pams.ai.demo.databinding.ActivityProductDetailPageBinding
 import pamsdk.PamSDK
-
+import webservices.MockAPI
 
 class ProductDetailPage : AppCompatActivity() {
     var binding: ActivityProductDetailPageBinding? = null
@@ -21,14 +21,12 @@ class ProductDetailPage : AppCompatActivity() {
             setContentView(it.root)
         }
 
-        val product: Product? = intent.getSerializableExtra("product") as Product
-        product?.let {
-            this.product = it
+        product = intent.getParcelableExtra("product") as? Product
+        binding?.let {
+            it.product = product
+            Picasso.get().load(product?.Image).into(it.productImage)
         }
 
-        this.registerImage()
-        this.registerTitle()
-        this.registerPrice()
         this.registerAddToCart()
         this.registerBuyNow()
         this.registerFavourite()
@@ -44,39 +42,10 @@ class ProductDetailPage : AppCompatActivity() {
         )
     }
 
-    private fun registerImage() {
-        binding?.let {
-            it.productImage.let { image ->
-                this.product?.Image?.let {
-                    Picasso.get().load(this.product?.Image).into(image)
-                }
-            }
-        }
-    }
-
-    private fun registerTitle() {
-        binding?.let {
-            it.productTitle.let { title ->
-                this.product?.Title?.let {
-                    title.text = this.product!!.Title
-                }
-            }
-        }
-    }
-
-    private fun registerPrice() {
-        binding?.let {
-            it.productPrice.let { title ->
-                this.product?.Price?.let {
-                    title.text = "฿ ${this.product!!.Price.toString()}"
-                }
-            }
-        }
-    }
-
     private fun registerAddToCart() {
         binding?.let {
             it.btnAddToCart.setOnClickListener {
+                MockAPI.getInstance().addToCart(this.product?.Id!!)
                 PamSDK.track(
                     "add_to_cart", mutableMapOf(
                         "product_id" to this.product?.Image.toString(),

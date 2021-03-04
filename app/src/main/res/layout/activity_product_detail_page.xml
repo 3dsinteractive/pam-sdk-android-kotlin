@@ -3,23 +3,33 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="product"
+            type="models.Product" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="8dp"
         tools:context=".ProductDetailPage">
+
+        <include
+            android:id="@+id/top_bar"
+            layout="@layout/activity_top_bar" />
 
         <ImageView
             android:id="@+id/product_image"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:background="@color/secondary_light"
-            android:scaleType="fitCenter"
+            android:minHeight="200dp"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/top_bar" />
 
         <TextView
             android:id="@+id/product_title"
@@ -27,79 +37,74 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:ellipsize="end"
-            android:hint="Product Title"
             android:inputType="none"
             android:maxLines="3"
+            android:paddingStart="8dp"
+            android:text="@{product.title}"
             android:textSize="32dp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="@id/product_image"
             app:layout_constraintStart_toStartOf="@id/product_image"
             app:layout_constraintTop_toBottomOf="@id/product_image" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/product_price"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            app:layout_constraintEnd_toEndOf="@id/product_image"
-            app:layout_constraintStart_toStartOf="@id/product_image"
-            app:layout_constraintTop_toBottomOf="@id/product_title">
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:paddingTop="8dp"
+            android:text="@{product.price.toString()}"
+            android:textColor="@color/primary"
+            android:textSize="24dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/btn_favourite"
+            app:layout_constraintStart_toStartOf="@id/product_title"
+            app:layout_constraintTop_toBottomOf="@id/product_title" />
 
-            <TextView
-                android:id="@+id/product_price"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:paddingTop="8dp"
-                android:hint="$ Product Price"
-                android:textColor="@color/primary"
-                android:textSize="24dp"
-                android:textStyle="bold" />
+        <Button
+            android:id="@+id/btn_favourite"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/primary_button"
+            android:foreground="@drawable/heart_icon"
+            app:layout_constraintEnd_toEndOf="@id/product_title"
+            app:layout_constraintTop_toBottomOf="@id/product_title" />
 
-            <Button
-                android:id="@+id/btn_favourite"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/primary_button"
-                android:foreground="@drawable/heart_icon"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@id/product_image"
-                app:layout_constraintStart_toStartOf="@id/product_image" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/btn_add_to_cart"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="100"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/primary_button"
+            android:text="Add To Cart"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/product_image"
-            app:layout_constraintStart_toStartOf="@id/product_image">
+            app:layout_constraintEnd_toEndOf="@id/center_guideline"
+            app:layout_constraintStart_toStartOf="parent" />
 
-            <Button
-                android:id="@+id/btn_add_to_cart"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="4dp"
-                android:layout_marginBottom="12dp"
-                android:layout_weight="50"
-                android:background="@drawable/primary_button"
-                android:text="Add To Cart"
-                app:layout_constraintBottom_toTopOf="@+id/btn_buy_now"
-                app:layout_constraintEnd_toEndOf="@id/product_image"
-                app:layout_constraintStart_toStartOf="@id/product_image" />
+        <Button
+            android:id="@+id/btn_buy_now"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/primary_button"
+            android:text="Buy Now"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/center_guideline" />
 
-            <Button
-                android:id="@+id/btn_buy_now"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
-                android:layout_marginBottom="12dp"
-                android:layout_weight="50"
-                android:background="@drawable/primary_button"
-                android:text="Buy Now"
-                app:layout_constraintBottom_toTopOf="@+id/btn_favourite"
-                app:layout_constraintEnd_toEndOf="@id/product_image"
-                app:layout_constraintStart_toStartOf="@id/product_image" />
-        </LinearLayout>
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/center_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
