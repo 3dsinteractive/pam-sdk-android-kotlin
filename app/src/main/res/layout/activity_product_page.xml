@@ -18,7 +18,6 @@
             android:layout_height="0dp"
             android:paddingHorizontal="4dp"
             android:paddingVertical="8dp"
-            android:numColumns="2"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/top_bar" />

@@ -26,11 +26,6 @@ class ProductPage : AppCompatActivity() {
         fetchProducts()
     }
 
-    private fun fetchProducts() {
-        val products = MockAPI.getInstance().getProducts()
-        adapter?.setProducts(products = products)
-    }
-
     private fun registerProductView() {
         adapter = ProductsListAdapter()
         adapter?.onClickProduct = { product ->
@@ -45,5 +40,10 @@ class ProductPage : AppCompatActivity() {
 
         val layout = GridLayoutManager(this, 2)
         binding?.listView?.layoutManager = layout
+    }
+
+    private fun fetchProducts() {
+        val products = MockAPI.getInstance().getProducts()
+        adapter?.setProducts(products = products)
     }
 }

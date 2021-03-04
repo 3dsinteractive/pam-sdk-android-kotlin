@@ -12,11 +12,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PamDemo">
-        <activity android:name=".ProductDetailPage"></activity>
+        <activity android:name=".notificationsPage.NotificationPage"></activity>
+        <activity android:name=".ProductDetailPage" />
         <activity android:name=".RegisterPage" />
         <activity android:name=".TopBar" />
         <activity android:name=".productsPage.ProductPage" /> <!-- Configs -->
-
         <meta-data
             android:name="pam-server"
             android:value="https:stg.pams.ai" />
