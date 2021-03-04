@@ -34,11 +34,7 @@ class RegisterPage : AppCompatActivity() {
                 val response = MockAPI.getInstance().register(email.toString())
 
                 PamSDK.track(
-                    "register", mutableMapOf(
-                        "form_fields" to mutableMapOf(
-                            "email" to response.Email
-                        )
-                    )
+                    "register", mutableMapOf()
                 )
 
                 val intent = Intent(this@RegisterPage, ProductPage::class.java)

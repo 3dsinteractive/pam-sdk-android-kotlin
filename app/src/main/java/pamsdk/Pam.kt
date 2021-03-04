@@ -4,7 +4,8 @@ import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
-import android.widget.TextView
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
@@ -17,13 +18,64 @@ data class IPamResponse(
     @SerializedName("contact_id") val contactID: String? = null
 )
 
-class IPamOption(val pamServer: String, val publicDbAlias: String, val loginDbAlias: String) {
+data class IPamOption(val pamServer: String, val publicDbAlias: String, val loginDbAlias: String)
+
+typealias ListenerFunction = (Map<String, String>) -> Unit
+
+enum class PamEvent {
+    page_view,
+    add_to_cart,
+    purchase_success,
+    favourite,
+    save_push,
+}
+
+enum class PamCallback {
+    onToken,
 }
 
 class PamSDK {
     companion object {
         var app: Application? = null
         var options: IPamOption? = null
+
+        var onTokenListener = mutableListOf<ListenerFunction>()
+
+
+        fun listen(eventName: String, callBack: ListenerFunction) {
+            if (eventName == PamCallback.onToken.toString()) {
+                onTokenListener.add(callBack)
+            }
+        }
+
+        fun dispatch(eventName: String, args: Map<String, String>) {
+            if (eventName == PamCallback.onToken.toString()) {
+                onTokenListener.forEach { callBack ->
+                    callBack(args)
+                }
+            }
+        }
+
+        fun askNotificationPermission() {
+            FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    return@OnCompleteListener
+                }
+
+                track(
+                    "save_push", mutableMapOf(
+                        "android_notification" to task.result.toString()
+                    )
+                )
+                saveToSharedPref("push_key", task.result.toString())
+                dispatch(
+                    PamCallback.onToken.toString(), mutableMapOf(
+                        "token" to task.result.toString()
+                    )
+                )
+            })
+        }
+
 
         fun init(application: Application) {
             this.app = application
@@ -40,7 +92,7 @@ class PamSDK {
             Log.d(PamSDKName, "Pam has initial\n")
         }
 
-        fun saveToSharedPref(key: String, value: Any): Boolean? {
+        private fun saveToSharedPref(key: String, value: Any): Boolean? {
             val sharedPref =
                 app?.getSharedPreferences(sharedPreferenceKey, Context.MODE_PRIVATE)
             val editor = sharedPref?.edit()
@@ -48,7 +100,7 @@ class PamSDK {
             return editor?.commit()
         }
 
-        fun removeFromSharedPref(key: String): Boolean? {
+        private fun removeFromSharedPref(key: String): Boolean? {
             val sharedPref =
                 app?.getSharedPreferences(sharedPreferenceKey, Context.MODE_PRIVATE)
             val editor = sharedPref?.edit()
@@ -56,9 +108,32 @@ class PamSDK {
             return editor?.commit()
         }
 
-        fun getFromSharedPref(key: String, default: String): String {
+        private fun getFromSharedPref(key: String, default: String): String {
             val sharedPref = app?.getSharedPreferences(sharedPreferenceKey, Context.MODE_PRIVATE)
             return sharedPref?.getString(key, default)!!
+        }
+
+        private fun replaceFormFieldsValueIfNull(
+            obj: MutableMap<String, Any>,
+            key: String,
+            value: Any
+        ) {
+            if (value.toString() != "") {
+                obj["form_fields"].let {
+                    val newObj: MutableMap<String, String>
+                    if (it == null) {
+                        newObj = mutableMapOf()
+                    } else {
+                        newObj = it as MutableMap<String, String>
+                    }
+
+                    if (newObj[key] == null) {
+                        newObj[key] = value.toString()
+                    }
+
+                    obj["form_fields"] = newObj
+                }
+            }
         }
 
         fun userLogin(customerID: String) {
@@ -80,27 +155,14 @@ class PamSDK {
             this.removeFromSharedPref("_database")
         }
 
-        fun replaceFormFieldsValueIfNull(
-            obj: MutableMap<String, Any>,
-            key: String,
-            value: Any
-        ) {
-            if (value.toString() != "") {
-                obj["form_fields"].let {
-                    val newObj: MutableMap<String, String>
-                    if (it == null) {
-                        newObj = mutableMapOf()
-                    } else {
-                        newObj = it as MutableMap<String, String>
-                    }
-
-                    if (newObj[key] == null) {
-                        newObj[key] = value.toString()
-                    }
-
-                    obj["form_fields"] = newObj
-                }
-            }
+        fun savePushKey(pushKey: String) {
+            this.track(
+                PamEvent.save_push.toString(), mutableMapOf(
+                    "form_fields" to mutableMapOf(
+                        "android_notification" to pushKey
+                    )
+                )
+            )
         }
 
         fun track(eventName: String, payload: MutableMap<String, Any>) {

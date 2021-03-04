@@ -12,11 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PamDemo">
-        <activity android:name=".notificationsPage.NotificationPage"></activity>
-        <activity android:name=".ProductDetailPage" />
-        <activity android:name=".RegisterPage" />
-        <activity android:name=".TopBar" />
-        <activity android:name=".productsPage.ProductPage" /> <!-- Configs -->
+
+        <!-- Configs -->
         <meta-data
             android:name="pam-server"
             android:value="https:stg.pams.ai" />
@@ -25,7 +22,30 @@
             android:value="3digits-public" />
         <meta-data
             android:name="login-db-alias"
-            android:value="3digits-login" /> <!-- Activities -->
+            android:value="3digits-login" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/logo_3digits" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/primary" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/noti_default_channel_id" />
+        <meta-data
+            android:name="firebase_messaging_auto_init_enabled"
+            android:value="false" />
+
+        <!-- Services -->
+        <service
+            android:name="services.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Activities -->
         <activity android:name=".LaunchScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,6 +54,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".LoginPage" />
+        <activity android:name=".notificationsPage.NotificationPage" />
+        <activity android:name=".ProductDetailPage" />
+        <activity android:name=".RegisterPage" />
+        <activity android:name=".TopBar" />
+        <activity android:name=".productsPage.ProductPage" />
+
     </application>
 
 </manifest>

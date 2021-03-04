@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import pams.ai.demo.ProductDetailPage
 import pams.ai.demo.R
 import pams.ai.demo.databinding.ActivityProductPageBinding
+import pamsdk.PamSDK
 import webservices.MockAPI
 
 class ProductPage : AppCompatActivity() {
@@ -21,6 +22,8 @@ class ProductPage : AppCompatActivity() {
         binding?.let {
             setContentView(it.root)
         }
+
+        PamSDK.askNotificationPermission()
 
         registerProductView()
         fetchProducts()
