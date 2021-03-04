@@ -28,6 +28,7 @@ class LoginPage : AppCompatActivity() {
 
         this.registerButtonLogin()
         this.registerButtonRegister()
+        this.registerButtonSkip()
         this.registerSpinner()
     }
 
@@ -52,6 +53,16 @@ class LoginPage : AppCompatActivity() {
         buttonRegister?.let { btn ->
             btn.setOnClickListener {
                 val intent = Intent(this@LoginPage, RegisterPage::class.java)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun registerButtonSkip() {
+        val buttonSkip = binding?.btnSkip
+        buttonSkip?.let { btn ->
+            btn.setOnClickListener {
+                val intent = Intent(this@LoginPage, ProductPage::class.java)
                 startActivity(intent)
             }
         }

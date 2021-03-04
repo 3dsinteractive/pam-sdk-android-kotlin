@@ -62,11 +62,7 @@ class PamSDK {
                     return@OnCompleteListener
                 }
 
-                track(
-                    "save_push", mutableMapOf(
-                        "android_notification" to task.result.toString()
-                    )
-                )
+                savePushKey(task.result.toString())
                 saveToSharedPref("push_key", task.result.toString())
                 dispatch(
                     PamCallback.onToken.toString(), mutableMapOf(
