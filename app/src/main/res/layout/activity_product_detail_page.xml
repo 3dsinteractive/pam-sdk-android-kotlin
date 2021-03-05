@@ -16,7 +16,7 @@
 
         <include
             android:id="@+id/top_bar"
-            layout="@layout/activity_top_bar" />
+            layout="@layout/top_bar" />
 
         <ImageView
             android:id="@+id/product_image"

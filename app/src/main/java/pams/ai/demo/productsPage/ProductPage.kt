@@ -12,8 +12,8 @@ import webservices.MockAPI
 
 class ProductPage : AppCompatActivity() {
 
-    var binding: ActivityProductPageBinding? = null
-    var adapter: ProductsListAdapter? = null
+    private var binding: ActivityProductPageBinding? = null
+    private var adapter: ProductsListAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +41,8 @@ class ProductPage : AppCompatActivity() {
 
         binding?.listView?.adapter = adapter
 
-        val layout = GridLayoutManager(this, 2)
-        binding?.listView?.layoutManager = layout
+        val layoutManager = GridLayoutManager(this, 2)
+        binding?.listView?.layoutManager = layoutManager
     }
 
     private fun fetchProducts() {

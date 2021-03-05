@@ -1,5 +1,6 @@
 package webservices
 
+import models.Notification
 import models.Product
 import models.UserModel
 
@@ -59,5 +60,13 @@ val mockUsers: MutableMap<String, UserModel> = mutableMapOf(
     "choengchai@3dsinteractive.com" to UserModel(
         CusID = "1ZYqsLkwMLuo3RIaXo4EwAZlhVP",
         Email = "choengchai@3dsinteractive.com"
+    )
+)
+
+val mockNotifications = mutableListOf(
+    Notification(
+        Image = "https://pams.ai/_nuxt/img/hero-image.8122b56.png",
+        Message = "Mock Message",
+        Date = "2020-03-05 10:33:00"
     )
 )
