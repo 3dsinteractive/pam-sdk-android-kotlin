@@ -21,7 +21,11 @@ class MockAPI {
     }
 
     fun getCart() = cart
+
     fun getProducts() = mockProducts
+
+    fun getNotifications() = mockNotifications
+
     private fun getProductFromID(productID: String): Product? = mockProducts.find {
         if (it.Id === productID) {
             return it

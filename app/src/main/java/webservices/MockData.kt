@@ -66,7 +66,8 @@ val mockUsers: MutableMap<String, UserModel> = mutableMapOf(
 val mockNotifications = mutableListOf(
     Notification(
         Image = "https://pams.ai/_nuxt/img/hero-image.8122b56.png",
+        Title = "Mock Title",
         Message = "Mock Message",
         Date = "2020-03-05 10:33:00"
-    )
+    ),
 )

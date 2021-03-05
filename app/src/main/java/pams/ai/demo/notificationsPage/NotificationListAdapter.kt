@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import models.Notification
-import models.Product
 import pams.ai.demo.databinding.NotificationListItemBinding
 
 class NotificationListAdapter : RecyclerView.Adapter<NotificationViewHolder>() {
@@ -35,8 +34,6 @@ class NotificationListAdapter : RecyclerView.Adapter<NotificationViewHolder>() {
 
 class NotificationViewHolder(val binding: NotificationListItemBinding) :
     RecyclerView.ViewHolder(binding.root) {
-
-    var onClickProduct: ((Product) -> Unit)? = null
 
     fun setNotification(notification: Notification) {
         binding.notification = notification

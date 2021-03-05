@@ -20,7 +20,7 @@ data class IPamResponse(
 
 data class IPamOption(val pamServer: String, val publicDbAlias: String, val loginDbAlias: String)
 
-typealias ListenerFunction = (Map<String, String>) -> Unit
+typealias ListenerFunction = (Map<String, Any>) -> Unit
 
 enum class PamEvent {
     page_view,
@@ -32,6 +32,7 @@ enum class PamEvent {
 
 enum class PamCallback {
     onToken,
+    onMessage
 }
 
 class PamSDK {
@@ -40,17 +41,24 @@ class PamSDK {
         var options: IPamOption? = null
 
         var onTokenListener = mutableListOf<ListenerFunction>()
+        var onMessageListener = mutableListOf<ListenerFunction>()
 
 
         fun listen(eventName: String, callBack: ListenerFunction) {
             if (eventName == PamCallback.onToken.toString()) {
                 onTokenListener.add(callBack)
+            } else if (eventName == PamCallback.onMessage.toString()) {
+                onMessageListener.add(callBack)
             }
         }
 
-        fun dispatch(eventName: String, args: Map<String, String>) {
+        fun dispatch(eventName: String, args: Map<String, Any>) {
             if (eventName == PamCallback.onToken.toString()) {
                 onTokenListener.forEach { callBack ->
+                    callBack(args)
+                }
+            } else if (eventName == PamCallback.onMessage.toString()) {
+                onMessageListener.forEach { callBack ->
                     callBack(args)
                 }
             }

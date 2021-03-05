@@ -26,10 +26,10 @@ class LoginPage : AppCompatActivity() {
             setContentView(it.root)
         }
 
-        this.registerButtonLogin()
-        this.registerButtonRegister()
-        this.registerButtonSkip()
-        this.registerSpinner()
+        registerButtonLogin()
+        registerButtonRegister()
+        registerButtonSkip()
+        registerSpinner()
     }
 
     private fun registerButtonLogin() {
@@ -40,7 +40,7 @@ class LoginPage : AppCompatActivity() {
                     val response = MockAPI.getInstance().login(u.Email)
                     response?.CusID?.let {
                         PamSDK.userLogin(it)
-                        val intent = Intent(this@LoginPage, ProductPage::class.java)
+                        val intent = Intent(this, ProductPage::class.java)
                         startActivity(intent)
                     }
                 }
@@ -52,7 +52,7 @@ class LoginPage : AppCompatActivity() {
         val buttonRegister = binding?.btnRegister
         buttonRegister?.let { btn ->
             btn.setOnClickListener {
-                val intent = Intent(this@LoginPage, RegisterPage::class.java)
+                val intent = Intent(this, RegisterPage::class.java)
                 startActivity(intent)
             }
         }
@@ -62,7 +62,7 @@ class LoginPage : AppCompatActivity() {
         val buttonSkip = binding?.btnSkip
         buttonSkip?.let { btn ->
             btn.setOnClickListener {
-                val intent = Intent(this@LoginPage, ProductPage::class.java)
+                val intent = Intent(this, ProductPage::class.java)
                 startActivity(intent)
             }
         }
@@ -70,7 +70,7 @@ class LoginPage : AppCompatActivity() {
 
     private fun registerSpinner() {
         val spinner = binding?.spinnerUser
-        this@LoginPage.user = mockUsers[resources.getStringArray(R.array.users)[0]]
+        this.user = mockUsers[resources.getStringArray(R.array.users)[0]]
 
         ArrayAdapter.createFromResource(
             this,

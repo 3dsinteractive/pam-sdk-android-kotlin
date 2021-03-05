@@ -1,11 +1,13 @@
 package pams.ai.demo
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.squareup.picasso.Picasso
 import models.Product
 import pams.ai.demo.databinding.ActivityProductDetailPageBinding
+import pams.ai.demo.notificationsPage.NotificationPage
 import pamsdk.PamSDK
 import webservices.MockAPI
 
@@ -27,9 +29,10 @@ class ProductDetailPage : AppCompatActivity() {
             Picasso.get().load(product?.Image).into(it.productImage)
         }
 
-        this.registerAddToCart()
-        this.registerBuyNow()
-        this.registerFavourite()
+        registerAddToCart()
+        registerBuyNow()
+        registerFavourite()
+        registerNotificationButton()
     }
 
     override fun onResume() {
@@ -85,8 +88,17 @@ class ProductDetailPage : AppCompatActivity() {
         }
     }
 
+    private fun registerNotificationButton() {
+        binding?.let {
+            it.btnNotification.setOnClickListener {
+                val intent = Intent(this, NotificationPage::class.java)
+                startActivity(intent)
+            }
+        }
+    }
+
     private fun alert(title: String, body: String) {
-        val alertDialog: AlertDialog = AlertDialog.Builder(this@ProductDetailPage).create()
+        val alertDialog: AlertDialog = AlertDialog.Builder(this).create()
         alertDialog.setTitle(title)
         alertDialog.setMessage(body)
         alertDialog.setButton(

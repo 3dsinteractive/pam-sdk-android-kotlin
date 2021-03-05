@@ -14,5 +14,9 @@ class PamDemoApplication : Application() {
         PamSDK.listen("onToken") { args ->
             Log.d(PamSDKName, args.toString())
         }
+
+        PamSDK.listen("onMessage") { args ->
+            Log.d(PamSDKName, args.toString())
+        }
     }
 }

@@ -2,12 +2,15 @@ package pams.ai.demo.productsPage
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import pams.ai.demo.ProductDetailPage
 import pams.ai.demo.R
 import pams.ai.demo.databinding.ActivityProductPageBinding
+import pams.ai.demo.notificationsPage.NotificationPage
 import pamsdk.PamSDK
+import pamsdk.PamSDKName
 import webservices.MockAPI
 
 class ProductPage : AppCompatActivity() {
@@ -26,6 +29,8 @@ class ProductPage : AppCompatActivity() {
         PamSDK.askNotificationPermission()
 
         registerProductView()
+        registerNotificationButton()
+
         fetchProducts()
     }
 
@@ -43,6 +48,15 @@ class ProductPage : AppCompatActivity() {
 
         val layoutManager = GridLayoutManager(this, 2)
         binding?.listView?.layoutManager = layoutManager
+    }
+
+    private fun registerNotificationButton() {
+        binding?.let {
+            it.btnNotification.setOnClickListener {
+                val intent = Intent(this, NotificationPage::class.java)
+                startActivity(intent)
+            }
+        }
     }
 
     private fun fetchProducts() {

@@ -15,12 +15,31 @@ open class PAMFirebaseMessagingService : FirebaseMessagingService() {
         )
     }
 
-    override fun onMessageReceived(message: RemoteMessage) {
-        super.onMessageReceived(message)
+    override fun onMessageReceived(rm: RemoteMessage) {
+        super.onMessageReceived(rm)
+
+        var title = ""
+        var message = ""
+        var payload: MutableMap<String, String>
+
+        rm.notification?.let {
+            it.title?.let { t ->
+                title = t
+            }
+            it.body?.let { m ->
+                message = m
+            }
+        }
+
+        rm.data.isNotEmpty().let {
+            payload = rm.data
+        }
 
         PamSDK.dispatch(
             "onMessage", mutableMapOf(
-                "message" to message.toString()
+                "payload" to payload,
+                "title" to title,
+                "message" to message
             )
         )
     }
