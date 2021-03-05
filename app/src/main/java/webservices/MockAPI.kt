@@ -1,8 +1,10 @@
 package webservices
 
+import android.util.Log
 import models.Notification
 import models.Product
 import models.UserModel
+import pamsdk.PamSDKName
 
 class MockAPI {
     companion object {
@@ -39,9 +41,11 @@ class MockAPI {
 
     fun getNotifications() = notifications
 
-    private fun getProductFromID(productID: String): Product? = mockProducts.find {
-        if (it.Id === productID) {
-            return it
+    fun getProductFromID(productID: String): Product? {
+        for (p in mockProducts) {
+            if (productID == p.Id) {
+                return p
+            }
         }
         return null
     }

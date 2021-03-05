@@ -60,6 +60,10 @@ val mockUsers: MutableMap<String, UserModel> = mutableMapOf(
     "choengchai@3dsinteractive.com" to UserModel(
         CusID = "1ZYqsLkwMLuo3RIaXo4EwAZlhVP",
         Email = "choengchai@3dsinteractive.com"
+    ),
+    "pat-qw12@3dsinteractive.com" to UserModel(
+        CusID = "1nbJxj5HYSTlzmyzAC5NzMkX6u9",
+        Email = "pat-qw12@3dsinteractive.com"
     )
 )
 
@@ -70,4 +74,7 @@ val mockNotifications = mutableListOf(
         Message = "Mock Message",
         Date = "2020-03-05 10:33:00"
     ),
+
+
+
 )

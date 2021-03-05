@@ -9,7 +9,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Pam Demo"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PamDemo">
 
@@ -49,7 +49,6 @@
         <activity android:name=".LaunchScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -57,9 +56,6 @@
         <activity android:name=".notificationsPage.NotificationPage" />
         <activity android:name=".ProductDetailPage" />
         <activity android:name=".RegisterPage" />
-        <activity android:name=".TopBar" />
         <activity android:name=".productsPage.ProductPage" />
-
     </application>
-
 </manifest>

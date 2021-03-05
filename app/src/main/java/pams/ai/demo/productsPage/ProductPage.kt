@@ -2,7 +2,6 @@ package pams.ai.demo.productsPage
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -12,7 +11,6 @@ import pams.ai.demo.R
 import pams.ai.demo.databinding.ActivityProductPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
 import pamsdk.PamSDK
-import pamsdk.PamSDKName
 import webservices.MockAPI
 
 class ProductPage : AppCompatActivity() {
@@ -33,7 +31,7 @@ class ProductPage : AppCompatActivity() {
         registerProductView()
         registerNotificationButton()
         registerUserButton()
-        registerLoginButton()
+        registerLogoutButton()
 
         fetchProducts()
     }
@@ -82,7 +80,7 @@ class ProductPage : AppCompatActivity() {
         }
     }
 
-    private fun registerLoginButton() {
+    private fun registerLogoutButton() {
         binding?.let {
             it.btnLogout.setOnClickListener {
                 PamSDK.userLogout()

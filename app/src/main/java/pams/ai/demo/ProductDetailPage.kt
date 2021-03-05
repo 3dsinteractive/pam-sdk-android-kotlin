@@ -34,16 +34,20 @@ class ProductDetailPage : AppCompatActivity() {
         registerBuyNow()
         registerFavourite()
         registerUserButton()
-        registerLoginButton()
+        registerLogoutButton()
         registerNotificationButton()
     }
 
     override fun onResume() {
         super.onResume()
+
         PamSDK.track(
             "page_view", mutableMapOf(
-                "product_id" to this.product?.Image.toString(),
-                "total_price" to this.product?.Price.toString()
+                "page_title" to this.product!!.Title.toString(),
+                "form_fields" to mutableMapOf(
+                    "product_id" to this.product!!.Id.toString(),
+                    "product_price" to this.product!!.Price.toString()
+                )
             )
         )
     }
@@ -54,8 +58,11 @@ class ProductDetailPage : AppCompatActivity() {
                 MockAPI.getInstance().addToCart(this.product?.Id!!)
                 PamSDK.track(
                     "add_to_cart", mutableMapOf(
-                        "product_id" to this.product?.Image.toString(),
-                        "total_price" to this.product?.Price.toString()
+                        "page_title" to this.product!!.Title.toString(),
+                        "form_fields" to mutableMapOf(
+                            "product_id" to this.product!!.Id.toString(),
+                            "product_price" to this.product!!.Price.toString()
+                        )
                     )
                 )
                 this.alert("Add To Cart", "Added to your cart")
@@ -68,8 +75,11 @@ class ProductDetailPage : AppCompatActivity() {
             it.btnBuyNow.setOnClickListener {
                 PamSDK.track(
                     "purchase_success", mutableMapOf(
-                        "product_id" to this.product?.Image.toString(),
-                        "total_price" to this.product?.Price.toString()
+                        "page_title" to this.product!!.Title.toString(),
+                        "form_fields" to mutableMapOf(
+                            "product_id" to this.product!!.Id.toString(),
+                            "product_price" to this.product!!.Price.toString()
+                        )
                     )
                 )
                 this.alert("Buy Now", "Buy now success")
@@ -82,8 +92,11 @@ class ProductDetailPage : AppCompatActivity() {
             it.btnFavourite.setOnClickListener {
                 PamSDK.track(
                     "favourite", mutableMapOf(
-                        "product_id" to this.product?.Image.toString(),
-                        "total_price" to this.product?.Price.toString()
+                        "page_title" to this.product!!.Title.toString(),
+                        "form_fields" to mutableMapOf(
+                            "product_id" to this.product!!.Id.toString(),
+                            "product_price" to this.product!!.Price.toString()
+                        )
                     )
                 )
                 this.alert("Add To Favourite", "Added to your favourite products")
@@ -95,6 +108,7 @@ class ProductDetailPage : AppCompatActivity() {
         binding?.let {
             it.btnNotification.setOnClickListener {
                 val intent = Intent(this, NotificationPage::class.java)
+                overridePendingTransition(R.anim.anim_in, R.anim.anim_out)
                 startActivity(intent)
             }
         }
@@ -114,7 +128,7 @@ class ProductDetailPage : AppCompatActivity() {
         }
     }
 
-    private fun registerLoginButton() {
+    private fun registerLogoutButton() {
         binding?.let {
             it.btnLogout.setOnClickListener {
                 PamSDK.userLogout()
