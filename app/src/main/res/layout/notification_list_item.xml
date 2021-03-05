@@ -65,7 +65,7 @@
                     android:paddingEnd="8dp"
                     android:text="@{notification.message}"
                     android:textSize="16sp"
-                    app:layout_constraintBottom_toTopOf="@id/notification_guild_line"
+                    app:layout_constraintBottom_toTopOf="@id/notification_guide_line"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/notification_image" />
 
@@ -82,10 +82,10 @@
                     android:text="@{notification.date}"
                     android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/notification_guild_line" />
+                    app:layout_constraintTop_toBottomOf="@id/notification_guide_line" />
 
                 <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/notification_guild_line"
+                    android:id="@+id/notification_guide_line"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:orientation="horizontal"

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="product"
             type="models.Product" />
@@ -13,6 +14,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ProductDetailPage">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/top_bar_guide_line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="27.5dp" />
+
+        <Button
+            android:id="@+id/btn_logout"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="25dp"
+            android:backgroundTint="@color/white"
+            android:text="Logout"
+            android:textColor="@color/black"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_bar_guide_line" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/top_bar"
@@ -41,10 +61,23 @@
                 android:id="@+id/btn_notification"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
                 android:background="@drawable/rounded_border"
                 android:padding="4dp"
                 android:scaleType="fitCenter"
                 android:src="@mipmap/ic_notification"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btn_user"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/btn_user"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_border"
+                android:padding="4dp"
+                android:scaleType="fitCenter"
+                android:src="@mipmap/ic_user"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -99,9 +132,9 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginEnd="8dp"
-            android:src="@mipmap/ic_heart"
             android:padding="0dp"
             android:scaleType="fitCenter"
+            android:src="@mipmap/ic_heart"
             app:layout_constraintEnd_toEndOf="@id/product_title"
             app:layout_constraintTop_toBottomOf="@id/product_title" />
 

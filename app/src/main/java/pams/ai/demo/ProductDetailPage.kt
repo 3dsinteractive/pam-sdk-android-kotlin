@@ -3,6 +3,7 @@ package pams.ai.demo
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.squareup.picasso.Picasso
 import models.Product
@@ -32,6 +33,8 @@ class ProductDetailPage : AppCompatActivity() {
         registerAddToCart()
         registerBuyNow()
         registerFavourite()
+        registerUserButton()
+        registerLoginButton()
         registerNotificationButton()
     }
 
@@ -93,6 +96,34 @@ class ProductDetailPage : AppCompatActivity() {
             it.btnNotification.setOnClickListener {
                 val intent = Intent(this, NotificationPage::class.java)
                 startActivity(intent)
+            }
+        }
+    }
+
+    private fun registerUserButton() {
+        binding?.let {
+            it.btnUser.setOnClickListener {
+                binding?.let { b ->
+                    if (b.btnLogout.visibility == View.INVISIBLE) {
+                        b.btnLogout.visibility = View.VISIBLE
+                    } else {
+                        b.btnLogout.visibility = View.INVISIBLE
+                    }
+                }
+            }
+        }
+    }
+
+    private fun registerLoginButton() {
+        binding?.let {
+            it.btnLogout.setOnClickListener {
+                PamSDK.userLogout()
+
+                val intent = Intent(this, LoginPage::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
+                startActivity(intent)
+                this@ProductDetailPage.finish()
             }
         }
     }

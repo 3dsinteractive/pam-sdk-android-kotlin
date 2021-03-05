@@ -3,8 +3,10 @@ package pams.ai.demo.productsPage
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import pams.ai.demo.LoginPage
 import pams.ai.demo.ProductDetailPage
 import pams.ai.demo.R
 import pams.ai.demo.databinding.ActivityProductPageBinding
@@ -30,6 +32,8 @@ class ProductPage : AppCompatActivity() {
 
         registerProductView()
         registerNotificationButton()
+        registerUserButton()
+        registerLoginButton()
 
         fetchProducts()
     }
@@ -40,8 +44,13 @@ class ProductPage : AppCompatActivity() {
             val intent = Intent(this, ProductDetailPage::class.java).also {
                 it.putExtra("product", product)
             }
+
             startActivity(intent)
             overridePendingTransition(R.anim.anim_in, R.anim.anim_out)
+
+            binding?.btnLogout?.let {
+                it.visibility = View.INVISIBLE
+            }
         }
 
         binding?.listView?.adapter = adapter
@@ -55,6 +64,34 @@ class ProductPage : AppCompatActivity() {
             it.btnNotification.setOnClickListener {
                 val intent = Intent(this, NotificationPage::class.java)
                 startActivity(intent)
+            }
+        }
+    }
+
+    private fun registerUserButton() {
+        binding?.let {
+            it.btnUser.setOnClickListener {
+                binding?.let { b ->
+                    if (b.btnLogout.visibility == View.INVISIBLE) {
+                        b.btnLogout.visibility = View.VISIBLE
+                    } else {
+                        b.btnLogout.visibility = View.INVISIBLE
+                    }
+                }
+            }
+        }
+    }
+
+    private fun registerLoginButton() {
+        binding?.let {
+            it.btnLogout.setOnClickListener {
+                PamSDK.userLogout()
+
+                val intent = Intent(this, LoginPage::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
+                startActivity(intent)
+                this@ProductPage.finish()
             }
         }
     }
