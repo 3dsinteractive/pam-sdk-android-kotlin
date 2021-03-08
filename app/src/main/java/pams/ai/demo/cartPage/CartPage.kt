@@ -35,19 +35,22 @@ class CartPage : AppCompatActivity() {
             it.btnCheckout.let {
                 it.setOnClickListener {
                     val cart = MockAPI.getInstance().getCart()
-                    val productIds: String = cart.Products?.map { p -> p.Id }!!.joinToString()
 
-                    PamSDK.track(
-                        "purchase_success", mutableMapOf(
-                            "form_fields" to mutableMapOf(
-                                "product_id" to productIds,
-                                "total_price" to cart.TotalPrice
+                    cart.Products?.let {
+                        val productIds: String = cart.Products?.map { p -> p.Id }!!.joinToString()
+
+                        PamSDK.track(
+                            "purchase_success", mutableMapOf(
+                                "form_fields" to mutableMapOf(
+                                    "product_id" to productIds,
+                                    "total_price" to cart.TotalPrice
+                                )
                             )
                         )
-                    )
 
-                    MockAPI.getInstance().checkout()
-                    fetchCart()
+                        MockAPI.getInstance().checkout()
+                        fetchCart()
+                    }
                 }
             }
         }
