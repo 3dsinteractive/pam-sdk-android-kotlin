@@ -7,6 +7,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.squareup.picasso.Picasso
 import models.Product
+import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductDetailPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
 import pamsdk.PamSDK
@@ -33,9 +34,10 @@ class ProductDetailPage : AppCompatActivity() {
         registerAddToCart()
         registerBuyNow()
         registerFavourite()
+        registerCartButton()
+        registerNotificationButton()
         registerUserButton()
         registerLogoutButton()
-        registerNotificationButton()
     }
 
     override fun onResume() {
@@ -100,6 +102,17 @@ class ProductDetailPage : AppCompatActivity() {
                     )
                 )
                 this.alert("Add To Favourite", "Added to your favourite products")
+            }
+        }
+    }
+
+    private fun registerCartButton() {
+        binding?.let {
+            it.btnCart.setOnClickListener {
+                val intent = Intent(this, CartPage::class.java)
+                overridePendingTransition(R.anim.anim_in, R.anim.anim_out)
+
+                startActivity(intent)
             }
         }
     }

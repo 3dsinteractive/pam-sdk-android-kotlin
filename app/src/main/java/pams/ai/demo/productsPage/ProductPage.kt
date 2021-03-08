@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import pams.ai.demo.LoginPage
 import pams.ai.demo.ProductDetailPage
 import pams.ai.demo.R
+import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
 import pamsdk.PamSDK
@@ -29,6 +30,7 @@ class ProductPage : AppCompatActivity() {
         PamSDK.askNotificationPermission()
 
         registerProductView()
+        registerCartButton()
         registerNotificationButton()
         registerUserButton()
         registerLogoutButton()
@@ -55,6 +57,15 @@ class ProductPage : AppCompatActivity() {
 
         val layoutManager = GridLayoutManager(this, 2)
         binding?.listView?.layoutManager = layoutManager
+    }
+
+    private fun registerCartButton() {
+        binding?.let {
+            it.btnCart.setOnClickListener {
+                val intent = Intent(this, CartPage::class.java)
+                startActivity(intent)
+            }
+        }
     }
 
     private fun registerNotificationButton() {

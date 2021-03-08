@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PamDemo">
-
+        <activity android:name=".cartPage.CartPage"></activity>
         <!-- Configs -->
         <meta-data
             android:name="pam-server"
@@ -34,21 +34,18 @@
             android:value="@string/noti_default_channel_id" />
         <meta-data
             android:name="firebase_messaging_auto_init_enabled"
-            android:value="false" />
-
-        <!-- Services -->
+            android:value="false" /> <!-- Services -->
         <service
             android:name="services.MyFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-        </service>
-
-        <!-- Activities -->
+        </service> <!-- Activities -->
         <activity android:name=".LaunchScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -58,4 +55,5 @@
         <activity android:name=".RegisterPage" />
         <activity android:name=".productsPage.ProductPage" />
     </application>
+
 </manifest>

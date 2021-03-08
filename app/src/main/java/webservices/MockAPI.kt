@@ -1,9 +1,7 @@
 package webservices
 
 import android.util.Log
-import models.Notification
-import models.Product
-import models.UserModel
+import models.*
 import pamsdk.PamSDKName
 
 class MockAPI {
@@ -14,14 +12,89 @@ class MockAPI {
         }
     }
 
-    private var cart = mutableListOf<Product>()
+    private var cart = CartModel(TotalPrice = 0.0)
     private var notifications = mutableListOf<Notification>()
+
+    fun checkout() {
+        this.cart = CartModel(TotalPrice = 0.0)
+    }
 
     fun addToCart(productID: String) {
         val product = getProductFromID(productID)
+
         product?.let {
-            cart.add(it)
+            val oldCartProduct = getProductFromCartById(productID)
+            val cartProduct = CartProductModel(
+                Id = product.Id,
+                Image = product.Image,
+                Title = product.Title,
+                UnitPrice = product.Price,
+                Quantity = 1,
+                TotalPrice = product.Price
+            )
+
+            if (oldCartProduct != null) {
+                cartProduct.Quantity = oldCartProduct.Quantity?.plus(1)
+                cart.Products?.remove(oldCartProduct)
+            }
+
+            cartProduct.TotalPrice = (cartProduct.Quantity?.times(cartProduct.UnitPrice!!))
+
+            if (cart.Products == null) {
+                cart.Products = mutableListOf(
+                    cartProduct
+                )
+            } else {
+                cart.Products?.add(cartProduct)
+            }
         }
+    }
+
+    fun removeFromCart(productID: String) {
+        val product = getProductFromID(productID)
+
+        product?.let {
+            val oldCartProduct = getProductFromCartById(productID)
+            val cartProduct = CartProductModel(
+                Id = product.Id,
+                Image = product.Image,
+                Title = product.Title,
+                UnitPrice = product.Price,
+                Quantity = 1,
+                TotalPrice = product.Price
+            )
+
+            cartProduct.Quantity = oldCartProduct!!.Quantity?.minus(1)
+            cart.Products?.remove(oldCartProduct)
+            cartProduct.TotalPrice = (cartProduct.Quantity?.times(cartProduct.UnitPrice!!))
+
+            if (cartProduct.Quantity!! <= 0) {
+                cart.Products?.remove(cartProduct)
+            } else {
+                cart.Products?.add(cartProduct)
+            }
+        }
+    }
+
+    fun deleteFromCart(productID: String) {
+        val product = getProductFromID(productID)
+
+        product?.let {
+            val oldCartProduct = getProductFromCartById(productID)
+            cart.Products?.remove(oldCartProduct)
+        }
+    }
+
+    private fun getProductFromCartById(productID: String): CartProductModel? {
+        cart.Products?.let {
+            it.forEach { p ->
+                if (p.Id == productID) {
+                    return p
+                }
+            }
+        }
+
+        return null
     }
 
     fun addToNotification(image: String, title: String, message: String, date: String) {
@@ -35,7 +108,19 @@ class MockAPI {
         )
     }
 
-    fun getCart() = cart
+    fun getCart(): CartModel {
+        cart.Products?.let { ps ->
+            var totalPrice = 0.0
+            for (product in ps) {
+                product.TotalPrice?.let {
+                    totalPrice += it
+                }
+            }
+            cart.TotalPrice = totalPrice
+        }
+
+        return cart
+    }
 
     fun getProducts() = mockProducts
 
