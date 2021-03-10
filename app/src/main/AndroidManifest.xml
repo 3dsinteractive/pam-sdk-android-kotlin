@@ -35,25 +35,45 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/noti_default_channel_id" />
+
         <service
             android:name="services.MyFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-        </service> <!-- Activities -->
-        <activity android:name=".LaunchScreen">
+        </service>
+
+        <activity
+            android:name=".LaunchScreen"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginPage" />
-        <activity android:name=".notificationsPage.NotificationPage" />
-        <activity android:name=".ProductDetailPage" />
-        <activity android:name=".RegisterPage" />
-        <activity android:name=".productsPage.ProductPage" />
+        <activity
+            android:name=".LoginPage"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".notificationsPage.NotificationPage"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ProductDetailPage"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RegisterPage"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".productsPage.ProductPage"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

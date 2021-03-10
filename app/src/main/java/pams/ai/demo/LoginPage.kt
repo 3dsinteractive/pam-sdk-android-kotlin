@@ -38,6 +38,7 @@ class LoginPage : AppCompatActivity() {
             btn.setOnClickListener {
                 user?.let { u ->
                     val response = MockAPI.getInstance().login(u.Email)
+                    PamSDK.saveToSharedPref("_contact_id", u.ContactID)
                     response?.CusID?.let {
                         PamSDK.userLogin(it)
                         val intent = Intent(this, ProductPage::class.java)

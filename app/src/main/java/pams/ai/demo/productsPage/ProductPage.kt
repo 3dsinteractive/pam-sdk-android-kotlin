@@ -33,6 +33,7 @@ class ProductPage : AppCompatActivity() {
         registerCartButton()
         registerNotificationButton()
         registerUserButton()
+        registerLoginButton()
         registerLogoutButton()
 
         fetchProducts()
@@ -81,12 +82,32 @@ class ProductPage : AppCompatActivity() {
         binding?.let {
             it.btnUser.setOnClickListener {
                 binding?.let { b ->
-                    if (b.btnLogout.visibility == View.INVISIBLE) {
-                        b.btnLogout.visibility = View.VISIBLE
+                    if (PamSDK.getCustomerID() == null) {
+                        if (b.btnLogin.visibility == View.INVISIBLE) {
+                            b.btnLogin.visibility = View.VISIBLE
+                        } else {
+                            b.btnLogin.visibility = View.INVISIBLE
+                        }
                     } else {
-                        b.btnLogout.visibility = View.INVISIBLE
+                        if (b.btnLogout.visibility == View.INVISIBLE) {
+                            b.btnLogout.visibility = View.VISIBLE
+                        } else {
+                            b.btnLogout.visibility = View.INVISIBLE
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    private fun registerLoginButton() {
+        binding?.let {
+            it.btnLogin.setOnClickListener {
+                val intent = Intent(this, LoginPage::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
+                startActivity(intent)
+                this.finish()
             }
         }
     }
@@ -100,7 +121,7 @@ class ProductPage : AppCompatActivity() {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
 
                 startActivity(intent)
-                this@ProductPage.finish()
+                this.finish()
             }
         }
     }

@@ -45,6 +45,7 @@ class MockAPI {
             val oldCartProduct = getProductFromCartById(productID)
             val cartProduct = CartProductModel(
                 Id = product.Id,
+                CategoryId = product.CategoryId,
                 Image = product.Image,
                 Title = product.Title,
                 UnitPrice = product.Price,
@@ -161,6 +162,7 @@ class MockAPI {
     fun register(email: String): UserModel {
         return UserModel(
             CusID = email,
+            ContactID = "",
             Email = email
         )
     }

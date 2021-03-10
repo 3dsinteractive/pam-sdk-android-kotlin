@@ -9,7 +9,7 @@ class PamDemoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        PamSDK.init(application = this)
+        PamSDK.init(application = this, enableLog = true)
 
         PamSDK.listen("onToken") { args ->
             Log.d(PamSDKName, args.toString())

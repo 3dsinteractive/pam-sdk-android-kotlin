@@ -28,11 +28,20 @@ class ProductDetailPage : AppCompatActivity() {
             setContentView(it.root)
         }
 
-        product = intent.getParcelableExtra("product") as? Product
+        product = intent.getParcelableExtra("product")
         binding?.let {
             it.product = product
             Picasso.get().load(product?.Image).into(it.productImage)
         }
+
+        PamSDK.track(
+            PamStandardEvent.pageView, mapOf(
+                "page_url" to "app//product?id=${this.product?.Id ?: ""}",
+                "page_title" to (this.product?.Title ?: ""),
+                "product_id" to (this.product?.Id ?: ""),
+                "product_price" to (this.product?.Price ?: "")
+            )
+        )
 
         registerAddToCart()
         registerBuyNow()
@@ -40,25 +49,10 @@ class ProductDetailPage : AppCompatActivity() {
         registerCartButton()
         registerNotificationButton()
         registerUserButton()
+        registerLoginButton()
         registerLogoutButton()
 
         fetchFavourite()
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-       // val payload = PamSDK.createPurshaseSuccessPayload(title="", url="", mapOf("" to ""))
-
-        val payload = PamSDK.createPageViewPayload(title="", url="", mapOf("" to ""))
-        PamSDK.track( PamStandardEvent.pageView, payload )
-
-//        mapOf(
-//                "page_title" to (this.product?.Title ?: ""),
-//                "product_id" to (this.product?.Id ?: ""),
-//                "product_price" to (this.product?.Price ?: "")
-//            )
-//        )
     }
 
     private fun registerAddToCart() {
@@ -66,12 +60,10 @@ class ProductDetailPage : AppCompatActivity() {
             it.btnAddToCart.setOnClickListener {
                 MockAPI.getInstance().addToCart(this.product?.Id!!)
                 PamSDK.track(
-                    "add_to_cart", mutableMapOf(
-                        "page_title" to this.product!!.Title.toString(),
-                        "form_fields" to mutableMapOf(
-                            "product_id" to this.product!!.Id.toString(),
-                            "product_price" to this.product!!.Price.toString()
-                        )
+                    PamStandardEvent.addToCart, mapOf(
+                        "page_title" to (this.product?.Title ?: ""),
+                        "product_id" to (this.product?.Id ?: ""),
+                        "product_price" to (this.product?.Price ?: "")
                     )
                 )
                 this.alert("Add To Cart", "Added to your cart")
@@ -83,12 +75,10 @@ class ProductDetailPage : AppCompatActivity() {
         binding?.let {
             it.btnBuyNow.setOnClickListener {
                 PamSDK.track(
-                    "purchase_success", mutableMapOf(
-                        "page_title" to this.product!!.Title.toString(),
-                        "form_fields" to mutableMapOf(
-                            "product_id" to this.product!!.Id.toString(),
-                            "product_price" to this.product!!.Price.toString()
-                        )
+                    PamStandardEvent.purchaseSuccess, mapOf(
+                        "page_title" to (this.product?.Title ?: ""),
+                        "product_id" to (this.product?.Id ?: ""),
+                        "product_price" to (this.product?.Price ?: "")
                     )
                 )
                 this.alert("Buy Now", "Buy now success")
@@ -100,28 +90,24 @@ class ProductDetailPage : AppCompatActivity() {
         binding?.let {
             it.btnFavourite.setOnClickListener {
                 val isAddedToFavourite =
-                    MockAPI.getInstance().isProductFavourite(this.product!!.Id.toString())
+                    MockAPI.getInstance().isProductFavourite(this.product?.Id ?: "")
                 if (!isAddedToFavourite) {
-                    MockAPI.getInstance().addToFavourite(this.product!!.Id.toString())
+                    MockAPI.getInstance().addToFavourite(this.product?.Id ?: "")
                     PamSDK.track(
-                        "favourite", mutableMapOf(
-                            "page_title" to this.product!!.Title.toString(),
-                            "form_fields" to mutableMapOf(
-                                "product_id" to this.product!!.Id.toString(),
-                                "product_price" to this.product!!.Price.toString()
-                            )
+                        "favourite", mapOf(
+                            "page_title" to (this.product?.Title ?: ""),
+                            "product_id" to (this.product?.Id ?: ""),
+                            "product_price" to (this.product?.Price ?: "")
                         )
                     )
                     this.alert("Add To Favourite", "Added to your favourite products")
                 } else {
-                    MockAPI.getInstance().removeFromFavourite(this.product!!.Id.toString())
+                    MockAPI.getInstance().removeFromFavourite(this.product?.Id ?: "")
                     PamSDK.track(
-                        "remove_favourite", mutableMapOf(
-                            "page_title" to this.product!!.Title.toString(),
-                            "form_fields" to mutableMapOf(
-                                "product_id" to this.product!!.Id.toString(),
-                                "product_price" to this.product!!.Price.toString()
-                            )
+                        "remove_favourite", mapOf(
+                            "page_title" to (this.product?.Title ?: ""),
+                            "product_id" to (this.product?.Id ?: ""),
+                            "product_price" to (this.product?.Price ?: "")
                         )
                     )
                     this.alert("Remove From Favourite", "Removed from your favourite products")
@@ -157,12 +143,32 @@ class ProductDetailPage : AppCompatActivity() {
         binding?.let {
             it.btnUser.setOnClickListener {
                 binding?.let { b ->
-                    if (b.btnLogout.visibility == View.INVISIBLE) {
-                        b.btnLogout.visibility = View.VISIBLE
+                    if (PamSDK.getCustomerID() == null) {
+                        if (b.btnLogin.visibility == View.INVISIBLE) {
+                            b.btnLogin.visibility = View.VISIBLE
+                        } else {
+                            b.btnLogin.visibility = View.INVISIBLE
+                        }
                     } else {
-                        b.btnLogout.visibility = View.INVISIBLE
+                        if (b.btnLogout.visibility == View.INVISIBLE) {
+                            b.btnLogout.visibility = View.VISIBLE
+                        } else {
+                            b.btnLogout.visibility = View.INVISIBLE
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    private fun registerLoginButton() {
+        binding?.let {
+            it.btnLogin.setOnClickListener {
+                val intent = Intent(this, LoginPage::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
+                startActivity(intent)
+                this.finish()
             }
         }
     }
@@ -183,15 +189,18 @@ class ProductDetailPage : AppCompatActivity() {
 
     private fun fetchFavourite() {
         product?.Id.let { id ->
-            val isAddedToFavourite = MockAPI.getInstance().isProductFavourite(id!!)
-            Log.d(PamSDKName, "isAddedToFavourite = $isAddedToFavourite")
+            val isAddedToFavourite = MockAPI.getInstance().isProductFavourite(id ?: "")
+            if (PamSDK.enableLog) {
+                Log.d(PamSDKName, "isAddedToFavourite = $isAddedToFavourite")
+            }
+
             if (isAddedToFavourite) {
                 binding?.btnFavourite?.let {
-                    it.imageAlpha = 100
+                    it.imageAlpha = 255
                 }
             } else {
                 binding?.btnFavourite?.let {
-                    it.imageAlpha = 255
+                    it.imageAlpha = 100
                 }
             }
         }

@@ -15,6 +15,7 @@ import pams.ai.demo.notificationsPage.NotificationPage
 import pams.ai.demo.productsPage.ProductsListAdapter
 import pamsdk.PamSDK
 import pamsdk.PamSDKName
+import pamsdk.PamStandardEvent
 import webservices.MockAPI
 
 class CartPage : AppCompatActivity() {
@@ -34,6 +35,7 @@ class CartPage : AppCompatActivity() {
         registerCartView()
         registerNotificationButton()
         registerUserButton()
+        registerLoginButton()
         registerLogoutButton()
 
         fetchCart()
@@ -46,14 +48,16 @@ class CartPage : AppCompatActivity() {
                     val cart = MockAPI.getInstance().getCart()
 
                     cart.Products?.let {
-                        val productIds: String = cart.Products?.map { p -> p.Id }!!.joinToString()
+                        val productIds: String =
+                            cart.Products?.map { p -> p.Id }?.joinToString() ?: ""
+                        val categoryIds: String =
+                            cart.Products?.map { p -> p.CategoryId }?.joinToString() ?: ""
 
                         PamSDK.track(
-                            "purchase_success", mutableMapOf(
-                                "form_fields" to mutableMapOf(
-                                    "product_id" to productIds,
-                                    "total_price" to cart.TotalPrice
-                                )
+                            PamStandardEvent.purchaseSuccess, mapOf(
+                                "product_id" to productIds,
+                                "product_cat" to categoryIds,
+                                "total_price" to (cart.TotalPrice ?: "")
                             )
                         )
 
@@ -97,12 +101,32 @@ class CartPage : AppCompatActivity() {
         binding?.let {
             it.btnUser.setOnClickListener {
                 binding?.let { b ->
-                    if (b.btnLogout.visibility == View.INVISIBLE) {
-                        b.btnLogout.visibility = View.VISIBLE
+                    if (PamSDK.getCustomerID() == null) {
+                        if (b.btnLogin.visibility == View.INVISIBLE) {
+                            b.btnLogin.visibility = View.VISIBLE
+                        } else {
+                            b.btnLogin.visibility = View.INVISIBLE
+                        }
                     } else {
-                        b.btnLogout.visibility = View.INVISIBLE
+                        if (b.btnLogout.visibility == View.INVISIBLE) {
+                            b.btnLogout.visibility = View.VISIBLE
+                        } else {
+                            b.btnLogout.visibility = View.INVISIBLE
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    private fun registerLoginButton() {
+        binding?.let {
+            it.btnLogin.setOnClickListener {
+                val intent = Intent(this, LoginPage::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
+                startActivity(intent)
+                this.finish()
             }
         }
     }
