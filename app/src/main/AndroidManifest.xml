@@ -24,6 +24,9 @@
             android:name="login-db-alias"
             android:value="3digits-login" />
         <meta-data
+            android:name="pam-enable-log"
+            android:value="true" />
+        <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/logo_3digits" />
         <meta-data
@@ -32,9 +35,6 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/noti_default_channel_id" />
-        <meta-data
-            android:name="firebase_messaging_auto_init_enabled"
-            android:value="false" /> <!-- Services -->
         <service
             android:name="services.MyFirebaseMessagingService"
             android:exported="false">

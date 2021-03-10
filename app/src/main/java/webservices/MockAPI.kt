@@ -1,8 +1,6 @@
 package webservices
 
-import android.util.Log
 import models.*
-import pamsdk.PamSDKName
 
 class MockAPI {
     companion object {
@@ -14,6 +12,27 @@ class MockAPI {
 
     private var cart = CartModel(TotalPrice = 0.0)
     private var notifications = mutableListOf<Notification>()
+    private var favourite = mutableListOf<String>()
+
+    fun addToFavourite(productID: String) {
+        favourite.add(productID)
+    }
+
+    fun removeFromFavourite(productID: String) {
+        favourite.remove(productID)
+    }
+
+    fun isProductFavourite(productID: String): Boolean {
+        var bool = false
+
+        favourite.forEach { id ->
+            if (productID == id) {
+                bool = true
+            }
+        }
+
+        return bool
+    }
 
     fun checkout() {
         this.cart = CartModel(TotalPrice = 0.0)

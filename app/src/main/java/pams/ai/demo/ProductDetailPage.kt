@@ -3,6 +3,7 @@ package pams.ai.demo
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.squareup.picasso.Picasso
@@ -11,6 +12,8 @@ import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductDetailPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
 import pamsdk.PamSDK
+import pamsdk.PamSDKName
+import pamsdk.PamStandardEvent
 import webservices.MockAPI
 
 class ProductDetailPage : AppCompatActivity() {
@@ -38,20 +41,24 @@ class ProductDetailPage : AppCompatActivity() {
         registerNotificationButton()
         registerUserButton()
         registerLogoutButton()
+
+        fetchFavourite()
     }
 
     override fun onResume() {
         super.onResume()
 
-        PamSDK.track(
-            "page_view", mutableMapOf(
-                "page_title" to this.product!!.Title.toString(),
-                "form_fields" to mutableMapOf(
-                    "product_id" to this.product!!.Id.toString(),
-                    "product_price" to this.product!!.Price.toString()
-                )
-            )
-        )
+       // val payload = PamSDK.createPurshaseSuccessPayload(title="", url="", mapOf("" to ""))
+
+        val payload = PamSDK.createPageViewPayload(title="", url="", mapOf("" to ""))
+        PamSDK.track( PamStandardEvent.pageView, payload )
+
+//        mapOf(
+//                "page_title" to (this.product?.Title ?: ""),
+//                "product_id" to (this.product?.Id ?: ""),
+//                "product_price" to (this.product?.Price ?: "")
+//            )
+//        )
     }
 
     private fun registerAddToCart() {
@@ -92,16 +99,35 @@ class ProductDetailPage : AppCompatActivity() {
     private fun registerFavourite() {
         binding?.let {
             it.btnFavourite.setOnClickListener {
-                PamSDK.track(
-                    "favourite", mutableMapOf(
-                        "page_title" to this.product!!.Title.toString(),
-                        "form_fields" to mutableMapOf(
-                            "product_id" to this.product!!.Id.toString(),
-                            "product_price" to this.product!!.Price.toString()
+                val isAddedToFavourite =
+                    MockAPI.getInstance().isProductFavourite(this.product!!.Id.toString())
+                if (!isAddedToFavourite) {
+                    MockAPI.getInstance().addToFavourite(this.product!!.Id.toString())
+                    PamSDK.track(
+                        "favourite", mutableMapOf(
+                            "page_title" to this.product!!.Title.toString(),
+                            "form_fields" to mutableMapOf(
+                                "product_id" to this.product!!.Id.toString(),
+                                "product_price" to this.product!!.Price.toString()
+                            )
                         )
                     )
-                )
-                this.alert("Add To Favourite", "Added to your favourite products")
+                    this.alert("Add To Favourite", "Added to your favourite products")
+                } else {
+                    MockAPI.getInstance().removeFromFavourite(this.product!!.Id.toString())
+                    PamSDK.track(
+                        "remove_favourite", mutableMapOf(
+                            "page_title" to this.product!!.Title.toString(),
+                            "form_fields" to mutableMapOf(
+                                "product_id" to this.product!!.Id.toString(),
+                                "product_price" to this.product!!.Price.toString()
+                            )
+                        )
+                    )
+                    this.alert("Remove From Favourite", "Removed from your favourite products")
+                }
+
+                fetchFavourite()
             }
         }
     }
@@ -150,7 +176,23 @@ class ProductDetailPage : AppCompatActivity() {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
 
                 startActivity(intent)
-                this@ProductDetailPage.finish()
+                this.finish()
+            }
+        }
+    }
+
+    private fun fetchFavourite() {
+        product?.Id.let { id ->
+            val isAddedToFavourite = MockAPI.getInstance().isProductFavourite(id!!)
+            Log.d(PamSDKName, "isAddedToFavourite = $isAddedToFavourite")
+            if (isAddedToFavourite) {
+                binding?.btnFavourite?.let {
+                    it.imageAlpha = 100
+                }
+            } else {
+                binding?.btnFavourite?.let {
+                    it.imageAlpha = 255
+                }
             }
         }
     }

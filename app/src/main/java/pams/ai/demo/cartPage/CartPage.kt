@@ -1,12 +1,17 @@
 package pams.ai.demo.cartPage
 
 import android.app.AlertDialog
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import pams.ai.demo.LoginPage
+import pams.ai.demo.R
 import pams.ai.demo.databinding.ActivityCartPageBinding
+import pams.ai.demo.notificationsPage.NotificationPage
 import pams.ai.demo.productsPage.ProductsListAdapter
 import pamsdk.PamSDK
 import pamsdk.PamSDKName
@@ -27,6 +32,10 @@ class CartPage : AppCompatActivity() {
 
         registerCheckoutButton()
         registerCartView()
+        registerNotificationButton()
+        registerUserButton()
+        registerLogoutButton()
+
         fetchCart()
     }
 
@@ -70,13 +79,50 @@ class CartPage : AppCompatActivity() {
         binding?.listView?.adapter = adapter
 
         val layoutManager =
-            LinearLayoutManager(this@CartPage, LinearLayoutManager.VERTICAL, false)
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding?.listView?.layoutManager = layoutManager
+    }
+
+    private fun registerNotificationButton() {
+        binding?.let {
+            it.btnNotification.setOnClickListener {
+                val intent = Intent(this, NotificationPage::class.java)
+                overridePendingTransition(R.anim.anim_in, R.anim.anim_out)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun registerUserButton() {
+        binding?.let {
+            it.btnUser.setOnClickListener {
+                binding?.let { b ->
+                    if (b.btnLogout.visibility == View.INVISIBLE) {
+                        b.btnLogout.visibility = View.VISIBLE
+                    } else {
+                        b.btnLogout.visibility = View.INVISIBLE
+                    }
+                }
+            }
+        }
+    }
+
+    private fun registerLogoutButton() {
+        binding?.let {
+            it.btnLogout.setOnClickListener {
+                PamSDK.userLogout()
+
+                val intent = Intent(this, LoginPage::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
+                startActivity(intent)
+                this.finish()
+            }
+        }
     }
 
     private fun fetchCart() {
         val cart = MockAPI.getInstance().getCart()
-        Log.d(PamSDKName, "cart ${cart.toString()}")
 
         adapter?.setCart(cart = cart)
         binding?.cart = cart

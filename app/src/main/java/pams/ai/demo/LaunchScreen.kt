@@ -28,24 +28,7 @@ class LaunchScreen : AppCompatActivity() {
 
     private fun navigatorHandler(bundle: Set<String>?) {
         if (bundle == null) {
-            val task = CoroutineScope(Dispatchers.Default)
-            task.launch {
-                sleep(1500)
-                withContext(Dispatchers.Main) {
-                    val contactID = PamSDK.getContactID()
-
-                    if (contactID == null) {
-                        val intent = Intent(this@LaunchScreen, LoginPage::class.java)
-                        startActivity(intent)
-                    } else {
-                        val intent = Intent(this@LaunchScreen, ProductPage::class.java)
-                        startActivity(intent)
-                    }
-
-                    this@LaunchScreen.finish()
-                }
-            }
-
+            defaultNavigator()
             return
         }
 
@@ -74,6 +57,29 @@ class LaunchScreen : AppCompatActivity() {
                             )
                         )
                     )
+                }
+
+                this@LaunchScreen.finish()
+                return
+            }
+        }
+
+        defaultNavigator()
+    }
+
+    private fun defaultNavigator() {
+        val task = CoroutineScope(Dispatchers.Default)
+        task.launch {
+            sleep(1500)
+            withContext(Dispatchers.Main) {
+                val contactID = PamSDK.getContactID()
+
+                if (contactID == null) {
+                    val intent = Intent(this@LaunchScreen, LoginPage::class.java)
+                    startActivity(intent)
+                } else {
+                    val intent = Intent(this@LaunchScreen, ProductPage::class.java)
+                    startActivity(intent)
                 }
 
                 this@LaunchScreen.finish()
