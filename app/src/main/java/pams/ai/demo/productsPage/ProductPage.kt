@@ -2,18 +2,22 @@ package pams.ai.demo.productsPage
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import pams.ai.demo.LoginPage
 import pams.ai.demo.ProductDetailPage
 import pams.ai.demo.R
+import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductPageBinding
+import pams.ai.demo.notificationsPage.NotificationPage
 import pamsdk.PamSDK
 import webservices.MockAPI
 
 class ProductPage : AppCompatActivity() {
 
-    var binding: ActivityProductPageBinding? = null
-    var adapter: ProductsListAdapter? = null
+    private var binding: ActivityProductPageBinding? = null
+    private var adapter: ProductsListAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +30,12 @@ class ProductPage : AppCompatActivity() {
         PamSDK.askNotificationPermission()
 
         registerProductView()
+        registerCartButton()
+        registerNotificationButton()
+        registerUserButton()
+        registerLoginButton()
+        registerLogoutButton()
+
         fetchProducts()
     }
 
@@ -35,14 +45,85 @@ class ProductPage : AppCompatActivity() {
             val intent = Intent(this, ProductDetailPage::class.java).also {
                 it.putExtra("product", product)
             }
+
             startActivity(intent)
             overridePendingTransition(R.anim.anim_in, R.anim.anim_out)
+
+            binding?.btnLogout?.let {
+                it.visibility = View.INVISIBLE
+            }
         }
 
         binding?.listView?.adapter = adapter
 
-        val layout = GridLayoutManager(this, 2)
-        binding?.listView?.layoutManager = layout
+        val layoutManager = GridLayoutManager(this, 2)
+        binding?.listView?.layoutManager = layoutManager
+    }
+
+    private fun registerCartButton() {
+        binding?.let {
+            it.btnCart.setOnClickListener {
+                val intent = Intent(this, CartPage::class.java)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun registerNotificationButton() {
+        binding?.let {
+            it.btnNotification.setOnClickListener {
+                val intent = Intent(this, NotificationPage::class.java)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun registerUserButton() {
+        binding?.let {
+            it.btnUser.setOnClickListener {
+                binding?.let { b ->
+                    if (PamSDK.getCustomerID() == null) {
+                        if (b.btnLogin.visibility == View.INVISIBLE) {
+                            b.btnLogin.visibility = View.VISIBLE
+                        } else {
+                            b.btnLogin.visibility = View.INVISIBLE
+                        }
+                    } else {
+                        if (b.btnLogout.visibility == View.INVISIBLE) {
+                            b.btnLogout.visibility = View.VISIBLE
+                        } else {
+                            b.btnLogout.visibility = View.INVISIBLE
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun registerLoginButton() {
+        binding?.let {
+            it.btnLogin.setOnClickListener {
+                val intent = Intent(this, LoginPage::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
+                startActivity(intent)
+                this.finish()
+            }
+        }
+    }
+
+    private fun registerLogoutButton() {
+        binding?.let {
+            it.btnLogout.setOnClickListener {
+                PamSDK.userLogout()
+
+                val intent = Intent(this, LoginPage::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
+                startActivity(intent)
+                this.finish()
+            }
+        }
     }
 
     private fun fetchProducts() {

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="users">
-        <item>choengchai@3dsinteractive.com</item>
+        <item>a@a.com</item>
+        <item>b@b.com</item>
     </string-array>
 </resources>

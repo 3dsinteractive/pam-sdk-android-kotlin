@@ -2,12 +2,22 @@ package pamsdk
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Parcelable
+import android.telephony.SignalStrength
 import android.util.Log
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import kotlinx.coroutines.*
+import kotlinx.parcelize.Parcelize
+import models.CartProductModel
+import pams.ai.demo.LoginPage
+import pams.ai.demo.productsPage.ProductPage
+import webservices.MockAPI
+import java.util.*
 
 const val PamSDKName: String = "PamSDK"
 const val sharedPreferenceKey: String = "PamSDK"
@@ -18,42 +28,117 @@ data class IPamResponse(
     @SerializedName("contact_id") val contactID: String? = null
 )
 
+data class IPamMessagePayload(
+    @SerializedName("flex") val flex: String? = null,
+    @SerializedName("pixel") val pixel: String? = null,
+    @SerializedName("url") val url: String? = null,
+    @SerializedName("created_date") val CreatedDate: String? = null
+)
+
 data class IPamOption(val pamServer: String, val publicDbAlias: String, val loginDbAlias: String)
 
-typealias ListenerFunction = (Map<String, String>) -> Unit
+typealias ListenerFunction = (Map<String, Any>) -> Unit
 
-enum class PamEvent {
-    page_view,
-    add_to_cart,
-    purchase_success,
-    favourite,
-    save_push,
+typealias PamIntentCallback = (IPamMessagePayload) -> Unit
+
+enum class PamCallback(val string: String) {
+    onToken("onToken"),
+    onMessage("onMessage")
 }
 
-enum class PamCallback {
-    onToken,
+enum class PamStandardEvent(val string: String) {
+    login("login"),
+    appLaunch("app_launch"),
+    pageView("page_view"),
+    addToCart("add_to_cart"),
+    purchaseSuccess("purchase_success"),
+    favourite("favourite"),
+    savePush("save_push"),
+    openPush("open_push"),
 }
 
 class PamSDK {
     companion object {
+
         var app: Application? = null
         var options: IPamOption? = null
+        var queueTrackerManager: QueueTrackerManager? = null
+        var enableLog = false
+        var isAppReady = false
 
         var onTokenListener = mutableListOf<ListenerFunction>()
+        var onMessageListener = mutableListOf<ListenerFunction>()
+        var pendingMessage = mutableListOf<Map<String, Any>>()
 
+        fun init(application: Application, enableLog: Boolean = false) {
+            app = application
+            val config = application.packageManager.getApplicationInfo(
+                application.packageName,
+                PackageManager.GET_META_DATA
+            )
+            options = IPamOption(
+                pamServer = config.metaData.get("pam-server").toString(),
+                publicDbAlias = config.metaData.get("public-db-alias").toString(),
+                loginDbAlias = config.metaData.get("login-db-alias").toString()
+            )
+            queueTrackerManager = QueueTrackerManager(this.trackCallback())
+            this.enableLog = enableLog
 
-        fun listen(eventName: String, callBack: ListenerFunction) {
-            if (eventName == PamCallback.onToken.toString()) {
-                onTokenListener.add(callBack)
+            if (enableLog) {
+                Log.d(PamSDKName, "Pam has initial\n")
             }
         }
 
-        fun dispatch(eventName: String, args: Map<String, String>) {
+        fun listen(event: PamCallback, callback: ListenerFunction) {
+            listen(event.string, callback)
+        }
+
+        fun listen(eventName: String, callback: ListenerFunction) {
+            if (eventName == PamCallback.onToken.string) {
+                onTokenListener.add(callback)
+            } else if (eventName == PamCallback.onMessage.string) {
+                onMessageListener.add(callback)
+            }
+        }
+
+        fun dispatch(event: PamCallback, args: Map<String, Any>) {
+            dispatch(event.string, args)
+        }
+
+        fun dispatch(eventName: String, args: Map<String, Any>) {
             if (eventName == PamCallback.onToken.toString()) {
-                onTokenListener.forEach { callBack ->
-                    callBack(args)
+                onTokenListener.forEach { callback ->
+                    callback(args)
+                }
+            } else if (eventName == PamCallback.onMessage.toString()) {
+                onMessageListener.forEach { callback ->
+                    callback(args)
                 }
             }
+        }
+
+        fun receiveMessage(
+            imageURL: String,
+            title: String,
+            message: String,
+            payload: Map<String, Any>
+        ): Boolean {
+            if (payload["pam"] != null) {
+                val args = mapOf(
+                    "image_url" to imageURL,
+                    "title" to title,
+                    "message" to message,
+                    "payload" to payload,
+                )
+
+                if (isAppReady) {
+                    dispatch(PamCallback.onMessage, args)
+                } else {
+                    pendingMessage.add(args)
+                }
+                return false
+            }
+            return true
         }
 
         fun askNotificationPermission() {
@@ -62,146 +147,246 @@ class PamSDK {
                     return@OnCompleteListener
                 }
 
-                savePushKey(task.result.toString())
                 saveToSharedPref("push_key", task.result.toString())
+                savePushKey(task.result.toString())
                 dispatch(
-                    PamCallback.onToken.toString(), mutableMapOf(
+                    PamCallback.onToken, mapOf(
                         "token" to task.result.toString()
                     )
                 )
             })
         }
 
+        fun appReady() {
+            if (!isAppReady) {
+                isAppReady = true
 
-        fun init(application: Application) {
-            this.app = application
-            val config = this.app!!.packageManager.getApplicationInfo(
-                this.app!!.packageName,
-                PackageManager.GET_META_DATA
-            )
-            this.options = IPamOption(
-                pamServer = config.metaData.get("pam-server").toString(),
-                publicDbAlias = config.metaData.get("public-db-alias").toString(),
-                loginDbAlias = config.metaData.get("login-db-alias").toString()
-            )
-
-            Log.d(PamSDKName, "Pam has initial\n")
+                track(PamStandardEvent.appLaunch)
+                pendingMessage.forEach { args ->
+                    dispatch(PamCallback.onMessage, args)
+                }
+                pendingMessage.clear()
+            }
         }
 
-        private fun saveToSharedPref(key: String, value: Any): Boolean? {
+        fun saveToSharedPref(key: String, value: Any) {
             val sharedPref =
                 app?.getSharedPreferences(sharedPreferenceKey, Context.MODE_PRIVATE)
             val editor = sharedPref?.edit()
             editor?.putString(key, value.toString())
-            return editor?.commit()
+            editor?.apply()
         }
 
-        private fun removeFromSharedPref(key: String): Boolean? {
+        fun saveToSharedPref(key: String, value: Long) {
+            val sharedPref =
+                app?.getSharedPreferences(sharedPreferenceKey, Context.MODE_PRIVATE)
+            val editor = sharedPref?.edit()
+            editor?.putLong(key, value)
+            editor?.apply()
+        }
+
+        fun removeFromSharedPref(key: String) {
             val sharedPref =
                 app?.getSharedPreferences(sharedPreferenceKey, Context.MODE_PRIVATE)
             val editor = sharedPref?.edit()
             editor?.remove(key)
-            return editor?.commit()
+            editor?.apply()
         }
 
-        private fun getFromSharedPref(key: String, default: String): String {
+        private fun getFromSharedPref(key: String): String? {
             val sharedPref = app?.getSharedPreferences(sharedPreferenceKey, Context.MODE_PRIVATE)
-            return sharedPref?.getString(key, default)!!
+            return sharedPref?.getString(key, null)
         }
 
-        private fun replaceFormFieldsValueIfNull(
-            obj: MutableMap<String, Any>,
-            key: String,
-            value: Any
-        ) {
-            if (value.toString() != "") {
-                obj["form_fields"].let {
-                    val newObj: MutableMap<String, String>
-                    if (it == null) {
-                        newObj = mutableMapOf()
-                    } else {
-                        newObj = it as MutableMap<String, String>
-                    }
+        private fun getLongFromSharedPref(key: String): Long {
+            val sharedPref = app?.getSharedPreferences(sharedPreferenceKey, Context.MODE_PRIVATE)
+            return sharedPref?.getLong(key, 0) ?: 0
+        }
 
-                    if (newObj[key] == null) {
-                        newObj[key] = value.toString()
-                    }
+        private fun getSessionID(): String {
+            val expire = getLongFromSharedPref("session_expire_in_mils")
+            val session = getFromSharedPref("session_id")
 
-                    obj["form_fields"] = newObj
-                }
+            if (System.currentTimeMillis() - expire > (1000 * 60 * 60)) {
+                val newExpire = System.currentTimeMillis() + 1000 * 60 * 60
+                val newSession = UUID.randomUUID().toString()
+
+                saveToSharedPref("session_expire_in_mils", newExpire)
+                saveToSharedPref("session_id", newSession)
+                return newSession
             }
+
+            val newExpire = System.currentTimeMillis() + 1000 * 60 * 60
+            val newSession = session ?: UUID.randomUUID().toString()
+            saveToSharedPref("session_expire_in_mils", newExpire)
+            saveToSharedPref("session_id", newSession)
+
+            return newSession
+        }
+
+        fun getContactID(): String? {
+            return getFromSharedPref("_contact_id")
+        }
+
+        fun getCustomerID(): String? {
+            return getFromSharedPref("customer_id")
         }
 
         fun userLogin(customerID: String) {
-            this.saveToSharedPref("customer_id", customerID)
-            this.saveToSharedPref("_database", this.options!!.loginDbAlias)
-            this.track(
-                "login", mutableMapOf(
-                    "form_fields" to mutableMapOf(
-                        "customer" to customerID
-                    )
+            saveToSharedPref("customer_id", customerID)
+            track(
+                PamStandardEvent.login, mapOf(
+                    "customer" to customerID
                 )
             )
         }
 
         fun userLogout() {
-            this.track("logout", mutableMapOf())
-            this.removeFromSharedPref("_contact_id")
-            this.removeFromSharedPref("customer_id")
-            this.removeFromSharedPref("_database")
+            track(
+                "logout", mapOf(
+                    "_delete_media" to mapOf(
+                        "android_notification" to ""
+                    )
+                )
+            )
+
+            removeFromSharedPref("customer_id")
+            removeFromSharedPref("login_contact_id")
         }
 
         fun savePushKey(pushKey: String) {
-            this.track(
-                PamEvent.save_push.toString(), mutableMapOf(
-                    "form_fields" to mutableMapOf(
-                        "android_notification" to pushKey
-                    )
+            track(
+                PamStandardEvent.savePush, mapOf(
+                    "android_notification" to pushKey
                 )
             )
         }
 
-        fun track(eventName: String, payload: MutableMap<String, Any>) {
-            payload["platform"] = "android"
-            payload["event"] = eventName
-            replaceFormFieldsValueIfNull(
-                payload,
-                "_database",
-                getFromSharedPref("_database", this.options!!.publicDbAlias)
-            )
-            replaceFormFieldsValueIfNull(
-                payload,
-                "_contact_id",
-                this.getFromSharedPref("_contact_id", "")
-            )
-            replaceFormFieldsValueIfNull(
-                payload,
-                "customer",
-                this.getFromSharedPref("customer_id", "")
-            )
+        fun isNotPamIntent(intent: Intent? = null, handler: PamIntentCallback? = null): Boolean {
+            if (intent == null) {
+                return true
+            }
 
-            Log.d(PamSDKName, "track payload $payload\n")
+            intent.extras?.keySet()?.forEach { key ->
+                if (key == "pam" && intent.extras?.get(key) != null) {
+                    // Pam handle the intent on it own
+                    intent.getStringExtra(key)?.let {
+                        val pamPayload = Gson().fromJson(it, IPamMessagePayload::class.java)
 
-            Http.getInstance().post(
-                url = "${this.options!!.pamServer}/trackers/events",
-                headers = mapOf(),
-                queryString = mapOf(),
-                data = payload
-            ) { text, err ->
-                val response = Gson().fromJson(text, IPamResponse::class.java)
-                if (response.contactID != null) {
-                    Log.d(PamSDKName, "track response is $text\n")
-                    saveToSharedPref("_contact_id", response.contactID).let {
-                        if (!it!!) {
-                            Log.d(PamSDKName, "track error $err\n")
+                        pamPayload.pixel?.let {
+                            if (enableLog) {
+                                Log.d(PamSDKName, "Calling pixel")
+                            }
+
+                            Http.getInstance().get(
+                                url = pamPayload.pixel,
+                            ) { text, err ->
+                                if (enableLog) {
+                                    Log.d(PamSDKName, "Calling pixel response is $text\n")
+                                }
+                                if (err != null) {
+                                    Log.d(PamSDKName, "Calling pixel error is ${err.message}\n")
+                                }
+                            }
                         }
+
+                        handler?.invoke(pamPayload)
+                        return false
                     }
-                } else if (response.code != null && response.message != null) {
-                    Log.d(PamSDKName, "track error $err\n")
                 }
             }
 
-            Log.d(PamSDKName, "track has been send\n")
+            return true
+        }
+
+        fun track(event: PamStandardEvent, payload: Map<String, Any>? = null) {
+            track(event.string, payload)
+        }
+
+        fun track(eventName: String, payload: Map<String, Any>? = null) {
+            this.queueTrackerManager?.enqueue(eventName, payload)
+        }
+
+        private fun trackCallback(): ((eventName: String, payload: Map<String, Any>?) -> Unit) {
+            return fun(eventName: String, payload: Map<String, Any>?) {
+                val postBody = mutableMapOf<String, Any>()
+
+                postBody["platform"] = "android"
+                postBody["event"] = eventName
+
+                val formFields = mutableMapOf<String, Any>()
+                formFields["_database"] = when (getFromSharedPref("customer_id")) {
+                    null -> options?.publicDbAlias!!
+                    else -> options?.loginDbAlias!!
+                }
+
+                val isLogin = getFromSharedPref("customer_id") != null
+
+                formFields["_contact_id"] = when (isLogin) {
+                    true -> getFromSharedPref("login_contact_id") ?: ""
+                    else -> getFromSharedPref("public_contact_id") ?: ""
+                }
+
+                if (isLogin) {
+                    getFromSharedPref("customer_id")?.let {
+                        formFields["customer"] = it
+                    }
+                }
+
+                payload?.get("page_url")?.let {
+                    postBody["page_url"] = it
+                }
+                payload?.get("page_title")?.let {
+                    postBody["page_title"] = it
+                }
+
+                payload?.forEach {
+                    if (it.key != "page_url" || it.key != "page_title") {
+                        formFields[it.key] = it.value
+                    }
+                }
+
+                formFields["_session"] = getSessionID()
+
+                postBody["form_fields"] = formFields
+                if (enableLog) {
+                    Log.d(PamSDKName, "track payload $postBody\n")
+                }
+
+                Http.getInstance().post(
+                    url = "${options?.pamServer!!}/trackers/events",
+                    headers = mapOf(),
+                    queryString = mapOf(),
+                    data = postBody
+                ) { text, err ->
+                    if (enableLog) {
+                        Log.d(PamSDKName, "track response is $text\n")
+                    }
+
+                    val response = Gson().fromJson(text, IPamResponse::class.java)
+                    if (response.contactID != null) {
+
+                        if (isLogin) {
+                            saveToSharedPref("login_contact_id", response.contactID)
+                        } else {
+                            saveToSharedPref("public_contact_id", response.contactID)
+                        }
+                    } else if (response.code != null && response.message != null) {
+                        if (enableLog) {
+                            Log.d(PamSDKName, "track error $err\n")
+                        }
+                    }
+
+                    val task = CoroutineScope(Dispatchers.IO)
+                    task.launch {
+                        queueTrackerManager?.next()
+                    }
+                }
+
+                if (enableLog) {
+                    Log.d(PamSDKName, "track has been send\n")
+                }
+            }
         }
     }
 }

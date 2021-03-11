@@ -45,7 +45,6 @@ class ProductViewHolder(val binding: ProductListItemBinding) :
     var onClickProduct: ((Product) -> Unit)? = null
 
     fun setProduct(product: Product) {
-        product.Price = "฿${product.Price}"
         binding.product = product
         Picasso.get().load(product.Image).into(binding.productImage);
 
@@ -54,4 +53,3 @@ class ProductViewHolder(val binding: ProductListItemBinding) :
         }
     }
 }
-
