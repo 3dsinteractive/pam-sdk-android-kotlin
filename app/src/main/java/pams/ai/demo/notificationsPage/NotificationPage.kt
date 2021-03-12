@@ -4,14 +4,11 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import pams.ai.demo.LoginPage
 import pams.ai.demo.databinding.ActivityNotificationPageBinding
-import pamsdk.PamSDK
+import pamsdk.Pam
 import pamsdk.PamSDKName
 import webservices.MockAPI
 
@@ -58,7 +55,7 @@ class NotificationPage : AppCompatActivity() {
         binding?.let {
             it.btnUser.setOnClickListener {
                 binding?.let { b ->
-                    if (PamSDK.getCustomerID() == null) {
+                    if (Pam.getCustomerID() == null) {
                         if (b.btnLogin.visibility == View.INVISIBLE) {
                             b.btnLogin.visibility = View.VISIBLE
                         } else {
@@ -91,7 +88,7 @@ class NotificationPage : AppCompatActivity() {
     private fun registerLogoutButton() {
         binding?.let {
             it.btnLogout.setOnClickListener {
-                PamSDK.userLogout()
+                Pam.userLogout()
 
                 val intent = Intent(this, LoginPage::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)

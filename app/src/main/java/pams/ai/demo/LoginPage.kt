@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import models.UserModel
 import pams.ai.demo.databinding.ActivityLoginPageBinding
 import pams.ai.demo.productsPage.ProductPage
-import pamsdk.PamSDK
+import pamsdk.Pam
 import webservices.MockAPI
 import webservices.mockUsers
 
@@ -32,15 +32,26 @@ class LoginPage : AppCompatActivity() {
         registerSpinner()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        Pam.appReady()
+    }
+
     private fun registerButtonLogin() {
         val buttonLogin = binding?.btnLogin
         buttonLogin?.let { btn ->
             btn.setOnClickListener {
                 user?.let { u ->
                     val response = MockAPI.getInstance().login(u.Email)
-                    PamSDK.saveToSharedPref("_contact_id", u.ContactID)
+                    Pam.saveToSharedPref("_contact_id", u.ContactID)
                     response?.CusID?.let {
-                        PamSDK.userLogin(it)
+                        Pam.userLogin(it)
                         val intent = Intent(this, ProductPage::class.java)
                         startActivity(intent)
                     }

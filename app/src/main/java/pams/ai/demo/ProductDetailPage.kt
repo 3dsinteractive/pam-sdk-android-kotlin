@@ -11,7 +11,7 @@ import models.Product
 import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductDetailPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
-import pamsdk.PamSDK
+import pamsdk.Pam
 import pamsdk.PamSDKName
 import pamsdk.PamStandardEvent
 import webservices.MockAPI
@@ -34,7 +34,7 @@ class ProductDetailPage : AppCompatActivity() {
             Picasso.get().load(product?.Image).into(it.productImage)
         }
 
-        PamSDK.track(
+        Pam.track(
             PamStandardEvent.pageView, mapOf(
                 "page_url" to "app//product?id=${this.product?.Id ?: ""}",
                 "page_title" to (this.product?.Title ?: ""),
@@ -59,7 +59,7 @@ class ProductDetailPage : AppCompatActivity() {
         binding?.let {
             it.btnAddToCart.setOnClickListener {
                 MockAPI.getInstance().addToCart(this.product?.Id!!)
-                PamSDK.track(
+                Pam.track(
                     PamStandardEvent.addToCart, mapOf(
                         "page_title" to (this.product?.Title ?: ""),
                         "product_id" to (this.product?.Id ?: ""),
@@ -74,7 +74,7 @@ class ProductDetailPage : AppCompatActivity() {
     private fun registerBuyNow() {
         binding?.let {
             it.btnBuyNow.setOnClickListener {
-                PamSDK.track(
+                Pam.track(
                     PamStandardEvent.purchaseSuccess, mapOf(
                         "page_title" to (this.product?.Title ?: ""),
                         "product_id" to (this.product?.Id ?: ""),
@@ -93,7 +93,7 @@ class ProductDetailPage : AppCompatActivity() {
                     MockAPI.getInstance().isProductFavourite(this.product?.Id ?: "")
                 if (!isAddedToFavourite) {
                     MockAPI.getInstance().addToFavourite(this.product?.Id ?: "")
-                    PamSDK.track(
+                    Pam.track(
                         "favourite", mapOf(
                             "page_title" to (this.product?.Title ?: ""),
                             "product_id" to (this.product?.Id ?: ""),
@@ -103,7 +103,7 @@ class ProductDetailPage : AppCompatActivity() {
                     this.alert("Add To Favourite", "Added to your favourite products")
                 } else {
                     MockAPI.getInstance().removeFromFavourite(this.product?.Id ?: "")
-                    PamSDK.track(
+                    Pam.track(
                         "remove_favourite", mapOf(
                             "page_title" to (this.product?.Title ?: ""),
                             "product_id" to (this.product?.Id ?: ""),
@@ -143,7 +143,7 @@ class ProductDetailPage : AppCompatActivity() {
         binding?.let {
             it.btnUser.setOnClickListener {
                 binding?.let { b ->
-                    if (PamSDK.getCustomerID() == null) {
+                    if (Pam.getCustomerID() == null) {
                         if (b.btnLogin.visibility == View.INVISIBLE) {
                             b.btnLogin.visibility = View.VISIBLE
                         } else {
@@ -176,7 +176,7 @@ class ProductDetailPage : AppCompatActivity() {
     private fun registerLogoutButton() {
         binding?.let {
             it.btnLogout.setOnClickListener {
-                PamSDK.userLogout()
+                Pam.userLogout()
 
                 val intent = Intent(this, LoginPage::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
@@ -190,7 +190,7 @@ class ProductDetailPage : AppCompatActivity() {
     private fun fetchFavourite() {
         product?.Id.let { id ->
             val isAddedToFavourite = MockAPI.getInstance().isProductFavourite(id ?: "")
-            if (PamSDK.enableLog) {
+            if (Pam.enableLog) {
                 Log.d(PamSDKName, "isAddedToFavourite = $isAddedToFavourite")
             }
 

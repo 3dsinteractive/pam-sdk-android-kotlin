@@ -9,8 +9,8 @@ open class PAMFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
 
-        PamSDK.savePushKey(token)
-        PamSDK.dispatch(
+        Pam.savePushKey(token)
+        Pam.dispatch(
             PamCallback.onToken, mapOf(
                 "token" to token
             )
@@ -48,7 +48,7 @@ open class PAMFirebaseMessagingService : FirebaseMessagingService() {
                 date = "2020-03-05 12:49:45"
             )
 
-            PamSDK.receiveMessage(
+            Pam.receiveMessage(
                 imageURL = imageURL,
                 title = title,
                 message = message,

@@ -11,7 +11,7 @@ import pams.ai.demo.R
 import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
-import pamsdk.PamSDK
+import pamsdk.Pam
 import webservices.MockAPI
 
 class ProductPage : AppCompatActivity() {
@@ -27,7 +27,7 @@ class ProductPage : AppCompatActivity() {
             setContentView(it.root)
         }
 
-        PamSDK.askNotificationPermission()
+        Pam.askNotificationPermission()
 
         registerProductView()
         registerCartButton()
@@ -82,7 +82,7 @@ class ProductPage : AppCompatActivity() {
         binding?.let {
             it.btnUser.setOnClickListener {
                 binding?.let { b ->
-                    if (PamSDK.getCustomerID() == null) {
+                    if (Pam.getCustomerID() == null) {
                         if (b.btnLogin.visibility == View.INVISIBLE) {
                             b.btnLogin.visibility = View.VISIBLE
                         } else {
@@ -115,7 +115,7 @@ class ProductPage : AppCompatActivity() {
     private fun registerLogoutButton() {
         binding?.let {
             it.btnLogout.setOnClickListener {
-                PamSDK.userLogout()
+                Pam.userLogout()
 
                 val intent = Intent(this, LoginPage::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)

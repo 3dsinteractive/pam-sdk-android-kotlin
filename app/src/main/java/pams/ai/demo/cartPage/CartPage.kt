@@ -4,17 +4,13 @@ import android.app.AlertDialog
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import pams.ai.demo.LoginPage
 import pams.ai.demo.R
 import pams.ai.demo.databinding.ActivityCartPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
-import pams.ai.demo.productsPage.ProductsListAdapter
-import pamsdk.PamSDK
-import pamsdk.PamSDKName
+import pamsdk.Pam
 import pamsdk.PamStandardEvent
 import webservices.MockAPI
 
@@ -53,7 +49,7 @@ class CartPage : AppCompatActivity() {
                         val categoryIds: String =
                             cart.Products?.map { p -> p.CategoryId }?.joinToString() ?: ""
 
-                        PamSDK.track(
+                        Pam.track(
                             PamStandardEvent.purchaseSuccess, mapOf(
                                 "product_id" to productIds,
                                 "product_cat" to categoryIds,
@@ -101,7 +97,7 @@ class CartPage : AppCompatActivity() {
         binding?.let {
             it.btnUser.setOnClickListener {
                 binding?.let { b ->
-                    if (PamSDK.getCustomerID() == null) {
+                    if (Pam.getCustomerID() == null) {
                         if (b.btnLogin.visibility == View.INVISIBLE) {
                             b.btnLogin.visibility = View.VISIBLE
                         } else {
@@ -134,7 +130,7 @@ class CartPage : AppCompatActivity() {
     private fun registerLogoutButton() {
         binding?.let {
             it.btnLogout.setOnClickListener {
-                PamSDK.userLogout()
+                Pam.userLogout()
 
                 val intent = Intent(this, LoginPage::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)

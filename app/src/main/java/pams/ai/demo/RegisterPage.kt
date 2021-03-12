@@ -3,14 +3,9 @@ package pams.ai.demo
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import pams.ai.demo.databinding.ActivityRegisterPageBinding
 import pams.ai.demo.productsPage.ProductPage
-import pamsdk.PamSDK
-import pamsdk.PamSDKName
+import pamsdk.Pam
 import webservices.MockAPI
 
 class RegisterPage : AppCompatActivity() {
@@ -33,7 +28,7 @@ class RegisterPage : AppCompatActivity() {
                 val email = binding?.inputEmail?.text
                 MockAPI.getInstance().register(email.toString())
 
-                PamSDK.track("register", mutableMapOf())
+                Pam.track("register", mutableMapOf())
 
                 val intent = Intent(this, ProductPage::class.java)
                 startActivity(intent)
