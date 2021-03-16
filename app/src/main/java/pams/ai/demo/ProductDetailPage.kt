@@ -3,7 +3,6 @@ package pams.ai.demo
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.squareup.picasso.Picasso
@@ -13,6 +12,7 @@ import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductDetailPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
 import pamsdk.Pam
+import pamsdk.PamStandardEvent
 import webservices.MockAPI
 
 class ProductDetailPage : AppCompatActivity() {
@@ -33,14 +33,14 @@ class ProductDetailPage : AppCompatActivity() {
             Picasso.get().load(product?.Image).into(it.productImage)
         }
 
-        Pam.track(
-            "page_view", mapOf(
-                "page_url" to "app://product?id=${this.product?.Id ?: ""}",
-                "page_title" to (this.product?.Title ?: ""),
-                "product_id" to (this.product?.Id ?: ""),
-                "product_price" to (this.product?.Price ?: "")
+        PamStandardEvent.PageView(
+            this.product?.Title ?: "",
+            "app://product?id=${this.product?.Id ?: ""}",
+            mapOf(
+                "product_id" to (this.product?.Id ?: "")
             )
-        )
+        ).track()
+
 
         registerAddToCart()
         registerBuyNow()
