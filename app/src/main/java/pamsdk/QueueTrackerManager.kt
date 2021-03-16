@@ -1,8 +1,8 @@
 package pamsdk
 
-typealias QueueTrackerCallback = (String, Map<String, Any>?) -> Unit
+typealias QueueTrackerCallback = (String, Map<String, Any>?, Boolean) -> Unit
 
-class TrackingQueue(val eventName:String, val payload: Map<String, Any>? = null)
+class TrackingQueue(val eventName:String, val payload: Map<String, Any>? = null, val deleteLoginContactAfterPost: Boolean)
 
 class QueueTrackerManager() {
     private var isProcessing: Boolean = false
@@ -10,8 +10,8 @@ class QueueTrackerManager() {
 
     var callback: QueueTrackerCallback? = null
 
-    fun enqueue(eventName: String, payload: Map<String, Any>? = null) {
-        val tracking = TrackingQueue(eventName, payload)
+    fun enqueue(eventName: String, payload: Map<String, Any>? = null, deleteLoginContactAfterPost:Boolean) {
+        val tracking = TrackingQueue(eventName, payload, deleteLoginContactAfterPost)
         this.queue.add(tracking)
 
         if (!this.isProcessing) {
@@ -23,7 +23,7 @@ class QueueTrackerManager() {
         if (queue.size > 0) {
             this.isProcessing = true
             val task = queue.removeFirst()
-            callback?.invoke(task.eventName, task.payload)
+            callback?.invoke(task.eventName, task.payload, task.deleteLoginContactAfterPost)
 
         } else {
             this.isProcessing = false

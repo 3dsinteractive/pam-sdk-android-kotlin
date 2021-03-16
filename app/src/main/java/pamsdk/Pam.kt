@@ -2,9 +2,9 @@ package pamsdk
 
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
@@ -42,20 +42,36 @@ class Pam {
                 application.packageName,
                 PackageManager.GET_META_DATA
             )
+
+            var pamServer = config.metaData.get("pam-server").toString()
+            if( pamServer.endsWith("/") ){
+                pamServer = pamServer.replaceFirst(".$", "")
+            }
+
             shared.options = PamOption(
-                pamServer = config.metaData.get("pam-server").toString(),
+                pamServer = pamServer,
                 publicDbAlias = config.metaData.get("public-db-alias").toString(),
                 loginDbAlias = config.metaData.get("login-db-alias").toString()
             )
         }
 
-        fun track(eventName: String, payload: Map<String, Any>? = null) = shared.track(eventName, payload)
+        fun track(eventName: String, payload: Map<String, Any>? = null) = shared.track(
+            eventName,
+            payload
+        )
         fun appReady() = shared.appReady()
         fun listen(eventName: String, callback: ListenerFunction) =
             shared.listen(eventName, callback)
         fun userLogout() = shared.userLogout()
         fun userLogin(customerID: String) = shared.userLogin(customerID)
         fun askNotificationPermission() = shared.askNotificationPermission()
+    }
+
+    enum class SaveKey(val keyName:String) {
+        CustomerID("@pam_customer_id"),
+        ContactID("@_pam_contact_id"),
+        LoginContactID("@_pam_login_contact_id"),
+        PushKey("@_pam_push_key")
     }
 
     private var sessionID: String? = null
@@ -72,32 +88,37 @@ class Pam {
     var onMessageListener = mutableListOf<ListenerFunction>()
     var pendingMessage = mutableListOf<Map<String, Any>>()
 
+    private var platformVersionCache:String? = null
+    private var osVersionCache:String? = null
+    private var appVersionCache:String? = null
+    private var publicContactID:String? = null
+    private var loginContactID:String? = null
+    private var custID:String? = null
+
     private var sharedPreferences: SharedPreferences? = null
 
     init {
-        queueTrackerManager.callback = { eventName, payload ->
-            postTracker(eventName, payload)
+        queueTrackerManager.callback = { eventName, payload, deleteLoginContactAfterPost ->
+            postTracker(eventName, payload, deleteLoginContactAfterPost)
         }
     }
 
     fun listen(eventName: String, callback: ListenerFunction) {
-        val eventName = eventName.toLowerCase()
-        if (eventName == "ontoken") {
-            onTokenListener.add(callback)
-        } else if (eventName == "onmessage") {
-            onMessageListener.add(callback)
+        when (eventName.toLowerCase(Locale.ENGLISH)) {
+            "ontoken" -> onTokenListener.add(callback)
+            "onmessage" -> onMessageListener.add(callback)
         }
     }
 
     private fun dispatch(eventName: String, args: Map<String, Any>) {
-        if (eventName == "onToken") {
-            onTokenListener.forEach { callback ->
-                callback(args)
-            }
-        } else if (eventName == "onMessage") {
-            onMessageListener.forEach { callback ->
-                callback(args)
-            }
+        val listenerList = when (eventName.toLowerCase(Locale.ENGLISH)) {
+            "ontoken" -> onTokenListener
+            "onmessage" -> onMessageListener
+            else -> null
+        }
+
+        listenerList?.forEach { callback ->
+            callback(args)
         }
     }
 
@@ -106,7 +127,7 @@ class Pam {
             if (!task.isSuccessful) {
                 return@OnCompleteListener
             }
-            saveValue("push_key", task.result.toString())
+            saveValue(SaveKey.PushKey, task.result.toString())
             setDeviceToken(task.result.toString())
         })
     }
@@ -124,32 +145,34 @@ class Pam {
 
     private fun getSharedPreference(): SharedPreferences? {
         if (sharedPreferences == null) {
-            sharedPreferences = app?.getSharedPreferences("pams.ai/localpref", Context.MODE_PRIVATE)
+            sharedPreferences = app?.getSharedPreferences(
+                "@pams.ai/local/preference",
+                Context.MODE_PRIVATE
+            )
         }
         return sharedPreferences
     }
 
-    private fun saveValue(key: String, value: Any) {
+    private fun saveValue(key: SaveKey, value: Any) {
         val sharedPref = getSharedPreference()
         val editor = sharedPref?.edit()
-        editor?.putString(key, value.toString())
+        editor?.putString(key.keyName, value.toString())
         editor?.apply()
     }
 
-    private fun removeValue(key: String) {
+    private fun removeValue(key: SaveKey) {
         val sharedPref = getSharedPreference()
         val editor = sharedPref?.edit()
-        editor?.remove(key)
+        editor?.remove(key.keyName)
         editor?.apply()
     }
 
-    private fun readValue(key: String): String? {
+    private fun readValue(key: SaveKey): String? {
         val sharedPref = getSharedPreference()
-        return sharedPref?.getString(key, null)
+        return sharedPref?.getString(key.keyName, null)
     }
 
     private fun getSessionID(): String {
-
         val exp = this.sessionExpire ?: -1000000
         val now = System.currentTimeMillis()
         val diff = now - exp
@@ -170,16 +193,9 @@ class Pam {
         return this.sessionID ?: ""
     }
 
-    fun getContactID(): String? {
-        return readValue("_contact_id")
-    }
-
-    fun getCustomerID(): String? {
-        return readValue("customer_id")
-    }
-
     fun userLogin(customerID: String) {
-        saveValue("customer_id", customerID)
+        custID = customerID
+        saveValue(SaveKey.CustomerID, customerID)
         track(
             "login", mapOf(
                 "customer" to customerID
@@ -193,11 +209,8 @@ class Pam {
                 "_delete_media" to mapOf(
                     "android_notification" to ""
                 )
-            )
+            ), true
         )
-
-        removeValue("customer_id")
-        removeValue("login_contact_id")
     }
 
     fun setDeviceToken(deviceToken: String) {
@@ -209,95 +222,78 @@ class Pam {
         dispatch("onToken", mapOf("token" to deviceToken))
     }
 
-    fun isNotPamIntent(intent: Intent?): Boolean {
-        intent?.extras
+    fun track(eventName: String, payload: Map<String, Any>? = null, deleteLoginContactAfterPost: Boolean = false) {
+        this.queueTrackerManager.enqueue(eventName, payload, deleteLoginContactAfterPost)
+    }
 
-//            ?.keySet()?.forEach { key ->
-//            if (key == "pam" && intent.extras?.get(key) != null) {
-//                // Pam handle the intent on it own
-//                intent.getStringExtra(key)?.let {
-//                    val pamPayload = Gson().fromJson(it, IPamMessagePayload::class.java)
-//
-//                    pamPayload.pixel?.let {
-//                        if (enableLog) {
-//                            Log.d(PamSDKName, "Calling pixel")
-//                        }
-//
-//                        Http.getInstance().get(
-//                            url = pamPayload.pixel,
-//                        ) { text, err ->
-//                            if (enableLog) {
-//                                Log.d(PamSDKName, "Calling pixel response is $text\n")
-//                            }
-//                            if (err != null) {
-//                                Log.d(PamSDKName, "Calling pixel error is ${err.message}\n")
-//                            }
-//                        }
-//                    }
-//
-//                    handler?.invoke(pamPayload)
-//                    return false
-//                }
-//            }
-//        }
-
+    private fun isUserLogin(): Boolean {
+        if(custID == null) {
+            custID = readValue(SaveKey.CustomerID)
+        }
         return true
     }
 
-    fun track(eventName: String, payload: Map<String, Any>? = null) {
-        this.queueTrackerManager.enqueue(eventName, payload)
-    }
+    private fun postTracker(eventName: String, payload: Map<String, Any>?, deleteLoginContactAfterPost: Boolean) {
+        val url = "${options?.pamServer!!}/trackers/events"
 
-    private fun postTracker(eventName: String, payload: Map<String, Any>?) {
-        val postBody = mutableMapOf<String, Any>()
+        if(platformVersionCache == null){
+            val pInfo = app?.packageManager?.getPackageInfo(app?.packageName ?: "", 0)
+            val packageName = app?.packageName ?: ""
+            appVersionCache = "$packageName (${pInfo?.versionName ?: ""})"
+            osVersionCache = "Android: ${Build.VERSION.SDK_INT}"
 
-        postBody["platform"] = "android"
-        postBody["event"] = eventName
-
-        val formFields = mutableMapOf<String, Any>()
-        formFields["_database"] = when (readValue("customer_id")) {
-            null -> options?.publicDbAlias!!
-            else -> options?.loginDbAlias!!
+            platformVersionCache = "Android: ${Build.VERSION.SDK_INT} (${Build.VERSION.RELEASE}), $packageName: $appVersionCache"
         }
 
-        val isLogin = readValue("customer_id") != null
+        val body = mutableMapOf<String, Any>(
+            "event" to eventName,
+            "platform" to (platformVersionCache ?: ""),
+        )
 
-        formFields["_contact_id"] = when (isLogin) {
-            true -> readValue("login_contact_id") ?: ""
-            else -> readValue("public_contact_id") ?: ""
-        }
+        val formField = mutableMapOf<String, Any>(
+            "os_version" to (osVersionCache ?: ""),
+            "app_version" to (appVersionCache ?: ""),
+            "_session_id" to getSessionID()
+        )
 
-        if (isLogin) {
-            readValue("customer_id")?.let {
-                formFields["customer"] = it
-            }
-        }
+        val publicContact = publicContactID ?: readValue(SaveKey.ContactID)
+        val loginContact = loginContactID ?: readValue(SaveKey.LoginContactID)
 
-        payload?.get("page_url")?.let {
-            postBody["page_url"] = it
-        }
-        payload?.get("page_title")?.let {
-            postBody["page_title"] = it
+        if (loginContact != null ){
+            formField["_contact_id"] = loginContact
+        }else if(publicContact != null){
+            formField["_contact_id"] = publicContact
         }
 
         payload?.forEach {
             if (it.key != "page_url" || it.key != "page_title") {
-                formFields[it.key] = it.value
+                formField[it.key] = it.value
+            }else{
+                body[it.key] = it.value
             }
         }
 
-        formFields["_session"] = getSessionID()
 
-        postBody["form_fields"] = formFields
-        if (enableLog) {
-            Log.d("Pam", "track payload $postBody\n")
+        if(isUserLogin()){
+            formField["_database"] = options?.loginDbAlias ?: ""
+            formField["customer"] = custID ?: (readValue(SaveKey.CustomerID) ?: "")
+        }else{
+            formField["_database"] = options?.publicDbAlias ?: ""
+        }
+
+        body["form_fields"] = formField
+
+        if(isLogEnable){
+            Log.d("PAM", "🦄 : POST Event = 🍀$eventName🍀")
+            Log.d("PAM","🦄 : Payload")
+            Log.d("PAM","🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉\n$body\n🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉\n\n")
         }
 
         Http.getInstance().post(
-            url = "${options?.pamServer!!}/trackers/events",
+            url = url,
             headers = mapOf(),
             queryString = mapOf(),
-            data = postBody
+            data = body
         ) { text, err ->
             if (enableLog) {
                 Log.d("Pam", "track response is $text\n")
@@ -306,11 +302,14 @@ class Pam {
             val response = Gson().fromJson(text, PamResponse::class.java)
             if (response.contactID != null) {
 
-                if (isLogin) {
-                    saveValue("login_contact_id", response.contactID)
+                if (isUserLogin()) {
+                    saveValue(SaveKey.LoginContactID, response.contactID)
+                    this.loginContactID = response.contactID
                 } else {
-                    saveValue("public_contact_id", response.contactID)
+                    saveValue(SaveKey.ContactID, response.contactID)
+                    this.publicContactID = response.contactID
                 }
+
             } else if (response.code != null && response.message != null) {
                 if (enableLog) {
                     Log.d("Pam", "track error $err\n")
@@ -319,7 +318,13 @@ class Pam {
 
             val task = CoroutineScope(Dispatchers.IO)
             task.launch {
-                queueTrackerManager?.next()
+                if( deleteLoginContactAfterPost ){
+                    this@Pam.custID = null
+                    this@Pam.loginContactID = null
+                    this@Pam.removeValue(SaveKey.CustomerID)
+                    this@Pam.removeValue(SaveKey.LoginContactID)
+                }
+                queueTrackerManager.next()
             }
         }
 
