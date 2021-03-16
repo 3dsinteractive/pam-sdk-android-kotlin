@@ -9,6 +9,7 @@ import android.util.Log
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.*
 import java.util.*
@@ -146,7 +147,7 @@ class Pam {
     private fun getSharedPreference(): SharedPreferences? {
         if (sharedPreferences == null) {
             sharedPreferences = app?.getSharedPreferences(
-                "@pams.ai/local/preference",
+                "pams-ai-local-preference",
                 Context.MODE_PRIVATE
             )
         }
@@ -196,11 +197,7 @@ class Pam {
     fun userLogin(customerID: String) {
         custID = customerID
         saveValue(SaveKey.CustomerID, customerID)
-        track(
-            "login", mapOf(
-                "customer" to customerID
-            )
-        )
+        track("login")
     }
 
     fun userLogout() {
@@ -230,7 +227,7 @@ class Pam {
         if(custID == null) {
             custID = readValue(SaveKey.CustomerID)
         }
-        return true
+        return custID != null
     }
 
     private fun postTracker(eventName: String, payload: Map<String, Any>?, deleteLoginContactAfterPost: Boolean) {
@@ -299,24 +296,28 @@ class Pam {
                 Log.d("Pam", "track response is $text\n")
             }
 
-            val response = Gson().fromJson(text, PamResponse::class.java)
-            if (response.contactID != null) {
+            try{
+                val response = Gson().fromJson(text, PamResponse::class.java)
+                if (response.contactID != null) {
 
-                if (isUserLogin()) {
-                    saveValue(SaveKey.LoginContactID, response.contactID)
-                    this.loginContactID = response.contactID
-                } else {
-                    saveValue(SaveKey.ContactID, response.contactID)
-                    this.publicContactID = response.contactID
-                }
+                    if (isUserLogin()) {
+                        saveValue(SaveKey.LoginContactID, response.contactID)
+                        this.loginContactID = response.contactID
+                    } else {
+                        saveValue(SaveKey.ContactID, response.contactID)
+                        this.publicContactID = response.contactID
+                    }
 
-            } else if (response.code != null && response.message != null) {
-                if (enableLog) {
-                    Log.d("Pam", "track error $err\n")
+                } else if (response.code != null && response.message != null) {
+                    if (enableLog) {
+                        Log.d("Pam", "track error $err\n")
+                    }
                 }
+            }catch (e: JsonSyntaxException){
+
             }
 
-            val task = CoroutineScope(Dispatchers.IO)
+            val task = CoroutineScope(Dispatchers.Main)
             task.launch {
                 if( deleteLoginContactAfterPost ){
                     this@Pam.custID = null

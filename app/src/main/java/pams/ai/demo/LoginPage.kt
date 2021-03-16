@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
@@ -19,7 +20,7 @@ import webservices.mockUsers
 
 class LoginPage : AppCompatActivity() {
 
-    private val emails = listOf("a@a.a", "b@b.b", "c@c.c")
+    private val emails = listOf("a@a.com", "b@b.com", "c@c.com")
     var binding: ActivityLoginPageBinding? = null
     var emailUseToLogin: String? = null
     var spinnerAdapter: ArrayAdapter<String>? = null
@@ -53,6 +54,7 @@ class LoginPage : AppCompatActivity() {
             emailUseToLogin?.let{ email ->
                 MockAPI.getInstance().login(email)?.let{ user ->
                     AppData.setUser(user)
+                    Pam.userLogin(user.CusID)
                     val intent = Intent(this, ProductPage::class.java)
                     startActivity(intent)
                 }
@@ -80,6 +82,8 @@ class LoginPage : AppCompatActivity() {
 
     private fun registerSpinner() {
         spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, emails)
+
+        emailUseToLogin = emails[0]
 
         binding?.spinnerUser?.adapter = spinnerAdapter
         binding?.spinnerUser?.onItemSelectedListener = object : OnItemSelectedListener {

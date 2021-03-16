@@ -1,6 +1,7 @@
 package models
 
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import pams.ai.demo.MainApplication
 
@@ -18,6 +19,7 @@ class AppData {
                 Context.MODE_PRIVATE
             )!!
             val userJson = sharePref.getString("login-user", null)
+            Log.d("DEMO", userJson ?: "")
             return Gson().fromJson(userJson, UserModel::class.java)
         }
 
