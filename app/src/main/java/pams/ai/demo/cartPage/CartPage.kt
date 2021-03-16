@@ -38,29 +38,25 @@ class CartPage : AppCompatActivity() {
     }
 
     private fun registerCheckoutButton() {
-        binding?.let {
-            it.btnCheckout.let {
-                it.setOnClickListener {
-                    val cart = MockAPI.getInstance().getCart()
+        binding?.btnCheckout?.setOnClickListener {
+            val cart = MockAPI.getInstance().getCart()
 
-                    cart.Products?.let {
-                        val productIds: String =
-                            cart.Products?.map { p -> p.Id }?.joinToString() ?: ""
-                        val categoryIds: String =
-                            cart.Products?.map { p -> p.CategoryId }?.joinToString() ?: ""
+            cart.Products?.let {
+                val productIds: String =
+                    cart.Products?.map { p -> p.Id }?.joinToString() ?: ""
+                val categoryIds: String =
+                    cart.Products?.map { p -> p.CategoryId }?.joinToString() ?: ""
 
-                        Pam.track(
-                            "purchase_success", mapOf(
-                                "product_id" to productIds,
-                                "product_cat" to categoryIds,
-                                "total_price" to (cart.TotalPrice ?: "")
-                            )
-                        )
+                Pam.track(
+                    "purchase_success", mapOf(
+                        "product_id" to productIds,
+                        "product_cat" to categoryIds,
+                        "total_price" to (cart.TotalPrice ?: "")
+                    )
+                )
 
-                        MockAPI.getInstance().checkout()
-                        fetchCart()
-                    }
-                }
+                MockAPI.getInstance().checkout()
+                fetchCart()
             }
         }
     }
@@ -94,50 +90,44 @@ class CartPage : AppCompatActivity() {
     }
 
     private fun registerUserButton() {
-        binding?.let {
-            it.btnUser.setOnClickListener {
-                binding?.let { b ->
-                    if (AppData.getUser() == null) {
-                        if (b.btnLogin.visibility == View.INVISIBLE) {
-                            b.btnLogin.visibility = View.VISIBLE
-                        } else {
-                            b.btnLogin.visibility = View.INVISIBLE
-                        }
-                    } else {
-                        if (b.btnLogout.visibility == View.INVISIBLE) {
-                            b.btnLogout.visibility = View.VISIBLE
-                        } else {
-                            b.btnLogout.visibility = View.INVISIBLE
-                        }
-                    }
+        binding?.btnUser?.setOnClickListener {
+
+
+            if (AppData.getUser() == null) {
+                if (binding?.btnLogin?.visibility == View.INVISIBLE) {
+                    binding?.btnLogin?.visibility = View.VISIBLE
+                } else {
+                    binding?.btnLogin?.visibility = View.INVISIBLE
+                }
+            } else {
+                if (binding?.btnLogout?.visibility == View.INVISIBLE) {
+                    binding?.btnLogout?.visibility = View.VISIBLE
+                } else {
+                    binding?.btnLogout?.visibility = View.INVISIBLE
                 }
             }
         }
     }
 
     private fun registerLoginButton() {
-        binding?.let {
-            it.btnLogin.setOnClickListener {
-                val intent = Intent(this, LoginPage::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        binding?.btnLogin?.setOnClickListener {
+            val intent = Intent(this, LoginPage::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
 
-                startActivity(intent)
-                this.finish()
-            }
+            startActivity(intent)
+            this.finish()
         }
     }
 
     private fun registerLogoutButton() {
-        binding?.let {
-            it.btnLogout.setOnClickListener {
-                Pam.userLogout()
+        binding?.btnLogout?.setOnClickListener {
+            Pam.userLogout()
 
-                val intent = Intent(this, LoginPage::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            val intent = Intent(this, LoginPage::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
 
-                startActivity(intent)
-                this.finish()
-            }
+            startActivity(intent)
+            this.finish()
         }
     }
 

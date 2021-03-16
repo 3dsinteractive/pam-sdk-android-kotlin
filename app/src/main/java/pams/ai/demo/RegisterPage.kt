@@ -23,17 +23,15 @@ class RegisterPage : AppCompatActivity() {
     }
 
     private fun registerButtonRegister() {
-        binding?.btnRegister?.let { btn ->
-            btn.setOnClickListener {
-                val email = binding?.inputEmail?.text
-                MockAPI.getInstance().register(email.toString())
+        binding?.btnRegister?.setOnClickListener {
+            val email = binding?.inputEmail?.text
+            MockAPI.getInstance().register(email.toString())
 
-                Pam.track("register", mutableMapOf())
+            Pam.track("register", mutableMapOf())
 
-                val intent = Intent(this, ProductPage::class.java)
-                startActivity(intent)
-                this.finish()
-            }
+            val intent = Intent(this, ProductPage::class.java)
+            startActivity(intent)
+            this.finish()
         }
     }
 }

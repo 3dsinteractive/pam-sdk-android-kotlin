@@ -86,22 +86,19 @@ class NotificationPage : AppCompatActivity() {
     }
 
     private fun registerLogoutButton() {
-        binding?.let {
-            it.btnLogout.setOnClickListener {
-                Pam.userLogout()
+        binding?.btnLogout?.setOnClickListener {
+            Pam.userLogout()
 
-                val intent = Intent(this, LoginPage::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            val intent = Intent(this, LoginPage::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
 
-                startActivity(intent)
-                this.finish()
-            }
+            startActivity(intent)
+            this.finish()
         }
     }
 
     private fun fetchNotifications() {
         val notifications = MockAPI.getInstance().getNotifications()
-        Log.d("Pam", notifications.toString())
         adapter?.setNotifications(notifications = notifications)
     }
 }

@@ -28,10 +28,8 @@ class ProductDetailPage : AppCompatActivity() {
         }
 
         product = intent.getParcelableExtra("product")
-        binding?.let {
-            it.product = product
-            Picasso.get().load(product?.Image).into(it.productImage)
-        }
+        binding?.product = product
+        Picasso.get().load(product?.Image).into(binding?.productImage)
 
         PamStandardEvent.PageView(
             this.product?.Title ?: "",
@@ -55,108 +53,95 @@ class ProductDetailPage : AppCompatActivity() {
     }
 
     private fun registerAddToCart() {
-        binding?.let {
-            it.btnAddToCart.setOnClickListener {
-                MockAPI.getInstance().addToCart(this.product?.Id!!)
-                Pam.track(
-                    "add_to_cart",
-                    mapOf(
-                        "page_title" to (this.product?.Title ?: ""),
-                        "product_id" to (this.product?.Id ?: ""),
-                        "product_price" to (this.product?.Price ?: "")
-                    )
+        binding?.btnAddToCart?.setOnClickListener {
+            MockAPI.getInstance().addToCart(this.product?.Id!!)
+            Pam.track(
+                "add_to_cart",
+                mapOf(
+                    "page_title" to (this.product?.Title ?: ""),
+                    "product_id" to (this.product?.Id ?: ""),
+                    "product_price" to (this.product?.Price ?: "")
                 )
-                this.alert("Add To Cart", "Added to your cart")
-            }
+            )
+            this.alert("Add To Cart", "Added to your cart")
         }
     }
 
     private fun registerBuyNow() {
-        binding?.let {
-            it.btnBuyNow.setOnClickListener {
+        binding?.btnBuyNow?.setOnClickListener {
+            Pam.track(
+                "purchase_success",
+                mapOf(
+                    "page_title" to (this.product?.Title ?: ""),
+                    "product_id" to (this.product?.Id ?: ""),
+                    "product_price" to (this.product?.Price ?: "")
+                )
+            )
+            this.alert("Buy Now", "Buy now success")
+        }
+    }
+
+    private fun registerFavourite() {
+        binding?.btnFavourite?.setOnClickListener {
+            val isAddedToFavourite =
+                MockAPI.getInstance().isProductFavourite(this.product?.Id ?: "")
+            if (!isAddedToFavourite) {
+                MockAPI.getInstance().addToFavourite(this.product?.Id ?: "")
                 Pam.track(
-                    "purchase_success",
-                    mapOf(
+                    "favourite", mapOf(
                         "page_title" to (this.product?.Title ?: ""),
                         "product_id" to (this.product?.Id ?: ""),
                         "product_price" to (this.product?.Price ?: "")
                     )
                 )
-                this.alert("Buy Now", "Buy now success")
-            }
-        }
-    }
-
-    private fun registerFavourite() {
-        binding?.let {
-            it.btnFavourite.setOnClickListener {
-                val isAddedToFavourite =
-                    MockAPI.getInstance().isProductFavourite(this.product?.Id ?: "")
-                if (!isAddedToFavourite) {
-                    MockAPI.getInstance().addToFavourite(this.product?.Id ?: "")
-                    Pam.track(
-                        "favourite", mapOf(
-                            "page_title" to (this.product?.Title ?: ""),
-                            "product_id" to (this.product?.Id ?: ""),
-                            "product_price" to (this.product?.Price ?: "")
-                        )
+                this.alert("Add To Favourite", "Added to your favourite products")
+            } else {
+                MockAPI.getInstance().removeFromFavourite(this.product?.Id ?: "")
+                Pam.track(
+                    "remove_favourite", mapOf(
+                        "page_title" to (this.product?.Title ?: ""),
+                        "product_id" to (this.product?.Id ?: ""),
+                        "product_price" to (this.product?.Price ?: "")
                     )
-                    this.alert("Add To Favourite", "Added to your favourite products")
-                } else {
-                    MockAPI.getInstance().removeFromFavourite(this.product?.Id ?: "")
-                    Pam.track(
-                        "remove_favourite", mapOf(
-                            "page_title" to (this.product?.Title ?: ""),
-                            "product_id" to (this.product?.Id ?: ""),
-                            "product_price" to (this.product?.Price ?: "")
-                        )
-                    )
-                    this.alert("Remove From Favourite", "Removed from your favourite products")
-                }
-
-                fetchFavourite()
+                )
+                this.alert("Remove From Favourite", "Removed from your favourite products")
             }
+
+            fetchFavourite()
         }
     }
 
     private fun registerCartButton() {
-        binding?.let {
-            it.btnCart.setOnClickListener {
-                val intent = Intent(this, CartPage::class.java)
-                overridePendingTransition(R.anim.anim_in, R.anim.anim_out)
-
-                startActivity(intent)
-            }
+        binding?.btnCart?.setOnClickListener {
+            val intent = Intent(this, CartPage::class.java)
+            overridePendingTransition(R.anim.anim_in, R.anim.anim_out)
+            startActivity(intent)
         }
     }
 
     private fun registerNotificationButton() {
-        binding?.let {
-            it.btnNotification.setOnClickListener {
-                val intent = Intent(this, NotificationPage::class.java)
-                overridePendingTransition(R.anim.anim_in, R.anim.anim_out)
-                startActivity(intent)
-            }
+        binding?.btnNotification?.setOnClickListener {
+            val intent = Intent(this, NotificationPage::class.java)
+            overridePendingTransition(R.anim.anim_in, R.anim.anim_out)
+            startActivity(intent)
         }
     }
 
     private fun registerUserButton() {
-        binding?.let {
-            it.btnUser.setOnClickListener {
-                binding?.let { b ->
-                    val user = AppData.getUser()
-                    if (user == null) {
-                        if (b.btnLogin.visibility == View.INVISIBLE) {
-                            b.btnLogin.visibility = View.VISIBLE
-                        } else {
-                            b.btnLogin.visibility = View.INVISIBLE
-                        }
+        binding?.btnUser?.setOnClickListener {
+            binding?.let { b ->
+                val user = AppData.getUser()
+                if (user == null) {
+                    if (b.btnLogin.visibility == View.INVISIBLE) {
+                        b.btnLogin.visibility = View.VISIBLE
                     } else {
-                        if (b.btnLogout.visibility == View.INVISIBLE) {
-                            b.btnLogout.visibility = View.VISIBLE
-                        } else {
-                            b.btnLogout.visibility = View.INVISIBLE
-                        }
+                        b.btnLogin.visibility = View.INVISIBLE
+                    }
+                } else {
+                    if (b.btnLogout.visibility == View.INVISIBLE) {
+                        b.btnLogout.visibility = View.VISIBLE
+                    } else {
+                        b.btnLogout.visibility = View.INVISIBLE
                     }
                 }
             }
@@ -164,42 +149,33 @@ class ProductDetailPage : AppCompatActivity() {
     }
 
     private fun registerLoginButton() {
-        binding?.let {
-            it.btnLogin.setOnClickListener {
-                val intent = Intent(this, LoginPage::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        binding?.btnLogin?.setOnClickListener {
+            val intent = Intent(this, LoginPage::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
 
-                startActivity(intent)
-                this.finish()
-            }
+            startActivity(intent)
+            this.finish()
         }
     }
 
     private fun registerLogoutButton() {
-        binding?.let {
-            it.btnLogout.setOnClickListener {
-                Pam.userLogout()
+        binding?.btnLogout?.setOnClickListener {
+            Pam.userLogout()
 
-                val intent = Intent(this, LoginPage::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            val intent = Intent(this, LoginPage::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
 
-                startActivity(intent)
-                this.finish()
-            }
+            startActivity(intent)
+            this.finish()
         }
     }
 
     private fun fetchFavourite() {
         product?.Id.let { id ->
             val isAddedToFavourite = MockAPI.getInstance().isProductFavourite(id ?: "")
-            if (isAddedToFavourite) {
-                binding?.btnFavourite?.let {
-                    it.imageAlpha = 255
-                }
-            } else {
-                binding?.btnFavourite?.let {
-                    it.imageAlpha = 100
-                }
+            binding?.btnFavourite?.imageAlpha = when (isAddedToFavourite) {
+                true-> 255
+                false -> 100
             }
         }
     }
