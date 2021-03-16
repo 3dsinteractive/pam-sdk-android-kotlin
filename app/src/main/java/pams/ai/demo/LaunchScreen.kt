@@ -4,11 +4,10 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.coroutines.*
+import models.AppData
 import pams.ai.demo.databinding.ActivityLaunchScreenBinding
 import pams.ai.demo.productsPage.ProductPage
 import pamsdk.Pam
-import pamsdk.PamStandardEvent
-import webservices.MockAPI
 import java.lang.Thread.sleep
 
 class LaunchScreen : AppCompatActivity() {
@@ -25,9 +24,10 @@ class LaunchScreen : AppCompatActivity() {
         CoroutineScope(Dispatchers.Default).launch {
             sleep(1000)
             withContext(Dispatchers.Main) {
-                val customerID = Pam.getCustomerID()
 
-                if (customerID == null) {
+                val loginUser = AppData.getUser()
+
+                if (loginUser == null) {
                     val intent = Intent(this@LaunchScreen, LoginPage::class.java)
                     startActivity(intent)
                 } else {

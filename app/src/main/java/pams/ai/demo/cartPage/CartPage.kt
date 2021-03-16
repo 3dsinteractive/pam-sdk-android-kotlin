@@ -6,12 +6,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import models.AppData
 import pams.ai.demo.LoginPage
 import pams.ai.demo.R
 import pams.ai.demo.databinding.ActivityCartPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
 import pamsdk.Pam
-import pamsdk.PamStandardEvent
 import webservices.MockAPI
 
 class CartPage : AppCompatActivity() {
@@ -50,7 +50,7 @@ class CartPage : AppCompatActivity() {
                             cart.Products?.map { p -> p.CategoryId }?.joinToString() ?: ""
 
                         Pam.track(
-                            PamStandardEvent.purchaseSuccess, mapOf(
+                            "purchase_success", mapOf(
                                 "product_id" to productIds,
                                 "product_cat" to categoryIds,
                                 "total_price" to (cart.TotalPrice ?: "")
@@ -97,7 +97,7 @@ class CartPage : AppCompatActivity() {
         binding?.let {
             it.btnUser.setOnClickListener {
                 binding?.let { b ->
-                    if (Pam.getCustomerID() == null) {
+                    if (AppData.getUser() == null) {
                         if (b.btnLogin.visibility == View.INVISIBLE) {
                             b.btnLogin.visibility = View.VISIBLE
                         } else {

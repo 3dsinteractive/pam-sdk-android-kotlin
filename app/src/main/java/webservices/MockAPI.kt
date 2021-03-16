@@ -162,7 +162,6 @@ class MockAPI {
     fun register(email: String): UserModel {
         return UserModel(
             CusID = email,
-            ContactID = "",
             Email = email
         )
     }

@@ -1,19 +1,18 @@
 package pamsdk
 
-typealias QueueTrackerCallback = (String, Map<String, Any>) -> Unit
+typealias QueueTrackerCallback = (String, Map<String, Any>?) -> Unit
 
-class QueueTrackerManager(val callback: QueueTrackerCallback? = null) {
+class TrackingQueue(val eventName:String, val payload: Map<String, Any>? = null)
+
+class QueueTrackerManager() {
     private var isProcessing: Boolean = false
-    private val queue = mutableListOf<Map<String, Any>>()
+    private val queue = mutableListOf<TrackingQueue>()
 
+    var callback: QueueTrackerCallback? = null
 
     fun enqueue(eventName: String, payload: Map<String, Any>? = null) {
-        this.queue.add(
-            mapOf(
-                "event_name" to eventName,
-                "payload" to (payload ?: mapOf())
-            )
-        )
+        val tracking = TrackingQueue(eventName, payload)
+        this.queue.add(tracking)
 
         if (!this.isProcessing) {
             this.next()
@@ -24,7 +23,8 @@ class QueueTrackerManager(val callback: QueueTrackerCallback? = null) {
         if (queue.size > 0) {
             this.isProcessing = true
             val task = queue.removeFirst()
-            callback?.invoke(task["event_name"] as String, task["payload"] as Map<String, Any>)
+            callback?.invoke(task.eventName, task.payload)
+
         } else {
             this.isProcessing = false
         }

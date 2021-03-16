@@ -6,10 +6,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import models.AppData
 import pams.ai.demo.LoginPage
 import pams.ai.demo.databinding.ActivityNotificationPageBinding
 import pamsdk.Pam
-import pamsdk.PamSDKName
 import webservices.MockAPI
 
 class NotificationPage : AppCompatActivity() {
@@ -55,7 +55,7 @@ class NotificationPage : AppCompatActivity() {
         binding?.let {
             it.btnUser.setOnClickListener {
                 binding?.let { b ->
-                    if (Pam.getCustomerID() == null) {
+                    if (AppData.getUser() == null) {
                         if (b.btnLogin.visibility == View.INVISIBLE) {
                             b.btnLogin.visibility = View.VISIBLE
                         } else {
@@ -101,7 +101,7 @@ class NotificationPage : AppCompatActivity() {
 
     private fun fetchNotifications() {
         val notifications = MockAPI.getInstance().getNotifications()
-        Log.d(PamSDKName, notifications.toString())
+        Log.d("Pam", notifications.toString())
         adapter?.setNotifications(notifications = notifications)
     }
 }

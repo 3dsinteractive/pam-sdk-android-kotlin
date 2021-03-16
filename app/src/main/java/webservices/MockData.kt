@@ -67,17 +67,14 @@ val mockProducts = listOf(
 val mockUsers: MutableMap<String, UserModel> = mutableMapOf(
     "a@a.com" to UserModel(
         CusID = "a",
-        ContactID = "1pYaPaZQcsg787iQOVo2y0C7hG5",
         Email = "a@a.com"
     ),
     "b@b.com" to UserModel(
         CusID = "b",
-        ContactID = "1pYaVSkXDVg5GDZ9b826tMfQw0B",
         Email = "b@b.com"
     ),
     "c@c.com" to UserModel(
         CusID = "c",
-        ContactID = "1pYaZRLVKlZcssq5jUQk01HD0d1",
         Email = "c@c.com"
     )
 )

@@ -2,11 +2,14 @@ package pams.ai.demo
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import models.AppData
 import models.UserModel
 import pams.ai.demo.databinding.ActivityLoginPageBinding
 import pams.ai.demo.productsPage.ProductPage
@@ -15,8 +18,11 @@ import webservices.MockAPI
 import webservices.mockUsers
 
 class LoginPage : AppCompatActivity() {
+
+    private val emails = listOf("a@a.a", "b@b.b", "c@c.c")
     var binding: ActivityLoginPageBinding? = null
-    var user: UserModel? = null
+    var emailUseToLogin: String? = null
+    var spinnerAdapter: ArrayAdapter<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,26 +45,21 @@ class LoginPage : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-
         Pam.appReady()
     }
 
     private fun registerButtonLogin() {
-        val buttonLogin = binding?.btnLogin
-        buttonLogin?.let { btn ->
-            btn.setOnClickListener {
-                user?.let { u ->
-                    val response = MockAPI.getInstance().login(u.Email)
-                    Pam.saveToSharedPref("_contact_id", u.ContactID)
-                    response?.CusID?.let {
-                        Pam.userLogin(it)
-                        val intent = Intent(this, ProductPage::class.java)
-                        startActivity(intent)
-                    }
+        binding?.btnLogin?.setOnClickListener {
+            emailUseToLogin?.let{ email ->
+                MockAPI.getInstance().login(email)?.let{ user ->
+                    AppData.setUser(user)
+                    val intent = Intent(this, ProductPage::class.java)
+                    startActivity(intent)
                 }
             }
         }
     }
+
 
     private fun registerButtonRegister() {
         val buttonRegister = binding?.btnRegister
@@ -71,41 +72,28 @@ class LoginPage : AppCompatActivity() {
     }
 
     private fun registerButtonSkip() {
-        val buttonSkip = binding?.btnSkip
-        buttonSkip?.let { btn ->
-            btn.setOnClickListener {
-                val intent = Intent(this, ProductPage::class.java)
-                startActivity(intent)
-            }
+        binding?.btnSkip?.setOnClickListener {
+            val intent = Intent(this, ProductPage::class.java)
+            startActivity(intent)
         }
     }
 
     private fun registerSpinner() {
-        val spinner = binding?.spinnerUser
-        this.user = mockUsers[resources.getStringArray(R.array.users)[0]]
+        spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, emails)
 
-        ArrayAdapter.createFromResource(
-            this,
-            R.array.users,
-            android.R.layout.simple_spinner_item
-        ).also {
-            it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner?.adapter = it
-        }
-
-        spinner?.onItemSelectedListener = object : OnItemSelectedListener {
+        binding?.spinnerUser?.adapter = spinnerAdapter
+        binding?.spinnerUser?.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(
                 parentView: AdapterView<*>?,
                 selectedItemView: View,
                 position: Int,
                 id: Long
             ) {
-                val array = resources.getStringArray(R.array.users)
-                this@LoginPage.user = mockUsers[array[position]]
+                emailUseToLogin = emails[position]
             }
 
             override fun onNothingSelected(parentView: AdapterView<*>?) {
-                this@LoginPage.user = null
+                emailUseToLogin = null
             }
         }
     }

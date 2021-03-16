@@ -18,8 +18,16 @@ class AppData {
                 Context.MODE_PRIVATE
             )!!
             val userJson = sharePref.getString("login-user", null)
-            val user = Gson().fromJson(userJson, UserModel::class.java)
-            user.ContactID
+            return Gson().fromJson(userJson, UserModel::class.java)
+        }
+
+        fun setUser(user: UserModel?){
+            val sharePref = MainApplication.appContext?.getSharedPreferences(
+                "app_pref",
+                Context.MODE_PRIVATE
+            )!!
+            val jsonString = Gson().toJson(user)
+            sharePref.edit().putString("login-user", jsonString).apply()
         }
     }
 }

@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import pamsdk.Pam
-import pamsdk.PamSDKName
 
 class MainApplication : Application() {
 
@@ -17,14 +16,14 @@ class MainApplication : Application() {
 
         appContext = this
 
-        Pam.init(application = this, enableLog = true)
+        Pam.initialize(application = this, enableLog = true)
 
         Pam.listen("onToken") { args ->
-            Log.d(PamSDKName, args.toString())
+            Log.d("Pam", args.toString())
         }
 
         Pam.listen("onMessage") { args ->
-            Log.d(PamSDKName, args.toString())
+            Log.d("Pam", args.toString())
         }
     }
 }

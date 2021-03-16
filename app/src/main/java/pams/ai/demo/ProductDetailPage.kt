@@ -7,13 +7,12 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.squareup.picasso.Picasso
+import models.AppData
 import models.Product
 import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductDetailPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
 import pamsdk.Pam
-import pamsdk.PamSDKName
-import pamsdk.PamStandardEvent
 import webservices.MockAPI
 
 class ProductDetailPage : AppCompatActivity() {
@@ -35,8 +34,8 @@ class ProductDetailPage : AppCompatActivity() {
         }
 
         Pam.track(
-            PamStandardEvent.pageView, mapOf(
-                "page_url" to "app//product?id=${this.product?.Id ?: ""}",
+            "page_view", mapOf(
+                "page_url" to "app://product?id=${this.product?.Id ?: ""}",
                 "page_title" to (this.product?.Title ?: ""),
                 "product_id" to (this.product?.Id ?: ""),
                 "product_price" to (this.product?.Price ?: "")
@@ -60,7 +59,8 @@ class ProductDetailPage : AppCompatActivity() {
             it.btnAddToCart.setOnClickListener {
                 MockAPI.getInstance().addToCart(this.product?.Id!!)
                 Pam.track(
-                    PamStandardEvent.addToCart, mapOf(
+                    "add_to_cart",
+                    mapOf(
                         "page_title" to (this.product?.Title ?: ""),
                         "product_id" to (this.product?.Id ?: ""),
                         "product_price" to (this.product?.Price ?: "")
@@ -75,7 +75,8 @@ class ProductDetailPage : AppCompatActivity() {
         binding?.let {
             it.btnBuyNow.setOnClickListener {
                 Pam.track(
-                    PamStandardEvent.purchaseSuccess, mapOf(
+                    "purchase_success",
+                    mapOf(
                         "page_title" to (this.product?.Title ?: ""),
                         "product_id" to (this.product?.Id ?: ""),
                         "product_price" to (this.product?.Price ?: "")
@@ -143,7 +144,8 @@ class ProductDetailPage : AppCompatActivity() {
         binding?.let {
             it.btnUser.setOnClickListener {
                 binding?.let { b ->
-                    if (Pam.getCustomerID() == null) {
+                    val user = AppData.getUser()
+                    if (user == null) {
                         if (b.btnLogin.visibility == View.INVISIBLE) {
                             b.btnLogin.visibility = View.VISIBLE
                         } else {
@@ -190,10 +192,6 @@ class ProductDetailPage : AppCompatActivity() {
     private fun fetchFavourite() {
         product?.Id.let { id ->
             val isAddedToFavourite = MockAPI.getInstance().isProductFavourite(id ?: "")
-            if (Pam.enableLog) {
-                Log.d(PamSDKName, "isAddedToFavourite = $isAddedToFavourite")
-            }
-
             if (isAddedToFavourite) {
                 binding?.btnFavourite?.let {
                     it.imageAlpha = 255

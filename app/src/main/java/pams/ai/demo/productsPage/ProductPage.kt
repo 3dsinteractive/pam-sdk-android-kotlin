@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import models.AppData
 import pams.ai.demo.LoginPage
 import pams.ai.demo.ProductDetailPage
 import pams.ai.demo.R
@@ -82,7 +83,7 @@ class ProductPage : AppCompatActivity() {
         binding?.let {
             it.btnUser.setOnClickListener {
                 binding?.let { b ->
-                    if (Pam.getCustomerID() == null) {
+                    if (AppData.getUser() == null) {
                         if (b.btnLogin.visibility == View.INVISIBLE) {
                             b.btnLogin.visibility = View.VISIBLE
                         } else {
