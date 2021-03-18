@@ -1,22 +1,18 @@
 package pams.ai.demo
 
+import ai.pams.android.kotlin.Pam
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcel
-import android.os.Parcelable
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import models.AppData
-import models.UserModel
 import pams.ai.demo.databinding.ActivityLoginPageBinding
 import pams.ai.demo.productsPage.ProductPage
-import pamsdk.Pam
 import webservices.MockAPI
-import webservices.mockUsers
+
 
 class LoginPage : AppCompatActivity() {
 

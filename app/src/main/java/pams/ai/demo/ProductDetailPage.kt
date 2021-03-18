@@ -1,23 +1,40 @@
 package pams.ai.demo
 
+import ai.pams.android.kotlin.Pam
+import ai.pams.android.kotlin.events.PamStandardEvent
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.squareup.picasso.Picasso
+import com.bumptech.glide.Glide
 import models.AppData
 import models.Product
 import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductDetailPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
-import pamsdk.Pam
-import pamsdk.PamStandardEvent
 import webservices.MockAPI
 
 class ProductDetailPage : AppCompatActivity() {
+
+    companion object{
+        fun createIntentWithProduct(context: Context, product: Product): Intent{
+            val intent = Intent(context, ProductDetailPage::class.java)
+            intent.putExtra("product", product)
+            return intent
+        }
+
+        fun createIntentWithProductID(context: Context, productID: String): Intent{
+            val intent = Intent(context, ProductDetailPage::class.java)
+            intent.putExtra("product_id", productID)
+            return intent
+        }
+    }
+
     var binding: ActivityProductDetailPageBinding? = null
     var product: Product? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,12 +45,21 @@ class ProductDetailPage : AppCompatActivity() {
         }
 
         product = intent.getParcelableExtra("product")
+        if(product == null){
+            intent.getStringExtra("product_id")?.let{ productId ->
+                product = MockAPI.getInstance().getProductFromID(productId)
+            }
+        }
+
         binding?.product = product
-        Picasso.get().load(product?.Image).into(binding?.productImage)
+
+        binding?.productImage?.let{
+            Glide.with(this).load(product?.Image).into(it)
+        }
 
         PamStandardEvent.PageView(
             this.product?.Title ?: "",
-            "app://product?id=${this.product?.Id ?: ""}",
+            "digits3://product?id=${this.product?.Id ?: ""}",
             mapOf(
                 "product_id" to (this.product?.Id ?: "")
             )

@@ -3,7 +3,7 @@ package pams.ai.demo.notificationsPage
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
+import com.bumptech.glide.Glide
 import models.Notification
 import pams.ai.demo.databinding.NotificationListItemBinding
 
@@ -37,6 +37,7 @@ class NotificationViewHolder(val binding: NotificationListItemBinding) :
 
     fun setNotification(notification: Notification) {
         binding.notification = notification
-        Picasso.get().load(notification.Image).into(binding.notificationImage);
+
+        Glide.with(this.itemView.context).load(notification.Image).into(binding.notificationImage);
     }
 }

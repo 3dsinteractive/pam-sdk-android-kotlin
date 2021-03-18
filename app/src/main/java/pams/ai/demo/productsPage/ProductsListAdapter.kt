@@ -3,7 +3,7 @@ package pams.ai.demo.productsPage
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
+import com.bumptech.glide.Glide
 import models.Product
 import pams.ai.demo.databinding.ProductListItemBinding
 
@@ -46,7 +46,8 @@ class ProductViewHolder(val binding: ProductListItemBinding) :
 
     fun setProduct(product: Product) {
         binding.product = product
-        Picasso.get().load(product.Image).into(binding.productImage);
+
+        Glide.with(this.itemView.context).load(product.Image).into(binding.productImage);
 
         binding.cardView.setOnClickListener {
             onClickProduct?.invoke(product)

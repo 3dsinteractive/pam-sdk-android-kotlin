@@ -1,5 +1,7 @@
-package pamsdk
+package ai.pams.android.kotlin
 
+import ai.pams.android.kotlin.http.Http
+import ai.pams.android.kotlin.queue.QueueTrackerManager
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
@@ -31,7 +33,7 @@ data class PamMessagePayload(
 data class PamOption(val pamServer: String, val publicDbAlias: String, val loginDbAlias: String)
 typealias ListenerFunction = (Map<String, Any>) -> Unit
 
-class Pam {
+public class Pam {
     companion object {
         var shared = Pam()
 
@@ -327,10 +329,6 @@ class Pam {
                 }
                 queueTrackerManager.next()
             }
-        }
-
-        if (enableLog) {
-            Log.d("Pam", "track has been send\n")
         }
     }
 }

@@ -1,5 +1,6 @@
-package pamsdk
+package ai.pams.android.kotlin.http
 
+import android.util.Log
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -56,12 +57,15 @@ class Http {
 
         sharedHttpClient().newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                Log.d("HTTP!", ">> ${e.localizedMessage}")
                 callBack?.invoke(null, e)
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use { res ->
-                    callBack?.invoke(res.body!!.string(), null)
+                    val bodyResult = res.body!!.string()
+                    Log.d("HTTP!", ">> $bodyResult")
+                    callBack?.invoke(bodyResult, null)
                 }
             }
         })

@@ -1,2 +1,3 @@
+include ':pam-android-kotlin'
 include ':app'
 rootProject.name = "PamDemo"

@@ -1,4 +1,4 @@
-package pamsdk
+package ai.pams.android.kotlin.queue
 
 import android.util.Log
 

@@ -1,4 +1,6 @@
-package pamsdk
+package ai.pams.android.kotlin.events
+
+import ai.pams.android.kotlin.Pam
 
 
 typealias Payload = Map<String, Any>

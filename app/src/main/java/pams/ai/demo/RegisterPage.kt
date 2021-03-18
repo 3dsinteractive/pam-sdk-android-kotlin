@@ -1,11 +1,11 @@
 package pams.ai.demo
 
+import ai.pams.android.kotlin.Pam
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import pams.ai.demo.databinding.ActivityRegisterPageBinding
 import pams.ai.demo.productsPage.ProductPage
-import pamsdk.Pam
 import webservices.MockAPI
 
 class RegisterPage : AppCompatActivity() {

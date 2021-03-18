@@ -1,15 +1,14 @@
 package pams.ai.demo.notificationsPage
 
+import ai.pams.android.kotlin.Pam
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import models.AppData
 import pams.ai.demo.LoginPage
 import pams.ai.demo.databinding.ActivityNotificationPageBinding
-import pamsdk.Pam
 import webservices.MockAPI
 
 class NotificationPage : AppCompatActivity() {

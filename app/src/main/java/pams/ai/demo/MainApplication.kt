@@ -1,9 +1,10 @@
 package pams.ai.demo
 
+import ai.pams.android.kotlin.Pam
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import pamsdk.Pam
+
 
 class MainApplication : Application() {
 

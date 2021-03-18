@@ -1,5 +1,6 @@
 package pams.ai.demo.productsPage
 
+import ai.pams.android.kotlin.Pam
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -12,7 +13,6 @@ import pams.ai.demo.R
 import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
-import pamsdk.Pam
 import webservices.MockAPI
 
 class ProductPage : AppCompatActivity() {
@@ -43,10 +43,7 @@ class ProductPage : AppCompatActivity() {
     private fun registerProductView() {
         adapter = ProductsListAdapter()
         adapter?.onClickProduct = { product ->
-            val intent = Intent(this, ProductDetailPage::class.java).also {
-                it.putExtra("product", product)
-            }
-
+            val intent = ProductDetailPage.createIntentWithProduct(this, product)
             startActivity(intent)
             overridePendingTransition(R.anim.anim_in, R.anim.anim_out)
 

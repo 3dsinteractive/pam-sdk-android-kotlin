@@ -1,17 +1,17 @@
 package pams.ai.demo.cartPage
 
+import ai.pams.android.kotlin.Pam
 import android.app.AlertDialog
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import models.AppData
 import pams.ai.demo.LoginPage
 import pams.ai.demo.R
 import pams.ai.demo.databinding.ActivityCartPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
-import pamsdk.Pam
 import webservices.MockAPI
 
 class CartPage : AppCompatActivity() {

@@ -1,5 +1,4 @@
 <resources>
-    <string name="noti_default_channel_id">default</string>
     <string name="buy_now">Buy Now</string>
     <string name="add_to_cart">Add To Cart</string>
 </resources>

@@ -1,13 +1,13 @@
 package pams.ai.demo
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 import models.AppData
 import pams.ai.demo.databinding.ActivityLaunchScreenBinding
 import pams.ai.demo.productsPage.ProductPage
-import pamsdk.Pam
 import java.lang.Thread.sleep
 
 class LaunchScreen : AppCompatActivity() {
@@ -19,6 +19,16 @@ class LaunchScreen : AppCompatActivity() {
         binding = ActivityLaunchScreenBinding.inflate(layoutInflater)
         binding?.let {
             setContentView(it.root)
+        }
+
+        Log.d("PAM Push>", "START")
+
+        val bundle = intent.extras
+        bundle?.keySet()?.forEach {
+            Log.d("PAMPush","$it" )
+        }
+        intent.extras?.keySet()?.forEach {
+            Log.d("PAM Push>","$it = ${intent.extras?.getString(it)}" )
         }
 
         CoroutineScope(Dispatchers.Default).launch {
@@ -38,6 +48,7 @@ class LaunchScreen : AppCompatActivity() {
                 this@LaunchScreen.finish()
             }
         }
+
 
 
 
