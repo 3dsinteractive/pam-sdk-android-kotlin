@@ -17,7 +17,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 
 
-class ConsentRequestDialog(
+class TrackingConsentRequestDialog(
     val consentMessage: TrackingConsentModel?,
     private val consentAllowModel: ConsentModel?
 ) : DialogFragment() {
@@ -219,9 +219,6 @@ class ConsentRequestDialog(
     }
 
     private fun saveSetting() {
-
-        Log.d("PDPA!", "PREF= ${consentMessage?.setting?.preferences_cookies?.is_allow}")
-
         val acceptList = mapOf(
             "_allow_terms_and_conditions" to (consentMessage?.setting?.terms_and_conditions?.is_allow ?: true),
             "_allow_privacy_overview" to (consentMessage?.setting?.privacy_overview?.is_allow ?: true),

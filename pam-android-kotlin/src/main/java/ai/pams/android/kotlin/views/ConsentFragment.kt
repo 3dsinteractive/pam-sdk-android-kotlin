@@ -1,6 +1,5 @@
 package ai.pams.android.kotlin.views
 
-import ai.pams.android.kotlin.R
 import ai.pams.android.kotlin.databinding.ConsentFragmentBinding
 import android.os.Bundle
 import android.view.LayoutInflater

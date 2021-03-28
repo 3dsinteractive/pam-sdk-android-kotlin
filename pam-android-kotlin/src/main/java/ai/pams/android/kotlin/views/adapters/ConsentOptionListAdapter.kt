@@ -2,9 +2,7 @@ package ai.pams.android.kotlin.views.adapters
 
 import ai.pams.android.kotlin.R
 import ai.pams.android.kotlin.models.consent.tracking.message.ConsentOption
-import ai.pams.android.kotlin.models.consent.tracking.message.FullDescription
 import android.text.Html
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +11,6 @@ import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import okhttp3.internal.notify
 
 class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
 

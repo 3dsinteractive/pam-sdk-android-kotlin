@@ -3,8 +3,7 @@ package ai.pams.android.kotlin
 import ai.pams.android.kotlin.http.Http
 import ai.pams.android.kotlin.models.consent.tracking.allow.ConsentModel
 import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentModel
-import ai.pams.android.kotlin.views.ConsentRequestDialog
-import android.util.Log
+import ai.pams.android.kotlin.views.TrackingConsentRequestDialog
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -106,9 +105,9 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
     }
 
     private fun showConsentRequestPopup() {
-        val dialog = ConsentRequestDialog(consentMessage, consentAllowModel)
+        val dialog = TrackingConsentRequestDialog(consentMessage, consentAllowModel)
         dialog.isCancelable = false
-        dialog.show(fragmentManager, "consent_request")
+        dialog.show(fragmentManager, "tracking_consent_request")
         dialog.onAccept = {
             saveConsent(it)
         }

@@ -1,5 +1,6 @@
 package pams.ai.demo
 
+import ai.pams.android.kotlin.ContactConsentManager
 import ai.pams.android.kotlin.Pam
 import android.content.Intent
 import android.os.Bundle
@@ -11,6 +12,8 @@ import webservices.MockAPI
 class RegisterPage : AppCompatActivity() {
     var binding: ActivityRegisterPageBinding? = null
 
+    var contactConsentManager: ContactConsentManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -20,6 +23,13 @@ class RegisterPage : AppCompatActivity() {
         }
 
         this.registerButtonRegister()
+
+        contactConsentManager = ContactConsentManager(
+            consentMessageID = "1qHksFD60L3Nekkt45Jjbdisp1Z",
+            fragmentManager = supportFragmentManager,
+            lifecycle
+        )
+
     }
 
     private fun registerButtonRegister() {
@@ -34,9 +44,5 @@ class RegisterPage : AppCompatActivity() {
             this.finish()
         }
 
-        binding?.consent?.setOnClickListener{
-            val intent = Intent(this, ConsentRequestActivity::class.java)
-            startActivity(intent)
-        }
     }
 }

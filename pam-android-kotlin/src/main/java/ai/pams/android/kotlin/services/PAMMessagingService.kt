@@ -3,20 +3,23 @@ package ai.pams.android.kotlin.services
 
 import ai.pams.android.kotlin.Pam
 import ai.pams.android.kotlin.PamMessagePayload
-import android.app.*
+import android.R
+import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
+import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.bumptech.glide.Glide
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import android.R
-import android.net.Uri
-import android.util.Log
-import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 
