@@ -77,6 +77,8 @@ class Http {
         queryString: Map<String, String> = mapOf(),
         callBack: HttpCallBack? = null
     ) {
+        Log.d("HTTP!", "GET >> $url")
+
         val urlBuilder = url.toHttpUrlOrNull()?.newBuilder()
         for ((k, v) in queryString) {
             urlBuilder?.addQueryParameter(k, v)
@@ -89,18 +91,19 @@ class Http {
             requestBuilder.addHeader(k, v)
         }
 
-        requestBuilder.get()
-
         val request = requestBuilder.build()
 
         sharedHttpClient().newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
+                Log.d("HTTP!", "ERROR >> ${e.localizedMessage}")
                 callBack?.invoke(null, e)
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use { res ->
-                    callBack?.invoke(res.body!!.string(), null)
+                    val bodyResult = res.body!!.string()
+                    Log.d("HTTP!", "${res.code} >> $bodyResult")
+                    callBack?.invoke(bodyResult, null)
                 }
             }
         })

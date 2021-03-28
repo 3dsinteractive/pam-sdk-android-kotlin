@@ -1,10 +1,11 @@
 package ai.pams.android.kotlin.queue
 
+import ai.pams.android.kotlin.TrackerCallback
 import android.util.Log
 
-typealias QueueTrackerCallback = (String, Map<String, Any>?, Boolean) -> Unit
+typealias QueueTrackerCallback = (String, Map<String, Any>?, TrackerCallback?) -> Unit
 
-class TrackingQueue(val eventName:String, val payload: Map<String, Any>? = null, val deleteLoginContactAfterPost: Boolean)
+class TrackingQueue(val eventName:String, val payload: Map<String, Any>? = null, val trackerCallback: TrackerCallback? = null)
 
 class QueueTrackerManager() {
     private var isProcessing: Boolean = false
@@ -12,8 +13,8 @@ class QueueTrackerManager() {
 
     var callback: QueueTrackerCallback? = null
 
-    fun enqueue(eventName: String, payload: Map<String, Any>? = null, deleteLoginContactAfterPost:Boolean) {
-        val tracking = TrackingQueue(eventName, payload, deleteLoginContactAfterPost)
+    fun enqueue(eventName: String, payload: Map<String, Any>? = null, trackerCallback:TrackerCallback? = null) {
+        val tracking = TrackingQueue(eventName, payload, trackerCallback)
         this.queue.add(tracking)
 
         Log.d("PAM", "1.Track = $eventName   isProcessing=$isProcessing")
@@ -21,6 +22,7 @@ class QueueTrackerManager() {
             Log.d("PAM", "2.Track = $eventName")
             this.next()
         }
+
     }
 
     fun next() {
@@ -28,7 +30,7 @@ class QueueTrackerManager() {
             this.isProcessing = true
             val task = queue.removeFirst()
             Log.d("PAM", "Queue = ${queue.size}")
-            callback?.invoke(task.eventName, task.payload, task.deleteLoginContactAfterPost)
+            callback?.invoke(task.eventName, task.payload, task.trackerCallback)
         } else {
             this.isProcessing = false
 

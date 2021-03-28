@@ -1,5 +1,6 @@
 package pams.ai.demo
 
+import ai.pams.android.kotlin.TrackingConsentManager
 import ai.pams.android.kotlin.Pam
 import android.content.Intent
 import android.os.Bundle
@@ -21,6 +22,8 @@ class LoginPage : AppCompatActivity() {
     var emailUseToLogin: String? = null
     var spinnerAdapter: ArrayAdapter<String>? = null
 
+    var trackingConsentManager:TrackingConsentManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -33,6 +36,8 @@ class LoginPage : AppCompatActivity() {
         registerButtonRegister()
         registerButtonSkip()
         registerSpinner()
+
+        trackingConsentManager = TrackingConsentManager(supportFragmentManager, lifecycle);
     }
 
     override fun onResume() {
@@ -57,7 +62,6 @@ class LoginPage : AppCompatActivity() {
             }
         }
     }
-
 
     private fun registerButtonRegister() {
         val buttonRegister = binding?.btnRegister

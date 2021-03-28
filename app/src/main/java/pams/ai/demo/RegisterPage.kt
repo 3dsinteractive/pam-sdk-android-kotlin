@@ -33,5 +33,10 @@ class RegisterPage : AppCompatActivity() {
             startActivity(intent)
             this.finish()
         }
+
+        binding?.consent?.setOnClickListener{
+            val intent = Intent(this, ConsentRequestActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

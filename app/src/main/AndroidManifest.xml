@@ -12,11 +12,12 @@
         android:roundIcon="@mipmap/ic_logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PamDemo">
-        <activity android:name=".cartPage.CartPage"></activity>
-        <!-- Configs -->
+        <activity android:name=".ConsentRequestActivity" />
+        <activity android:name=".cartPage.CartPage" /> <!-- Configs -->
+
         <meta-data
             android:name="pam-server"
-            android:value="https:stg.pams.ai" />
+            android:value="https://stgx.pams.ai" />
         <meta-data
             android:name="public-db-alias"
             android:value="3digits-public" />
@@ -26,6 +27,11 @@
         <meta-data
             android:name="pam-enable-log"
             android:value="true" />
+
+        <meta-data
+            android:name="pam-tracking-consent-message-id"
+            android:value="1qDQOyMeBv64LYnXi6dJOcZp2YQ"/>
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/logo_3digits" />
@@ -74,14 +80,11 @@
             android:name=".productsPage.ProductPage"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
-
         <activity
             android:name="services.NotiReaderActivity"
-            android:launchMode="singleTask"
-            android:taskAffinity=""
             android:excludeFromRecents="true"
-            />
-
+            android:launchMode="singleTask"
+            android:taskAffinity="" />
     </application>
 
 </manifest>

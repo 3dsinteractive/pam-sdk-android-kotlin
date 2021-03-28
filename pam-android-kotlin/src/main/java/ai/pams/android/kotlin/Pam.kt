@@ -16,11 +16,12 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.*
 import java.util.*
 
-
 data class PamResponse(
     @SerializedName("code") val code: String? = null,
     @SerializedName("message") val message: String? = null,
-    @SerializedName("contact_id") val contactID: String? = null
+    @SerializedName("contact_id") val contactID: String? = null,
+    @SerializedName("_database") val database: String? = null,
+    @SerializedName("consent_id") val consentID: String? = null
 )
 
 data class PamMessagePayload(
@@ -30,14 +31,23 @@ data class PamMessagePayload(
     @SerializedName("created_date") val CreatedDate: String? = null
 )
 
-data class PamOption(val pamServer: String, val publicDbAlias: String, val loginDbAlias: String)
+data class PamOption(
+    val pamServer: String,
+    val publicDbAlias: String,
+    val loginDbAlias: String,
+    val trackingConsentMessageID: String,
+    )
+
 typealias ListenerFunction = (Map<String, Any>) -> Unit
+typealias TrackerCallback = (PamResponse)->Unit
 
 public class Pam {
     companion object {
         var shared = Pam()
 
         fun initialize(application: Application, enableLog: Boolean = false) {
+            shared.allowTracking = shared.readBoolValue(SaveKey.AllowTracking) ?: false
+
             shared.isLogEnable = enableLog
             shared.app = application
 
@@ -54,13 +64,15 @@ public class Pam {
             shared.options = PamOption(
                 pamServer = pamServer,
                 publicDbAlias = config.metaData.get("public-db-alias").toString(),
-                loginDbAlias = config.metaData.get("login-db-alias").toString()
+                loginDbAlias = config.metaData.get("login-db-alias").toString(),
+                trackingConsentMessageID = config.metaData.get("pam-tracking-consent-message-id").toString()
             )
         }
 
-        fun track(eventName: String, payload: Map<String, Any>? = null) = shared.track(
+        fun track(eventName: String, payload: Map<String, Any>? = null, trackerCallBack: TrackerCallback? = null) = shared.track(
             eventName,
-            payload
+            payload,
+            trackerCallBack
         )
         fun appReady() = shared.appReady()
         fun listen(eventName: String, callback: ListenerFunction) =
@@ -74,7 +86,8 @@ public class Pam {
         CustomerID("@pam_customer_id"),
         ContactID("@_pam_contact_id"),
         LoginContactID("@_pam_login_contact_id"),
-        PushKey("@_pam_push_key")
+        PushKey("@_pam_push_key"),
+        AllowTracking("@_pam_allow_tracking")
     }
 
     private var sessionID: String? = null
@@ -98,12 +111,35 @@ public class Pam {
     private var loginContactID:String? = null
     private var custID:String? = null
 
+    var allowTracking = false
+        set(value){
+            field = value
+            saveValue(SaveKey.AllowTracking, value)
+        }
+
     private var sharedPreferences: SharedPreferences? = null
 
     init {
         queueTrackerManager.callback = { eventName, payload, deleteLoginContactAfterPost ->
             postTracker(eventName, payload, deleteLoginContactAfterPost)
         }
+    }
+
+    fun getContactID(): String?{
+        if(loginContactID != null) loginContactID
+        if(publicContactID != null) publicContactID
+
+        readValue(SaveKey.LoginContactID)?.let{
+            loginContactID =  it
+            return@getContactID it
+        }
+
+        readValue(SaveKey.ContactID)?.let{
+            publicContactID = it
+            return@getContactID it
+        }
+
+        return null
     }
 
     fun listen(eventName: String, callback: ListenerFunction) {
@@ -156,7 +192,14 @@ public class Pam {
         return sharedPreferences
     }
 
-    private fun saveValue(key: SaveKey, value: Any) {
+    private fun saveValue(key: SaveKey, value: Boolean) {
+        val sharedPref = getSharedPreference()
+        val editor = sharedPref?.edit()
+        editor?.putBoolean(key.keyName, value)
+        editor?.apply()
+    }
+
+    private fun saveValue(key: SaveKey, value: String) {
         val sharedPref = getSharedPreference()
         val editor = sharedPref?.edit()
         editor?.putString(key.keyName, value.toString())
@@ -173,6 +216,11 @@ public class Pam {
     private fun readValue(key: SaveKey): String? {
         val sharedPref = getSharedPreference()
         return sharedPref?.getString(key.keyName, null)
+    }
+
+    private fun readBoolValue(key: SaveKey): Boolean? {
+        val sharedPref = getSharedPreference()
+        return sharedPref?.getBoolean(key.keyName, false)
     }
 
     private fun getSessionID(): String {
@@ -203,13 +251,18 @@ public class Pam {
     }
 
     fun userLogout() {
-        track(
-            "logout", mapOf(
-                "_delete_media" to mapOf(
-                    "android_notification" to ""
-                )
-            ), true
+        val payload = mapOf(
+            "_delete_media" to mapOf(
+                "android_notification" to ""
+            )
         )
+
+        track("logout", payload){
+            this.custID = null
+            this.loginContactID = null
+            this.removeValue(SaveKey.CustomerID)
+            this.removeValue(SaveKey.LoginContactID)
+        }
     }
 
     fun setDeviceToken(deviceToken: String) {
@@ -221,8 +274,14 @@ public class Pam {
         dispatch("onToken", mapOf("token" to deviceToken))
     }
 
-    fun track(eventName: String, payload: Map<String, Any>? = null, deleteLoginContactAfterPost: Boolean = false) {
-        this.queueTrackerManager.enqueue(eventName, payload, deleteLoginContactAfterPost)
+    fun track(eventName: String, payload: Map<String, Any>? = null, trackerCallback: TrackerCallback?) {
+        if(!allowTracking && eventName != "save_push" && eventName != "allow_consent") {
+            if(isLogEnable){
+                Log.d("PAM", "🤡 NOTRACKING $eventName")
+            }
+            return
+        }
+        this.queueTrackerManager.enqueue(eventName, payload, trackerCallback)
     }
 
     private fun isUserLogin(): Boolean {
@@ -232,8 +291,7 @@ public class Pam {
         return custID != null
     }
 
-    private fun postTracker(eventName: String, payload: Map<String, Any>?, deleteLoginContactAfterPost: Boolean) {
-        val url = "${options?.pamServer!!}/trackers/events"
+    private fun buildPayload(eventName: String, payload: Map<String, Any>?): Map<String, Any>{
 
         if(platformVersionCache == null){
             val pInfo = app?.packageManager?.getPackageInfo(app?.packageName ?: "", 0)
@@ -255,13 +313,8 @@ public class Pam {
             "_session_id" to getSessionID()
         )
 
-        val publicContact = publicContactID ?: readValue(SaveKey.ContactID)
-        val loginContact = loginContactID ?: readValue(SaveKey.LoginContactID)
-
-        if (loginContact != null ){
-            formField["_contact_id"] = loginContact
-        }else if(publicContact != null){
-            formField["_contact_id"] = publicContact
+        getContactID()?.let{
+            formField["_contact_id"] = it
         }
 
         payload?.forEach {
@@ -272,7 +325,6 @@ public class Pam {
             }
         }
 
-
         if(isUserLogin()){
             formField["_database"] = options?.loginDbAlias ?: ""
             formField["customer"] = custID ?: (readValue(SaveKey.CustomerID) ?: "")
@@ -281,6 +333,14 @@ public class Pam {
         }
 
         body["form_fields"] = formField
+
+        return body
+    }
+
+    private fun postTracker(eventName: String, payload: Map<String, Any>?, trackerCallBack: TrackerCallback? = null) {
+        val url = "${options?.pamServer!!}/trackers/events"
+
+        val body = buildPayload(eventName, payload)
 
         if(isLogEnable){
             Log.d("PAM", "🦄 : POST Event = 🍀$eventName🍀")
@@ -315,19 +375,14 @@ public class Pam {
                         Log.d("Pam", "track error $err\n")
                     }
                 }
+
+                val task = CoroutineScope(Dispatchers.Main)
+                task.launch {
+                    trackerCallBack?.invoke(response)
+                    queueTrackerManager.next()
+                }
             }catch (e: JsonSyntaxException){
 
-            }
-
-            val task = CoroutineScope(Dispatchers.Main)
-            task.launch {
-                if( deleteLoginContactAfterPost ){
-                    this@Pam.custID = null
-                    this@Pam.loginContactID = null
-                    this@Pam.removeValue(SaveKey.CustomerID)
-                    this@Pam.removeValue(SaveKey.LoginContactID)
-                }
-                queueTrackerManager.next()
             }
         }
     }
