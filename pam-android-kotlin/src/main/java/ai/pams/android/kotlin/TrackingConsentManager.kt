@@ -63,6 +63,14 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
             "_consent_message_id" to (consentMessageID ?: ""),
         )
 
+        consentMessage?.setting?.version?.let{
+            payload["_version"] = it
+        }
+
+        Pam.shared.getDatabaseAlias()?.let{
+            payload["_database"] = it
+        }
+
         consentAllow["_allow_terms_and_conditions"]?.let {
             payload["_allow_terms_and_conditions"] = it
         }
@@ -93,7 +101,7 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
         }
 
         Pam.track("allow_consent", payload){
-            Pam.shared.allowTracking = true
+
         }
     }
 

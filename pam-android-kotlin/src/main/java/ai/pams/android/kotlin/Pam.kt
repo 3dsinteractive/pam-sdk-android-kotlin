@@ -125,6 +125,24 @@ public class Pam {
         }
     }
 
+    fun getCustomerID():String?{
+        if(custID != null){
+            return custID
+        }
+        custID = readValue(SaveKey.CustomerID)
+        if(custID != null){
+            return custID
+        }
+        return null
+    }
+
+    fun getDatabaseAlias(): String?{
+        return when(isUserLogin()) {
+            true -> options?.loginDbAlias
+            else -> options?.publicDbAlias
+        }
+    }
+
     fun getContactID(): String?{
         if(loginContactID != null) loginContactID
         if(publicContactID != null) publicContactID
@@ -275,12 +293,13 @@ public class Pam {
     }
 
     fun track(eventName: String, payload: Map<String, Any>? = null, trackerCallback: TrackerCallback?) {
-        if(!allowTracking && eventName != "save_push" && eventName != "allow_consent") {
+        if(!allowTracking && (eventName != "save_push" && eventName != "allow_consent")) {
             if(isLogEnable){
                 Log.d("PAM", "🤡 NOTRACKING $eventName")
             }
             return
         }
+
         this.queueTrackerManager.enqueue(eventName, payload, trackerCallback)
     }
 
@@ -325,11 +344,14 @@ public class Pam {
             }
         }
 
+        getDatabaseAlias()?.let{
+            formField["_database"] = it
+        }
+
         if(isUserLogin()){
-            formField["_database"] = options?.loginDbAlias ?: ""
-            formField["customer"] = custID ?: (readValue(SaveKey.CustomerID) ?: "")
-        }else{
-            formField["_database"] = options?.publicDbAlias ?: ""
+            getCustomerID()?.let{
+                formField["customer"] = it
+            }
         }
 
         body["form_fields"] = formField

@@ -7,6 +7,7 @@ import ai.pams.android.kotlin.models.consent.tracking.message.ConsentOption
 import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentModel
 import ai.pams.android.kotlin.views.adapters.ConsentOptionListAdapter
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -218,6 +219,9 @@ class ConsentRequestDialog(
     }
 
     private fun saveSetting() {
+
+        Log.d("PDPA!", "PREF= ${consentMessage?.setting?.preferences_cookies?.is_allow}")
+
         val acceptList = mapOf(
             "_allow_terms_and_conditions" to (consentMessage?.setting?.terms_and_conditions?.is_allow ?: true),
             "_allow_privacy_overview" to (consentMessage?.setting?.privacy_overview?.is_allow ?: true),
