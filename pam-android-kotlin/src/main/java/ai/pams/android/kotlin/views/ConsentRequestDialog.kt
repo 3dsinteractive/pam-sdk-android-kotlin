@@ -2,7 +2,7 @@ package ai.pams.android.kotlin.views
 
 import ai.pams.android.kotlin.R
 import ai.pams.android.kotlin.databinding.ConsentFragmentBinding
-import ai.pams.android.kotlin.models.consent.tracking.allow.TrackingConsentAllowModel
+import ai.pams.android.kotlin.models.consent.tracking.allow.ConsentModel
 import ai.pams.android.kotlin.models.consent.tracking.message.ConsentOption
 import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentModel
 import ai.pams.android.kotlin.views.adapters.ConsentOptionListAdapter
@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 
 class ConsentRequestDialog(
     val consentMessage: TrackingConsentModel?,
-    private val consentAllowModel: TrackingConsentAllowModel?
+    private val consentAllowModel: ConsentModel?
 ) : DialogFragment() {
 
     private var _binding: ConsentFragmentBinding? = null
@@ -98,6 +98,8 @@ class ConsentRequestDialog(
                 if(consentAllowModel == null){
                     it.is_allow = true
                 }
+                it.title = "Term & Conditions"
+                it.require = true
                 consentOptions.add(it)
             }
         }
@@ -107,6 +109,8 @@ class ConsentRequestDialog(
                 if(consentAllowModel == null){
                     it.is_allow = true
                 }
+                it.title = "Privacy OverView"
+                it.require = true
                 consentOptions.add(it)
             }
         }
@@ -116,6 +120,8 @@ class ConsentRequestDialog(
                 if(consentAllowModel == null){
                     it.is_allow = true
                 }
+                it.title = "Necessary Cookies"
+                it.require = true
                 consentOptions.add(it)
             }
         }
@@ -125,6 +131,8 @@ class ConsentRequestDialog(
                 if(consentAllowModel == null){
                     it.is_allow = true
                 }
+                it.title = "Preferences Cookies"
+                it.require = false
                 consentOptions.add(it)
             }
         }
@@ -134,6 +142,8 @@ class ConsentRequestDialog(
                 if(consentAllowModel == null){
                     it.is_allow = true
                 }
+                it.title = "Analytics Cookies"
+                it.require = false
                 consentOptions.add(it)
             }
         }
@@ -143,6 +153,8 @@ class ConsentRequestDialog(
                 if(consentAllowModel == null){
                     it.is_allow = true
                 }
+                it.title = "Marketing Cookies"
+                it.require = false
                 consentOptions.add(it)
             }
         }
@@ -152,6 +164,8 @@ class ConsentRequestDialog(
                 if(consentAllowModel == null){
                     it.is_allow = true
                 }
+                it.title = "Social Media Cookies"
+                it.require = false
                 consentOptions.add(it)
             }
         }
@@ -161,6 +175,7 @@ class ConsentRequestDialog(
                 if(consentAllowModel == null){
                     it.is_allow = true
                 }
+                it.require = false
                 consentOptions.add(it)
             }
         }
@@ -170,6 +185,7 @@ class ConsentRequestDialog(
                 if(consentAllowModel == null){
                     it.is_allow = true
                 }
+                it.require = false
                 consentOptions.add(it)
             }
         }
@@ -179,6 +195,7 @@ class ConsentRequestDialog(
                 if(consentAllowModel == null){
                     it.is_allow = true
                 }
+                it.require = false
                 consentOptions.add(it)
             }
         }

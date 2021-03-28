@@ -37,12 +37,11 @@ class LoginPage : AppCompatActivity() {
         registerButtonSkip()
         registerSpinner()
 
-        trackingConsentManager = TrackingConsentManager(supportFragmentManager, lifecycle);
+        trackingConsentManager = TrackingConsentManager(supportFragmentManager, lifecycle)
     }
 
     override fun onResume() {
         super.onResume()
-
     }
 
     override fun onStart() {

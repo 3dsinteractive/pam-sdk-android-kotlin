@@ -11,7 +11,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import okhttp3.internal.notify
 
 class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
 
@@ -35,8 +37,12 @@ class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
                 list.add(CellTypes.Info(it))
             }
         }
+
+
+        val diffResult = DiffUtil.calculateDiff(PDPADiffCallback(cellList, list))
+
         cellList = list
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -73,9 +79,9 @@ class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
                 val data = cellList[position] as CellTypes.Header
                 holder.setContent(data.consent, language)
                 holder.onClick = {
-                    Log.d("PAM", "CLick")
-                    collapseAll()
-                    it.is_expanded = !it.is_expanded
+                    val isExpanded = it.is_expanded
+                    //collapseAll()
+                    it.is_expanded = !isExpanded
                     updateList(consentList, language)
                 }
             }
@@ -106,10 +112,8 @@ class ConsentHeaderViewHolder(itemView: View) : ConsentViewHolder(itemView) {
 
     fun setContent(consent: ConsentOption?, language: String) {
         this.consent = consent
-        titleText.text = when (language) {
-            "th" -> consent?.brief_description?.th
-            else -> consent?.brief_description?.en
-        }
+
+        titleText.text = consent?.title
 
         val iconRes = when (consent?.is_allow) {
             true -> R.mipmap.accept_icon
@@ -133,6 +137,7 @@ class ConsentHeaderViewHolder(itemView: View) : ConsentViewHolder(itemView) {
 class ConsentInfoViewHolder(itemView: View) : ConsentViewHolder(itemView) {
     private val infoText: TextView = itemView.findViewById(R.id.info_text)
     private val switch: SwitchCompat = itemView.findViewById(R.id.switch_btn)
+    private val requireLabel: TextView = itemView.findViewById(R.id.require_label)
     private var consent: ConsentOption? = null
 
     var onChange: ((ConsentOption) -> Unit)? = null
@@ -144,11 +149,51 @@ class ConsentInfoViewHolder(itemView: View) : ConsentViewHolder(itemView) {
         }
         switch.isChecked = consent?.is_allow ?: true
         switch.setOnClickListener {
+            if(consent?.require == true){
+                switch.isChecked = true
+                return@setOnClickListener
+            }
             consent?.let {
                 it.is_allow = switch.isChecked
                 onChange?.invoke(it)
             }
         }
         infoText.text = Html.fromHtml(htmlStr, Html.FROM_HTML_MODE_COMPACT)
+
+        requireLabel.visibility = when(consent?.require){
+            true->View.VISIBLE
+            else->View.INVISIBLE
+        }
+
     }
+}
+
+class PDPADiffCallback(private val oldList : List<ConsentOptionListAdapter.CellTypes>,
+                     private val newList : List<ConsentOptionListAdapter.CellTypes>) : DiffUtil.Callback() {
+
+    override fun getOldListSize() = oldList.size
+
+    override fun getNewListSize() = newList.size
+
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        val theOld = oldList[oldItemPosition]
+        val theNew = newList[newItemPosition]
+
+        return (theOld is ConsentOptionListAdapter.CellTypes.Header &&
+            theNew is ConsentOptionListAdapter.CellTypes.Header &&
+            theOld.consent.title == theNew.consent.title
+        )
+    }
+
+    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        val theOld = oldList[oldItemPosition]
+        val theNew = newList[newItemPosition]
+
+        return (theOld is ConsentOptionListAdapter.CellTypes.Header &&
+                theNew is ConsentOptionListAdapter.CellTypes.Header &&
+                theOld.consent.title == theNew.consent.title &&
+                theOld.consent.is_expanded == theNew.consent.is_expanded
+                )
+    }
+
 }

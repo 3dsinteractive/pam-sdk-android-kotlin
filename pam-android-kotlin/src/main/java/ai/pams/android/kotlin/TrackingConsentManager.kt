@@ -1,7 +1,7 @@
 package ai.pams.android.kotlin
 
 import ai.pams.android.kotlin.http.Http
-import ai.pams.android.kotlin.models.consent.tracking.allow.TrackingConsentAllowModel
+import ai.pams.android.kotlin.models.consent.tracking.allow.ConsentModel
 import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentModel
 import ai.pams.android.kotlin.views.ConsentRequestDialog
 import android.util.Log
@@ -17,7 +17,7 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
     var consentMessageID: String? = null
     var pamServerURL: String? = null
     var consentMessage: TrackingConsentModel? = null
-    var consentAllowModel: TrackingConsentAllowModel? = null
+    var consentAllowModel: ConsentModel? = null
 
     init {
         lifeCycle.addObserver(this)
@@ -37,7 +37,7 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
 
     private fun checkConsentPermission() {
         val contact = Pam.shared.getContactID()
-        Log.d("PDPA", "contact >> \n$contact")
+
         if (contact == null) {
             showConsentRequestPopup()
         } else {
@@ -45,11 +45,13 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
                 .get("${pamServerURL ?: ""}/contacts/$contact/consents/$consentMessageID") { result, error ->
                     if (error == null) {
                         consentAllowModel =
-                            Gson().fromJson(result, TrackingConsentAllowModel::class.java)
-                        if (consentAllowModel?.code == "NOT_FOUND") {
-                            showConsentRequestPopup()
-                        } else {
+                            Gson().fromJson(result, ConsentModel::class.java)
 
+                        //Allow Tracking if preferencesCookies is allowed
+                        Pam.shared.allowTracking = consentAllowModel?.trackingPermission?.preferencesCookies == true
+
+                        if (consentAllowModel?.code == "NOT_FOUND" || consentAllowModel?.needConsentReview == true) {
+                            showConsentRequestPopup()
                         }
                     }
                 }
@@ -74,6 +76,7 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
         }
 
         consentAllow["_allow_preferences_cookies"]?.let {
+            Pam.shared.allowTracking = it
             payload["_allow_preferences_cookies"] = it
         }
 

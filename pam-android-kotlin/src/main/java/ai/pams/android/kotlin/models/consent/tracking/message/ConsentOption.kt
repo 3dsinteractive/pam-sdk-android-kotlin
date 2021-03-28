@@ -7,5 +7,7 @@ data class ConsentOption(
     val is_full_description_enabled: Boolean? = null,
     val tracking_collection: TrackingCollection? = null,
     var is_expanded: Boolean = false,
-    var is_allow: Boolean = true
+    var is_allow: Boolean = true,
+    var require:Boolean = false,
+    var title:String = ""
 )
