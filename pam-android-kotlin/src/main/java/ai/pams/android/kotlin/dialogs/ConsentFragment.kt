@@ -1,4 +1,4 @@
-package ai.pams.android.kotlin.views
+package ai.pams.android.kotlin.dialogs
 
 import ai.pams.android.kotlin.databinding.ConsentFragmentBinding
 import android.os.Bundle

@@ -3,7 +3,7 @@ package ai.pams.android.kotlin
 import ai.pams.android.kotlin.http.Http
 import ai.pams.android.kotlin.models.consent.tracking.allow.ConsentModel
 import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentModel
-import ai.pams.android.kotlin.views.TrackingConsentRequestDialog
+import ai.pams.android.kotlin.dialogs.TrackingConsentRequestDialog
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -111,7 +111,6 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
         dialog.onAccept = {
             saveConsent(it)
         }
-        consentMessage
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)

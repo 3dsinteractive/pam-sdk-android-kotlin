@@ -1,12 +1,13 @@
-package ai.pams.android.kotlin.views
+package ai.pams.android.kotlin.dialogs
 
+import ai.pams.android.kotlin.Pam
+import ai.pams.android.kotlin.PamResponse
 import ai.pams.android.kotlin.R
 import ai.pams.android.kotlin.databinding.ConsentFragmentBinding
 import ai.pams.android.kotlin.models.consent.contact.ContactConsentModel
 import ai.pams.android.kotlin.models.consent.tracking.message.ConsentOption
-import ai.pams.android.kotlin.views.adapters.ConsentOptionListAdapter
+import ai.pams.android.kotlin.dialogs.adapters.ConsentOptionListAdapter
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -114,7 +115,7 @@ class ContactConsentRequestDialog(
             if(it.is_enabled == true) {
                 it.is_allow = true
                 it.title = "Email"
-                it.require = true
+                it.require = false
                 consentOptions.add(it)
             }
         }
@@ -123,7 +124,7 @@ class ContactConsentRequestDialog(
             if(it.is_enabled == true) {
                 it.is_allow = true
                 it.title = "SMS"
-                it.require = true
+                it.require = false
                 consentOptions.add(it)
             }
         }
@@ -132,7 +133,7 @@ class ContactConsentRequestDialog(
             if(it.is_enabled == true) {
                 it.is_allow = true
                 it.title = "Line"
-                it.require = true
+                it.require = false
                 consentOptions.add(it)
             }
         }
@@ -141,7 +142,7 @@ class ContactConsentRequestDialog(
             if(it.is_enabled == true) {
                 it.is_allow = true
                 it.title = "Line"
-                it.require = true
+                it.require = false
                 consentOptions.add(it)
             }
         }
@@ -150,7 +151,7 @@ class ContactConsentRequestDialog(
             if(it.is_enabled == true) {
                 it.is_allow = true
                 it.title = "Facebook Messenger"
-                it.require = true
+                it.require = false
                 consentOptions.add(it)
             }
         }
@@ -158,28 +159,64 @@ class ContactConsentRequestDialog(
     }
 
     private fun acceptAll(){
-        val acceptList = mapOf(
-            "_allow_terms_and_conditions" to true,
-            "_allow_privacy_overview" to true,
-            "_allow_email" to  true,
-            "_allow_sms" to true,
-            "_allow_line" to true,
-            "_allow_facebook_messenger" to true
-        )
+        val acceptList = mutableMapOf<String, Boolean>()
+
+        consentMessage?.setting?.termsAndConditions?.is_enabled?.let{
+            if(it) acceptList["_allow_terms_and_conditions"] = true
+        }
+
+        consentMessage?.setting?.privacyOverview?.is_enabled?.let{
+            if(it) acceptList["_allow_privacy_overview"] = true
+        }
+
+        consentMessage?.setting?.email?.is_enabled?.let{
+            if(it) acceptList["_allow_email"] = true
+        }
+
+        consentMessage?.setting?.sms?.is_enabled?.let{
+            if(it) acceptList["_allow_sms"] = true
+        }
+
+        consentMessage?.setting?.line?.is_enabled?.let{
+            if(it) acceptList["_allow_line"] = true
+        }
+
+        consentMessage?.setting?.facebookMessenger?.is_enabled?.let{
+            if(it) acceptList["_allow_facebook_messenger"] = true
+        }
 
         onAccept?.invoke(acceptList)
         this.dismiss()
     }
 
     private fun saveSetting() {
-        val acceptList = mapOf(
-            "_allow_terms_and_conditions" to (consentMessage?.setting?.termsAndConditions?.is_allow ?: true),
-            "_allow_privacy_overview" to (consentMessage?.setting?.privacyOverview?.is_allow ?: true),
-            "_allow_email" to  (consentMessage?.setting?.email?.is_allow ?: true),
-            "_allow_sms" to (consentMessage?.setting?.sms?.is_allow ?: true),
-            "_allow_line" to (consentMessage?.setting?.line?.is_allow ?: true),
-            "_allow_facebook_messenger" to (consentMessage?.setting?.facebookMessenger?.is_allow ?: true),
-        )
+
+        val acceptList = mutableMapOf<String, Boolean>()
+
+        consentMessage?.setting?.termsAndConditions?.let{
+            if(it.is_enabled == true) acceptList["_allow_terms_and_conditions"] = it.is_allow
+        }
+
+        consentMessage?.setting?.privacyOverview?.let{
+            if(it.is_enabled == true) acceptList["_allow_privacy_overview"] = it.is_allow
+        }
+
+        consentMessage?.setting?.email?.let{
+            if(it.is_enabled == true) acceptList["_allow_email"] = it.is_allow
+        }
+
+        consentMessage?.setting?.sms?.let{
+            if(it.is_enabled == true) acceptList["_allow_sms"] = it.is_allow
+        }
+
+        consentMessage?.setting?.line?.let{
+            if(it.is_enabled == true) acceptList["_allow_line"] = it.is_allow
+        }
+
+        consentMessage?.setting?.facebookMessenger?.let{
+            if(it.is_enabled == true) acceptList["_allow_facebook_messenger"] = it.is_allow
+        }
+
         onAccept?.invoke(acceptList)
         this.dismiss()
     }

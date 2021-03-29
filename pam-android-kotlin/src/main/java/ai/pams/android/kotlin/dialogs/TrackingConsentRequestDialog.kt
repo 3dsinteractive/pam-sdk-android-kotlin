@@ -1,13 +1,12 @@
-package ai.pams.android.kotlin.views
+package ai.pams.android.kotlin.dialogs
 
 import ai.pams.android.kotlin.R
 import ai.pams.android.kotlin.databinding.ConsentFragmentBinding
 import ai.pams.android.kotlin.models.consent.tracking.allow.ConsentModel
 import ai.pams.android.kotlin.models.consent.tracking.message.ConsentOption
 import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentModel
-import ai.pams.android.kotlin.views.adapters.ConsentOptionListAdapter
+import ai.pams.android.kotlin.dialogs.adapters.ConsentOptionListAdapter
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -204,30 +203,71 @@ class TrackingConsentRequestDialog(
     }
 
     private fun acceptAll(){
-        val acceptList = mapOf(
-            "_allow_terms_and_conditions" to true,
-            "_allow_privacy_overview" to true,
-            "_allow_necessary_cookies" to  true,
-            "_allow_preferences_cookies" to true,
-            "_allow_analytics_cookies" to true,
-            "_allow_marketing_cookies" to true,
-            "_allow_social_media_cookies" to true
-        )
+        val acceptList = mutableMapOf<String, Boolean>()
+
+        consentMessage?.setting?.terms_and_conditions?.is_enabled?.let{
+            if(it) acceptList["_allow_terms_and_conditions"] = true
+        }
+
+        consentMessage?.setting?.privacy_overview?.is_enabled?.let{
+            if(it) acceptList["_allow_privacy_overview"] = true
+        }
+
+        consentMessage?.setting?.necessary_cookies?.is_enabled?.let{
+            if(it) acceptList["_allow_necessary_cookies"] = true
+        }
+
+        consentMessage?.setting?.preferences_cookies?.is_enabled?.let{
+            if(it) acceptList["_allow_preferences_cookies"] = true
+        }
+
+        consentMessage?.setting?.analytics_cookies?.is_enabled?.let{
+            if(it) acceptList["_allow_analytics_cookies"] = true
+        }
+
+        consentMessage?.setting?.marketing_cookies?.is_enabled?.let{
+            if(it) acceptList["_allow_marketing_cookies"] = true
+        }
+
+        consentMessage?.setting?.social_media_cookies?.is_enabled?.let{
+            if(it) acceptList["_allow_social_media_cookies"] = true
+        }
 
         onAccept?.invoke(acceptList)
         this.dismiss()
     }
 
     private fun saveSetting() {
-        val acceptList = mapOf(
-            "_allow_terms_and_conditions" to (consentMessage?.setting?.terms_and_conditions?.is_allow ?: true),
-            "_allow_privacy_overview" to (consentMessage?.setting?.privacy_overview?.is_allow ?: true),
-            "_allow_necessary_cookies" to  (consentMessage?.setting?.necessary_cookies?.is_allow ?: true),
-            "_allow_preferences_cookies" to (consentMessage?.setting?.preferences_cookies?.is_allow ?: true),
-            "_allow_analytics_cookies" to (consentMessage?.setting?.analytics_cookies?.is_allow ?: true),
-            "_allow_marketing_cookies" to (consentMessage?.setting?.marketing_cookies?.is_allow ?: true),
-            "_allow_social_media_cookies" to (consentMessage?.setting?.social_media_cookies?.is_allow ?: true)
-        )
+
+        val acceptList = mutableMapOf<String, Boolean>()
+
+        consentMessage?.setting?.terms_and_conditions?.let{
+            if(it.is_enabled == true) acceptList["_allow_terms_and_conditions"] = it.is_allow
+        }
+
+        consentMessage?.setting?.privacy_overview?.let{
+            if(it.is_enabled == true) acceptList["_allow_privacy_overview"] = it.is_allow
+        }
+
+        consentMessage?.setting?.necessary_cookies?.let{
+            if(it.is_enabled == true) acceptList["_allow_necessary_cookies"] = it.is_allow
+        }
+
+        consentMessage?.setting?.preferences_cookies?.let{
+            if(it.is_enabled == true) acceptList["_allow_preferences_cookies"] = it.is_allow
+        }
+
+        consentMessage?.setting?.analytics_cookies?.let{
+            if(it.is_enabled == true) acceptList["_allow_analytics_cookies"] = it.is_allow
+        }
+
+        consentMessage?.setting?.marketing_cookies?.let{
+            if(it.is_enabled == true) acceptList["_allow_marketing_cookies"] = it.is_allow
+        }
+
+        consentMessage?.setting?.social_media_cookies?.let{
+            if(it.is_enabled == true) acceptList["_allow_social_media_cookies"] = it.is_allow
+        }
 
         onAccept?.invoke(acceptList)
         this.dismiss()

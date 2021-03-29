@@ -1,4 +1,4 @@
-package ai.pams.android.kotlin.views.adapters
+package ai.pams.android.kotlin.dialogs.adapters
 
 import ai.pams.android.kotlin.R
 import ai.pams.android.kotlin.models.consent.tracking.message.ConsentOption
@@ -34,7 +34,6 @@ class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
                 list.add(CellTypes.Info(it))
             }
         }
-
 
         val diffResult = DiffUtil.calculateDiff(PDPADiffCallback(cellList, list))
 
@@ -81,6 +80,9 @@ class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
                     it.is_expanded = !isExpanded
                     updateList(consentList, language)
                 }
+                holder.onChange = {
+                    notifyDataSetChanged()
+                }
             }
             is ConsentInfoViewHolder -> {
                 val data = cellList[position] as CellTypes.Info
@@ -103,9 +105,14 @@ class ConsentHeaderViewHolder(itemView: View) : ConsentViewHolder(itemView) {
     private val iconImage: ImageView = itemView.findViewById(R.id.icon_image)
     private val titleText: TextView = itemView.findViewById(R.id.title_text)
     private val arrowIcon: ImageView = itemView.findViewById(R.id.arrow_icon)
+    private val switch: SwitchCompat = itemView.findViewById(R.id.switch_btn)
+    private val requireLabel: TextView = itemView.findViewById(R.id.require_label)
+
+
     private var consent: ConsentOption? = null
 
     var onClick: ((ConsentOption) -> Unit)? = null
+    var onChange: ((ConsentOption) -> Unit)? = null
 
     fun setContent(consent: ConsentOption?, language: String) {
         this.consent = consent
@@ -117,17 +124,50 @@ class ConsentHeaderViewHolder(itemView: View) : ConsentViewHolder(itemView) {
             else -> R.mipmap.denied_icon
         }
         iconImage.setImageResource(iconRes)
+
+        val isFullDescription = consent?.is_full_description_enabled ?: false
+
         itemView.setOnClickListener {
+            if(!isFullDescription){
+                return@setOnClickListener
+            }
             this.consent?.let {
                 onClick?.invoke(it)
             }
         }
 
-        val arrowIconRes = when (consent?.is_expanded) {
-            true -> R.mipmap.arrow_up
-            else -> R.mipmap.arrow_down
+        if(isFullDescription){
+            val arrowIconRes = when (consent?.is_expanded) {
+                true -> R.mipmap.arrow_up
+                else -> R.mipmap.arrow_down
+            }
+            arrowIcon.setImageResource(arrowIconRes)
+            arrowIcon.visibility = View.VISIBLE
+            requireLabel.visibility = View.GONE
+            switch.visibility = View.GONE
+        }else{
+            arrowIcon.visibility = View.GONE
+            if(consent?.require == true){
+                requireLabel.visibility = View.VISIBLE
+                switch.visibility = View.GONE
+            }else{
+                requireLabel.visibility = View.GONE
+                switch.visibility = View.VISIBLE
+                switch.isChecked = consent?.is_allow ?: false
+
+                switch.setOnClickListener {
+                    if(consent?.require == true){
+                        switch.isChecked = true
+                        return@setOnClickListener
+                    }
+                    consent?.let {
+                        it.is_allow = switch.isChecked
+                        onChange?.invoke(it)
+                    }
+                }
+            }
         }
-        arrowIcon.setImageResource(arrowIconRes)
+
     }
 }
 
@@ -155,7 +195,10 @@ class ConsentInfoViewHolder(itemView: View) : ConsentViewHolder(itemView) {
                 onChange?.invoke(it)
             }
         }
-        infoText.text = Html.fromHtml(htmlStr, Html.FROM_HTML_MODE_COMPACT)
+
+        htmlStr?.let{
+            infoText.text = Html.fromHtml(it, Html.FROM_HTML_MODE_COMPACT)
+        }
 
         requireLabel.visibility = when(consent?.require){
             true->View.VISIBLE

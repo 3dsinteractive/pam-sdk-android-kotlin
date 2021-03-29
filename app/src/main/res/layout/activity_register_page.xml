@@ -68,6 +68,7 @@
                     android:textSize="16sp"
                      />
                 <Button
+                    android:id="@+id/open_setting_btn1"
                     android:text="รายละเอียด"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -87,7 +88,7 @@
                 android:layout_height="wrap_content">
 
                 <CheckBox
-                    android:id="@+id/checkbox_privacy"
+                    android:id="@+id/checkbox_contact"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="อนุญาตให้เราส่งโปรโมชั่น"
@@ -95,6 +96,7 @@
                     />
 
                 <Button
+                    android:id="@+id/open_setting_btn2"
                     android:text="รายละเอียด"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
