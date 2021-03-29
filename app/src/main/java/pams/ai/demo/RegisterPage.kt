@@ -56,7 +56,7 @@ class RegisterPage : AppCompatActivity() {
         }
 
         contactConsentManager = ContactConsentManager(
-            consentMessageID = "1qHksFD60L3Nekkt45Jjbdisp1Z",
+            consentMessageID = "1qDQgHFygpAhuX0gBxHkYAPiwBN",
             fragmentManager = supportFragmentManager,
             lifecycle
         )

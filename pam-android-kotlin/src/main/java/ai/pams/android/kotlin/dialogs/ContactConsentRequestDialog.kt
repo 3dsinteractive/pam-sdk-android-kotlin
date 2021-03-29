@@ -138,15 +138,6 @@ class ContactConsentRequestDialog(
             }
         }
 
-        consentMessage?.setting?.line?.let{
-            if(it.is_enabled == true) {
-                it.is_allow = true
-                it.title = "Line"
-                it.require = false
-                consentOptions.add(it)
-            }
-        }
-
         consentMessage?.setting?.facebookMessenger?.let{
             if(it.is_enabled == true) {
                 it.is_allow = true
