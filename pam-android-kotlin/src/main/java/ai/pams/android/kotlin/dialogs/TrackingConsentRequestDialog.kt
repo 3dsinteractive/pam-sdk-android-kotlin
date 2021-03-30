@@ -6,7 +6,10 @@ import ai.pams.android.kotlin.models.consent.tracking.allow.ConsentModel
 import ai.pams.android.kotlin.models.consent.tracking.message.ConsentOption
 import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentModel
 import ai.pams.android.kotlin.dialogs.adapters.ConsentOptionListAdapter
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -87,8 +90,35 @@ class TrackingConsentRequestDialog(
 
         binding.listview.layoutManager = layoutManager
         binding.listview.adapter = listAdapter
+
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        initFullVersionReader()
         renderPopup()
     }
+
+    private fun initFullVersionReader(){
+
+        listAdapter.onShowFullDescription = {
+            showFullVersion(it)
+        }
+
+        binding.scrollView.visibility = View.GONE
+        binding.closeFullVersionBtn.visibility = View.GONE
+        binding.closeFullVersionBtn.setOnClickListener{
+            it.visibility = View.GONE
+            binding.scrollView.visibility = View.GONE
+        }
+    }
+
+    private fun showFullVersion(text:String){
+        binding.scrollView.visibility = View.VISIBLE
+        val html = Html.fromHtml(text,  Html.FROM_HTML_MODE_COMPACT)
+        binding.fullVersionText.text = html
+        binding.scrollView.visibility = View.VISIBLE
+        binding.scrollView.visibility = View.VISIBLE
+    }
+
 
     private fun createConsentOptionArray(){
         consentOptions = mutableListOf()

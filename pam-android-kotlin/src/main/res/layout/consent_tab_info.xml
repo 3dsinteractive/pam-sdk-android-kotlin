@@ -17,6 +17,37 @@
         app:layout_constraintEnd_toEndOf="parent"
         />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/full_version_btn"
+        app:layout_constraintStart_toStartOf="@+id/info_text"
+        app:layout_constraintTop_toBottomOf="@+id/info_text"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/full_version_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Full Version"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+             />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="#555555"
+            app:layout_constraintStart_toStartOf="@+id/full_version_label"
+            app:layout_constraintEnd_toEndOf="@+id/full_version_label"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="1dp"
+             />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <TextView
         android:id="@+id/require_label"
         android:layout_width="wrap_content"
@@ -36,7 +67,7 @@
         app:layout_constraintTop_toBottomOf="@+id/info_text"
         app:layout_constraintEnd_toEndOf="@+id/info_text"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

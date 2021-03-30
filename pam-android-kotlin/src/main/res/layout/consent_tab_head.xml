@@ -26,40 +26,14 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        android:layout_marginEnd="10dp"
         android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/switch_btn"
-        app:layout_constraintStart_toEndOf="@+id/icon_image"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="title text" />
-
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/switch_btn"
-        android:text="@string/accept"
-        android:textOn="@string/accept"
-        android:textOff="@string/accept"
-        android:layout_marginEnd="10dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/require_label"
-        app:layout_constraintBottom_toBottomOf="parent"
-
-
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
-
-    <TextView
-        android:id="@+id/require_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="*require"
-        android:textColor="#FB6C4F"
         android:layout_marginEnd="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/arrow_icon"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/icon_image"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="title text" />
 
     <ImageView
         android:id="@+id/arrow_icon"

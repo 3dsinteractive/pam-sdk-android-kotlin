@@ -18,6 +18,8 @@ class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
     private var language: String = ""
     private var consentList: List<ConsentOption> = listOf()
 
+    var onShowFullDescription: ((String) -> Unit)? = null
+
     sealed class CellTypes(val type: Int) {
         class Header(val consent: ConsentOption) : CellTypes(0)
         class Info(val consent: ConsentOption) : CellTypes(1)
@@ -90,6 +92,9 @@ class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
                 holder.onChange = {
                     notifyDataSetChanged()
                 }
+                holder.onShowFullDescription = {
+                    this.onShowFullDescription?.invoke(it)
+                }
             }
         }
     }
@@ -105,9 +110,6 @@ class ConsentHeaderViewHolder(itemView: View) : ConsentViewHolder(itemView) {
     private val iconImage: ImageView = itemView.findViewById(R.id.icon_image)
     private val titleText: TextView = itemView.findViewById(R.id.title_text)
     private val arrowIcon: ImageView = itemView.findViewById(R.id.arrow_icon)
-    private val switch: SwitchCompat = itemView.findViewById(R.id.switch_btn)
-    private val requireLabel: TextView = itemView.findViewById(R.id.require_label)
-
 
     private var consent: ConsentOption? = null
 
@@ -125,48 +127,18 @@ class ConsentHeaderViewHolder(itemView: View) : ConsentViewHolder(itemView) {
         }
         iconImage.setImageResource(iconRes)
 
-        val isFullDescription = consent?.is_full_description_enabled ?: false
+        val arrowIconRes = when (consent?.is_expanded) {
+            true -> R.mipmap.arrow_up
+            else -> R.mipmap.arrow_down
+        }
+        arrowIcon.setImageResource(arrowIconRes)
 
         itemView.setOnClickListener {
-            if(!isFullDescription){
-                return@setOnClickListener
-            }
             this.consent?.let {
                 onClick?.invoke(it)
             }
         }
 
-        if(isFullDescription){
-            val arrowIconRes = when (consent?.is_expanded) {
-                true -> R.mipmap.arrow_up
-                else -> R.mipmap.arrow_down
-            }
-            arrowIcon.setImageResource(arrowIconRes)
-            arrowIcon.visibility = View.VISIBLE
-            requireLabel.visibility = View.GONE
-            switch.visibility = View.GONE
-        }else{
-            arrowIcon.visibility = View.GONE
-            if(consent?.require == true){
-                requireLabel.visibility = View.VISIBLE
-                switch.visibility = View.GONE
-            }else{
-                requireLabel.visibility = View.GONE
-                switch.visibility = View.VISIBLE
-                switch.isChecked = consent?.is_allow ?: false
-
-                switch.setOnClickListener {
-                    if(consent?.require == true){
-                        switch.isChecked = true
-                        return@setOnClickListener
-                    }
-                    consent?.let {
-                        it.is_allow = switch.isChecked
-                        onChange?.invoke(it)
-                    }
-                }
-            }
-        }
 
     }
 }
@@ -175,18 +147,22 @@ class ConsentInfoViewHolder(itemView: View) : ConsentViewHolder(itemView) {
     private val infoText: TextView = itemView.findViewById(R.id.info_text)
     private val switch: SwitchCompat = itemView.findViewById(R.id.switch_btn)
     private val requireLabel: TextView = itemView.findViewById(R.id.require_label)
+    private val fullVersionBtn: TextView = itemView.findViewById(R.id.full_version_btn)
+
     private var consent: ConsentOption? = null
+
+    var onShowFullDescription: ((String)->Unit)? = null
 
     var onChange: ((ConsentOption) -> Unit)? = null
     fun setContent(consent: ConsentOption?, language: String) {
         this.consent = consent
         val htmlStr = when (language) {
-            "th" -> consent?.full_description?.th
-            else -> consent?.full_description?.en
+            "th" -> consent?.brief_description?.th
+            else -> consent?.brief_description?.en
         }
         switch.isChecked = consent?.is_allow ?: true
         switch.setOnClickListener {
-            if(consent?.require == true){
+            if (consent?.require == true) {
                 switch.isChecked = true
                 return@setOnClickListener
             }
@@ -196,20 +172,35 @@ class ConsentInfoViewHolder(itemView: View) : ConsentViewHolder(itemView) {
             }
         }
 
-        htmlStr?.let{
+        htmlStr?.let {
             infoText.text = Html.fromHtml(it, Html.FROM_HTML_MODE_COMPACT)
         }
 
-        requireLabel.visibility = when(consent?.require){
-            true->View.VISIBLE
-            else->View.INVISIBLE
+        requireLabel.visibility = when (consent?.require) {
+            true -> View.VISIBLE
+            else -> View.INVISIBLE
         }
 
+        if(consent?.is_full_description_enabled == true){
+            fullVersionBtn.visibility = View.VISIBLE
+            fullVersionBtn.setOnClickListener{
+                when (language) {
+                    "th" -> consent.full_description?.th
+                    else -> consent.full_description?.en
+                }?.let{ str ->
+                    onShowFullDescription?.invoke(str)
+                }
+            }
+        }else{
+            fullVersionBtn.visibility = View.GONE
+        }
     }
 }
 
-class PDPADiffCallback(private val oldList : List<ConsentOptionListAdapter.CellTypes>,
-                     private val newList : List<ConsentOptionListAdapter.CellTypes>) : DiffUtil.Callback() {
+class PDPADiffCallback(
+    private val oldList: List<ConsentOptionListAdapter.CellTypes>,
+    private val newList: List<ConsentOptionListAdapter.CellTypes>
+) : DiffUtil.Callback() {
 
     override fun getOldListSize() = oldList.size
 
@@ -220,9 +211,9 @@ class PDPADiffCallback(private val oldList : List<ConsentOptionListAdapter.CellT
         val theNew = newList[newItemPosition]
 
         return (theOld is ConsentOptionListAdapter.CellTypes.Header &&
-            theNew is ConsentOptionListAdapter.CellTypes.Header &&
-            theOld.consent.title == theNew.consent.title
-        )
+                theNew is ConsentOptionListAdapter.CellTypes.Header &&
+                theOld.consent.title == theNew.consent.title
+                )
     }
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
