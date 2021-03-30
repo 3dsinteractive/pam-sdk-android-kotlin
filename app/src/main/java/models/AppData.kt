@@ -9,7 +9,14 @@ import pams.ai.demo.MainApplication
 class AppData {
     companion object{
         private var user: UserModel? = null
+        var contactConsent: String? = null
+        var trackingConsent: String? = null
 
+        fun clean(){
+            user = null
+            contactConsent = null
+            trackingConsent = null
+        }
         fun getUser(): UserModel? {
             if(user != null){
                 return user

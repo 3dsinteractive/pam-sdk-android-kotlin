@@ -66,6 +66,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".UserProfileActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".LoginPage"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />

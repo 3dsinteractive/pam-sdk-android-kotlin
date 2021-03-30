@@ -46,6 +46,15 @@ public class Pam {
     companion object {
         var shared = Pam()
 
+        fun cleanEverything(){
+            shared.removeValue(SaveKey.PushKey)
+            shared.removeValue(SaveKey.LoginContactID)
+            shared.removeValue(SaveKey.CustomerID)
+            shared.removeValue(SaveKey.ContactID)
+            shared.removeValue(SaveKey.AllowTracking)
+            shared = Pam()
+        }
+
         fun initialize(application: Application, enableLog: Boolean = false) {
             shared.allowTracking = shared.readBoolValue(SaveKey.AllowTracking) ?: false
 
@@ -95,8 +104,11 @@ public class Pam {
         fun listen(eventName: String, callback: ListenerFunction) =
             shared.listen(eventName, callback)
 
-        fun userLogout() = shared.userLogout()
-        fun userLogin(customerID: String) = shared.userLogin(customerID)
+
+        fun userLogout(callBack: (() -> Unit)? = null) = shared.userLogout(callBack)
+        fun userLogin(customerID: String, callBack: (() -> Unit)? = null) =
+            shared.userLogin(customerID, callBack)
+
         fun askNotificationPermission() = shared.askNotificationPermission()
     }
 
@@ -290,13 +302,15 @@ public class Pam {
         return this.sessionID ?: ""
     }
 
-    fun userLogin(customerID: String) {
+    fun userLogin(customerID: String, callBack: (() -> Unit)? = null) {
         custID = customerID
         saveValue(SaveKey.CustomerID, customerID)
-        track("login")
+        track("login") {
+            callBack?.invoke()
+        }
     }
 
-    fun userLogout() {
+    fun userLogout(callBack: (() -> Unit)? = null) {
         val payload = mapOf(
             "_delete_media" to mapOf(
                 "android_notification" to ""
@@ -308,6 +322,8 @@ public class Pam {
             this.loginContactID = null
             this.removeValue(SaveKey.CustomerID)
             this.removeValue(SaveKey.LoginContactID)
+
+            callBack?.invoke()
         }
     }
 

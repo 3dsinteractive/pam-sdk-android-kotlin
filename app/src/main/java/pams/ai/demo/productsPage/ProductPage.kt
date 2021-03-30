@@ -1,6 +1,7 @@
 package pams.ai.demo.productsPage
 
 import ai.pams.android.kotlin.Pam
+import ai.pams.android.kotlin.TrackingConsentManager
 import ai.pams.android.kotlin.events.PamStandardEvent
 import android.content.Intent
 import android.os.Bundle
@@ -11,6 +12,7 @@ import models.AppData
 import pams.ai.demo.LoginPage
 import pams.ai.demo.ProductDetailPage
 import pams.ai.demo.R
+import pams.ai.demo.UserProfileActivity
 import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
@@ -20,6 +22,8 @@ class ProductPage : AppCompatActivity() {
 
     private var binding: ActivityProductPageBinding? = null
     private var adapter: ProductsListAdapter? = null
+
+    private var trackingConsentManager: TrackingConsentManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +43,8 @@ class ProductPage : AppCompatActivity() {
         registerLogoutButton()
 
         fetchProducts()
+
+
     }
 
     override fun onResume() {
@@ -47,6 +53,11 @@ class ProductPage : AppCompatActivity() {
         PamStandardEvent.PageView(pageTitle = "Product list",
             pageURL = "digits3://products-list",
             payload = null).track()
+
+        trackingConsentManager = TrackingConsentManager(supportFragmentManager, lifecycle)
+        trackingConsentManager?.onAcceptConsent = {consentID , _ ->
+            AppData.trackingConsent = consentID
+        }
     }
 
     private fun registerProductView() {
@@ -55,10 +66,6 @@ class ProductPage : AppCompatActivity() {
             val intent = ProductDetailPage.createIntentWithProduct(this, product)
             startActivity(intent)
             overridePendingTransition(R.anim.anim_in, R.anim.anim_out)
-
-            binding?.btnLogout?.let {
-                it.visibility = View.INVISIBLE
-            }
         }
 
         binding?.listView?.adapter = adapter
@@ -83,19 +90,8 @@ class ProductPage : AppCompatActivity() {
 
     private fun registerUserButton() {
         binding?.btnUser?.setOnClickListener {
-            if (AppData.getUser() == null) {
-                if (binding?.btnLogin?.visibility == View.INVISIBLE) {
-                    binding?.btnLogin?.visibility = View.VISIBLE
-                } else {
-                    binding?.btnLogin?.visibility = View.INVISIBLE
-                }
-            } else {
-                if (binding?.btnLogout?.visibility == View.INVISIBLE) {
-                    binding?.btnLogout?.visibility = View.VISIBLE
-                } else {
-                    binding?.btnLogout?.visibility = View.INVISIBLE
-                }
-            }
+            val intent = Intent(this, UserProfileActivity::class.java)
+            startActivity(intent)
         }
     }
 
@@ -110,15 +106,15 @@ class ProductPage : AppCompatActivity() {
     }
 
     private fun registerLogoutButton() {
-        binding?.btnLogout?.setOnClickListener {
-            Pam.userLogout()
-
-            val intent = Intent(this, LoginPage::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-
-            startActivity(intent)
-            this.finish()
-        }
+//        binding?.btnLogout?.setOnClickListener {
+//            Pam.userLogout()
+//
+//            val intent = Intent(this, LoginPage::class.java)
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+//
+//            startActivity(intent)
+//            this.finish()
+//        }
     }
 
     private fun fetchProducts() {

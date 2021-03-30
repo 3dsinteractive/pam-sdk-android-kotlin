@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout>
+
+    <data>
+        <variable
+            name="email"
+            type="String" />
+        <variable
+            name="custID"
+            type="String" />
+        <variable
+            name="dbAlias"
+            type="String" />
+        <variable
+            name="contactID"
+            type="String" />
+        <variable
+            name="trackingConsent"
+            type="String" />
+        <variable
+            name="contactConsent"
+            type="String" />
+
+        <variable
+            name="presenter"
+            type="pams.ai.demo.UserProfilePresenter" />
+    </data>
+
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
+
+            <TextView
+                android:text="email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+            <TextView
+                android:text="@{email}"
+                android:textColor="#F86E05"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp"
+                />
+
+            <TextView
+                android:text="Customer ID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+            <TextView
+                android:text="@{custID}"
+                android:textColor="#F86E05"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp"
+                />
+
+            <TextView
+                android:text="DB Alias"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+            <TextView
+                android:text="@{dbAlias}"
+                android:textColor="#F86E05"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp"
+                />
+
+            <TextView
+            android:text="Contact ID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+            <TextView
+                android:text="@{contactID}"
+                android:textColor="#F86E05"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp"
+                />
+
+
+            <TextView
+                android:text="Tracking Consent ID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+            <TextView
+                android:text="@{trackingConsent}"
+                android:textColor="#F86E05"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp"
+                />
+
+            <TextView
+                android:text="Contact Consent ID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+            <TextView
+                android:text="@{contactConsent}"
+                android:textColor="#F86E05"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp"
+                />
+
+            <Button
+                android:text="ONLY LOGOUT"
+                android:backgroundTint="#FF9800"
+                android:layout_marginTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="@{(view) -> presenter.clickLogout()}"
+                />
+
+            <Button
+                android:text="LOGOUT &amp; Clean"
+                android:layout_marginTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="@{(view) -> presenter.clickClean()}"
+                />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</layout>

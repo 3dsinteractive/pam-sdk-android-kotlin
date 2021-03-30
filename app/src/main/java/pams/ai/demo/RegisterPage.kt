@@ -31,6 +31,7 @@ class RegisterPage : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityRegisterPageBinding.inflate(layoutInflater)
+
         binding?.let {
             setContentView(it.root)
         }
@@ -78,6 +79,8 @@ class RegisterPage : AppCompatActivity() {
 
             contactConsentManager?.applyConsent {
                 Log.d("APP", "Consent ID = ${it.consentID}")
+
+                AppData.contactConsent = it.consentID
 
                 //MockAPI.getInstance().register(email.toString())
                 Pam.track("click_register", mutableMapOf())

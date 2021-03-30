@@ -78,8 +78,6 @@ class ProductDetailPage : AppCompatActivity() {
         registerLogoutButton()
 
         fetchFavourite()
-
-        trackingConsentManager = TrackingConsentManager(supportFragmentManager, lifecycle)
     }
 
     private fun registerAddToCart() {

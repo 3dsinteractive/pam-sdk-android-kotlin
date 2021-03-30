@@ -18,6 +18,7 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
     var consentMessage: TrackingConsentModel? = null
     var consentAllowModel: ConsentModel? = null
 
+    var onAcceptConsent: ((String?, Map<String,Boolean>?)->Unit)? = null
     init {
         lifeCycle.addObserver(this)
     }
@@ -100,7 +101,7 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
         }
 
         Pam.track("allow_consent", payload){
-
+            onAcceptConsent?.invoke(it.consentID, consentAllow)
         }
     }
 

@@ -42,6 +42,10 @@ class LoginPage : AppCompatActivity() {
         registerSpinner()
 
         trackingConsentManager = TrackingConsentManager(supportFragmentManager, lifecycle)
+
+        trackingConsentManager?.onAcceptConsent = {consentID, _ ->
+            AppData.trackingConsent = consentID
+        }
     }
 
     override fun onResume() {
