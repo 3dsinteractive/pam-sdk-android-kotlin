@@ -1,6 +1,7 @@
 package pams.ai.demo.productsPage
 
 import ai.pams.android.kotlin.Pam
+import ai.pams.android.kotlin.events.PamStandardEvent
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -38,6 +39,14 @@ class ProductPage : AppCompatActivity() {
         registerLogoutButton()
 
         fetchProducts()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        PamStandardEvent.PageView(pageTitle = "Product list",
+            pageURL = "digits3://products-list",
+            payload = null).track()
     }
 
     private fun registerProductView() {

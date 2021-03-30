@@ -37,10 +37,10 @@ data class PamOption(
     val loginDbAlias: String,
     val trackingConsentMessageID: String,
     val trackingConsentInterval: Long,
-    )
+)
 
 typealias ListenerFunction = (Map<String, Any>) -> Unit
-typealias TrackerCallback = (PamResponse)->Unit
+typealias TrackerCallback = (PamResponse) -> Unit
 
 public class Pam {
     companion object {
@@ -58,7 +58,7 @@ public class Pam {
             )
 
             var pamServer = config.metaData.get("pam-server").toString()
-            if( pamServer.endsWith("/") ){
+            if (pamServer.endsWith("/")) {
                 pamServer = pamServer.replaceFirst(".$", "")
             }
 
@@ -66,8 +66,10 @@ public class Pam {
 
             val publicDBAlias = config.metaData.get("public-db-alias").toString()
             val loginDBAlias = config.metaData.get("login-db-alias").toString()
-            val teckingConsentMessageID = config.metaData.get("pam-tracking-consent-message-id").toString()
-            val trackingConsentInterval = config.metaData.get("pam-tracking-consent-message-interval").toString().toLong()
+            val teckingConsentMessageID =
+                config.metaData.get("pam-tracking-consent-message-id").toString()
+            val trackingConsentInterval =
+                config.metaData.get("pam-tracking-consent-message-interval").toString().toLong()
 
             shared.options = PamOption(
                 pamServer = pamServer,
@@ -79,20 +81,26 @@ public class Pam {
 
         }
 
-        fun track(eventName: String, payload: Map<String, Any>? = null, trackerCallBack: TrackerCallback? = null) = shared.track(
+        fun track(
+            eventName: String,
+            payload: Map<String, Any>? = null,
+            trackerCallBack: TrackerCallback? = null
+        ) = shared.track(
             eventName,
             payload,
             trackerCallBack
         )
+
         fun appReady() = shared.appReady()
         fun listen(eventName: String, callback: ListenerFunction) =
             shared.listen(eventName, callback)
+
         fun userLogout() = shared.userLogout()
         fun userLogin(customerID: String) = shared.userLogin(customerID)
         fun askNotificationPermission() = shared.askNotificationPermission()
     }
 
-    enum class SaveKey(val keyName:String) {
+    enum class SaveKey(val keyName: String) {
         CustomerID("@pam_customer_id"),
         ContactID("@_pam_contact_id"),
         LoginContactID("@_pam_login_contact_id"),
@@ -114,15 +122,15 @@ public class Pam {
     var onMessageListener = mutableListOf<ListenerFunction>()
     var pendingMessage = mutableListOf<Map<String, Any>>()
 
-    private var platformVersionCache:String? = null
-    private var osVersionCache:String? = null
-    private var appVersionCache:String? = null
-    private var publicContactID:String? = null
-    private var loginContactID:String? = null
-    private var custID:String? = null
+    private var platformVersionCache: String? = null
+    private var osVersionCache: String? = null
+    private var appVersionCache: String? = null
+    private var publicContactID: String? = null
+    private var loginContactID: String? = null
+    private var custID: String? = null
 
     var allowTracking = false
-        set(value){
+        set(value) {
             field = value
             saveValue(SaveKey.AllowTracking, value)
         }
@@ -135,34 +143,44 @@ public class Pam {
         }
     }
 
-    fun getCustomerID():String?{
-        if(custID != null){
+    fun getCustomerID(): String? {
+        if (custID != null) {
             return custID
         }
         custID = readValue(SaveKey.CustomerID)
-        if(custID != null){
+        if (custID != null) {
             return custID
         }
         return null
     }
 
-    fun getDatabaseAlias(): String?{
-        return when(isUserLogin()) {
-            true -> options?.loginDbAlias
-            else -> options?.publicDbAlias
+    fun getDatabaseAlias(): String? {
+        return when (isUserLogin()) {
+            true -> {
+                if (isLogEnable) {
+                    Log.d("PAM", "🪣🪣 : USE : 🍎DB-LOGIN")
+                }
+                options?.loginDbAlias
+            }
+            else -> {
+                if (isLogEnable) {
+                    Log.d("PAM", "🪣🪣 : USE : 🍊DB-PUBLIC")
+                }
+                options?.publicDbAlias
+            }
         }
     }
 
-    fun getContactID(): String?{
-        if(loginContactID != null) loginContactID
-        if(publicContactID != null) publicContactID
+    fun getContactID(): String? {
+        if (loginContactID != null) loginContactID
+        if (publicContactID != null) publicContactID
 
-        readValue(SaveKey.LoginContactID)?.let{
-            loginContactID =  it
+        readValue(SaveKey.LoginContactID)?.let {
+            loginContactID = it
             return@getContactID it
         }
 
-        readValue(SaveKey.ContactID)?.let{
+        readValue(SaveKey.ContactID)?.let {
             publicContactID = it
             return@getContactID it
         }
@@ -285,7 +303,7 @@ public class Pam {
             )
         )
 
-        track("logout", payload){
+        track("logout", payload) {
             this.custID = null
             this.loginContactID = null
             this.removeValue(SaveKey.CustomerID)
@@ -302,9 +320,13 @@ public class Pam {
         dispatch("onToken", mapOf("token" to deviceToken))
     }
 
-    fun track(eventName: String, payload: Map<String, Any>? = null, trackerCallback: TrackerCallback?) {
-        if(!allowTracking && (eventName != "save_push" && eventName != "allow_consent")) {
-            if(isLogEnable){
+    fun track(
+        eventName: String,
+        payload: Map<String, Any>? = null,
+        trackerCallback: TrackerCallback?
+    ) {
+        if (!allowTracking && (eventName != "save_push" && eventName != "allow_consent")) {
+            if (isLogEnable) {
                 Log.d("PAM", "🤡 NOTRACKING $eventName")
             }
             return
@@ -314,21 +336,22 @@ public class Pam {
     }
 
     private fun isUserLogin(): Boolean {
-        if(custID == null) {
+        if (custID == null) {
             custID = readValue(SaveKey.CustomerID)
         }
         return custID != null
     }
 
-    private fun buildPayload(eventName: String, payload: Map<String, Any>?): Map<String, Any>{
+    private fun buildPayload(eventName: String, payload: Map<String, Any>?): Map<String, Any> {
 
-        if(platformVersionCache == null){
+        if (platformVersionCache == null) {
             val pInfo = app?.packageManager?.getPackageInfo(app?.packageName ?: "", 0)
             val packageName = app?.packageName ?: ""
             appVersionCache = "$packageName (${pInfo?.versionName ?: ""})"
             osVersionCache = "Android: ${Build.VERSION.SDK_INT}"
 
-            platformVersionCache = "Android: ${Build.VERSION.SDK_INT} (${Build.VERSION.RELEASE}), $packageName: $appVersionCache"
+            platformVersionCache =
+                "Android: ${Build.VERSION.SDK_INT} (${Build.VERSION.RELEASE}), $packageName: $appVersionCache"
         }
 
         val body = mutableMapOf<String, Any>(
@@ -342,24 +365,24 @@ public class Pam {
             "_session_id" to getSessionID()
         )
 
-        getContactID()?.let{
+        getContactID()?.let {
             formField["_contact_id"] = it
         }
 
         payload?.forEach {
             if (it.key != "page_url" || it.key != "page_title") {
                 formField[it.key] = it.value
-            }else{
+            } else {
                 body[it.key] = it.value
             }
         }
 
-        getDatabaseAlias()?.let{
+        getDatabaseAlias()?.let {
             formField["_database"] = it
         }
 
-        if(isUserLogin()){
-            getCustomerID()?.let{
+        if (isUserLogin()) {
+            getCustomerID()?.let {
                 formField["customer"] = it
             }
         }
@@ -369,15 +392,19 @@ public class Pam {
         return body
     }
 
-    private fun postTracker(eventName: String, payload: Map<String, Any>?, trackerCallBack: TrackerCallback? = null) {
+    private fun postTracker(
+        eventName: String,
+        payload: Map<String, Any>?,
+        trackerCallBack: TrackerCallback? = null
+    ) {
         val url = "${options?.pamServer!!}/trackers/events"
 
         val body = buildPayload(eventName, payload)
 
-        if(isLogEnable){
+        if (isLogEnable) {
             Log.d("PAM", "🦄 : POST Event = 🍀$eventName🍀")
-            Log.d("PAM","🦄 : Payload")
-            Log.d("PAM","🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉\n$body\n🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉\n\n")
+            Log.d("PAM", "🦄 : Payload")
+            Log.d("PAM", "🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉\n$body\n🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉🍉\n\n")
         }
 
         Http.getInstance().post(
@@ -390,7 +417,7 @@ public class Pam {
                 Log.d("Pam", "track response is $text\n")
             }
 
-            try{
+            try {
                 val response = Gson().fromJson(text, PamResponse::class.java)
                 if (response.contactID != null) {
 
@@ -413,7 +440,7 @@ public class Pam {
                     trackerCallBack?.invoke(response)
                     queueTrackerManager.next()
                 }
-            }catch (e: JsonSyntaxException){
+            } catch (e: JsonSyntaxException) {
 
             }
         }

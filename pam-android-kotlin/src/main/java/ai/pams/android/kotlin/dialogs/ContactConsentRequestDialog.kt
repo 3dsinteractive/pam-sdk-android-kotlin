@@ -130,7 +130,7 @@ class ContactConsentRequestDialog(
 
         consentMessage?.setting?.termsAndConditions?.let{
             if(it.is_enabled == true) {
-                it.is_allow = true
+                it.is_allow = it.is_allow
                 it.title = "Term & Conditions"
                 it.require = true
                 consentOptions.add(it)
@@ -139,7 +139,7 @@ class ContactConsentRequestDialog(
 
         consentMessage?.setting?.privacyOverview?.let{
             if(it.is_enabled == true) {
-                it.is_allow = true
+                it.is_allow = it.is_allow
                 it.title = "Privacy OverView"
                 it.require = true
                 consentOptions.add(it)
@@ -148,7 +148,7 @@ class ContactConsentRequestDialog(
 
         consentMessage?.setting?.email?.let{
             if(it.is_enabled == true) {
-                it.is_allow = true
+                it.is_allow = it.is_allow
                 it.title = "Email"
                 it.require = false
                 consentOptions.add(it)
@@ -157,7 +157,7 @@ class ContactConsentRequestDialog(
 
         consentMessage?.setting?.sms?.let{
             if(it.is_enabled == true) {
-                it.is_allow = true
+                it.is_allow = it.is_allow
                 it.title = "SMS"
                 it.require = false
                 consentOptions.add(it)
@@ -166,7 +166,7 @@ class ContactConsentRequestDialog(
 
         consentMessage?.setting?.line?.let{
             if(it.is_enabled == true) {
-                it.is_allow = true
+                it.is_allow = it.is_allow
                 it.title = "Line"
                 it.require = false
                 consentOptions.add(it)
@@ -175,7 +175,7 @@ class ContactConsentRequestDialog(
 
         consentMessage?.setting?.facebookMessenger?.let{
             if(it.is_enabled == true) {
-                it.is_allow = true
+                it.is_allow = it.is_allow
                 it.title = "Facebook Messenger"
                 it.require = false
                 consentOptions.add(it)

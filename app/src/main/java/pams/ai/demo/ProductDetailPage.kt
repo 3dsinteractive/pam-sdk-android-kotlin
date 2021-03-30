@@ -68,7 +68,6 @@ class ProductDetailPage : AppCompatActivity() {
             )
         ).track()
 
-
         registerAddToCart()
         registerBuyNow()
         registerFavourite()
