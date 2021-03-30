@@ -33,6 +33,11 @@
             android:value="1qDQOyMeBv64LYnXi6dJOcZp2YQ"/>
 
         <meta-data
+            android:name="pam-tracking-consent-message-interval"
+            android:value="300"/>
+        <!-- 300 second = 5 minute -->
+
+        <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/logo_3digits" />
         <meta-data

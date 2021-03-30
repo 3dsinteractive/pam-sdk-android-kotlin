@@ -36,6 +36,7 @@ data class PamOption(
     val publicDbAlias: String,
     val loginDbAlias: String,
     val trackingConsentMessageID: String,
+    val trackingConsentInterval: Long,
     )
 
 typealias ListenerFunction = (Map<String, Any>) -> Unit
@@ -61,12 +62,21 @@ public class Pam {
                 pamServer = pamServer.replaceFirst(".$", "")
             }
 
+            config.metaData.get("pam-tracking-consent-message-id")
+
+            val publicDBAlias = config.metaData.get("public-db-alias").toString()
+            val loginDBAlias = config.metaData.get("login-db-alias").toString()
+            val teckingConsentMessageID = config.metaData.get("pam-tracking-consent-message-id").toString()
+            val trackingConsentInterval = config.metaData.get("pam-tracking-consent-message-interval").toString().toLong()
+
             shared.options = PamOption(
                 pamServer = pamServer,
-                publicDbAlias = config.metaData.get("public-db-alias").toString(),
-                loginDbAlias = config.metaData.get("login-db-alias").toString(),
-                trackingConsentMessageID = config.metaData.get("pam-tracking-consent-message-id").toString()
+                publicDbAlias = publicDBAlias,
+                loginDbAlias = loginDBAlias,
+                trackingConsentMessageID = teckingConsentMessageID,
+                trackingConsentInterval = trackingConsentInterval
             )
+
         }
 
         fun track(eventName: String, payload: Map<String, Any>? = null, trackerCallBack: TrackerCallback? = null) = shared.track(

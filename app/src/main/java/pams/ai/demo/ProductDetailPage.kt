@@ -1,6 +1,7 @@
 package pams.ai.demo
 
 import ai.pams.android.kotlin.Pam
+import ai.pams.android.kotlin.TrackingConsentManager
 import ai.pams.android.kotlin.events.PamStandardEvent
 import android.app.AlertDialog
 import android.content.Context
@@ -17,6 +18,8 @@ import pams.ai.demo.notificationsPage.NotificationPage
 import webservices.MockAPI
 
 class ProductDetailPage : AppCompatActivity() {
+
+    var trackingConsentManager: TrackingConsentManager? = null
 
     companion object{
         fun createIntentWithProduct(context: Context, product: Product): Intent{
@@ -76,6 +79,8 @@ class ProductDetailPage : AppCompatActivity() {
         registerLogoutButton()
 
         fetchFavourite()
+
+        trackingConsentManager = TrackingConsentManager(supportFragmentManager, lifecycle)
     }
 
     private fun registerAddToCart() {
