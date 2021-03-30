@@ -47,7 +47,7 @@ class TrackingConsentRequestDialog(
         super.onViewCreated(view, savedInstanceState)
 
         val width = view.context.resources.displayMetrics.widthPixels * 0.98
-        val height = view.context.resources.displayMetrics.heightPixels * 0.7
+        val height = view.context.resources.displayMetrics.heightPixels * 0.75
 
         dialog?.window?.setLayout(width.toInt(), height.toInt())
 
@@ -98,7 +98,6 @@ class TrackingConsentRequestDialog(
     }
 
     private fun initFullVersionReader(){
-
         listAdapter.onShowFullDescription = {
             showFullVersion(it)
         }
@@ -108,15 +107,22 @@ class TrackingConsentRequestDialog(
         binding.closeFullVersionBtn.setOnClickListener{
             it.visibility = View.GONE
             binding.scrollView.visibility = View.GONE
+            binding.languageSpinner.visibility = View.VISIBLE
+            binding.closeFullVersionBtn.visibility = View.GONE
+            binding.acceptAllBtn.visibility = View.VISIBLE
+            binding.saveSettingBtn.visibility = View.VISIBLE
         }
     }
 
     private fun showFullVersion(text:String){
+        binding.languageSpinner.visibility = View.GONE
         binding.scrollView.visibility = View.VISIBLE
         val html = Html.fromHtml(text,  Html.FROM_HTML_MODE_COMPACT)
         binding.fullVersionText.text = html
         binding.scrollView.visibility = View.VISIBLE
-        binding.scrollView.visibility = View.VISIBLE
+        binding.closeFullVersionBtn.visibility = View.VISIBLE
+        binding.acceptAllBtn.visibility = View.GONE
+        binding.saveSettingBtn.visibility = View.GONE
     }
 
 

@@ -4,14 +4,18 @@ import ai.pams.android.kotlin.TrackingConsentManager
 import ai.pams.android.kotlin.Pam
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.Gson
 import models.AppData
+import models.UserModel
 import pams.ai.demo.databinding.ActivityLoginPageBinding
 import pams.ai.demo.productsPage.ProductPage
+import webservices.DemoAPI
 import webservices.MockAPI
 
 
@@ -52,12 +56,21 @@ class LoginPage : AppCompatActivity() {
     private fun registerButtonLogin() {
         binding?.btnLogin?.setOnClickListener {
             emailUseToLogin?.let{ email ->
-                MockAPI.getInstance().login(email)?.let{ user ->
-                    AppData.setUser(user)
-                    Pam.userLogin(user.CusID)
-                    val intent = Intent(this, ProductPage::class.java)
-                    startActivity(intent)
-                }
+
+                  DemoAPI.login( email, password = "1234"){
+                      val user = UserModel(it.data.customerID, email)
+                      AppData.setUser(user)
+                      Pam.userLogin(it.data.customerID)
+                      val intent = Intent(this, ProductPage::class.java)
+                      startActivity(intent)
+                  }
+
+//                MockAPI.getInstance().login(email)?.let{ user ->
+//                    AppData.setUser(user)
+//                    Pam.userLogin(user.CusID)
+//                    val intent = Intent(this, ProductPage::class.java)
+//                    startActivity(intent)
+//                }
             }
         }
     }

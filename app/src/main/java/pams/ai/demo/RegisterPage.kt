@@ -5,19 +5,27 @@ import ai.pams.android.kotlin.Pam
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import models.AppData
+import models.UserModel
 import pams.ai.demo.databinding.ActivityRegisterPageBinding
 import pams.ai.demo.productsPage.ProductPage
+import webservices.DemoAPI
 import webservices.MockAPI
 
 class RegisterPage : AppCompatActivity() {
     var binding: ActivityRegisterPageBinding? = null
-
+    private val emails = listOf("a@a.com", "b@b.com", "c@c.com")
     private var contactConsentManager: ContactConsentManager? = null
+    var emailUseToRegister: String? = null
+    var spinnerAdapter: ArrayAdapter<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +35,42 @@ class RegisterPage : AppCompatActivity() {
             setContentView(it.root)
         }
 
-        this.registerButtonRegister()
+        registerButtonRegister()
+        registerSpinner()
+    }
+
+    private fun registerSpinner() {
+        spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, emails)
+
+        emailUseToRegister = emails[0]
+
+        binding?.inputEmail?.adapter = spinnerAdapter
+        binding?.inputEmail?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parentView: AdapterView<*>?,
+                selectedItemView: View,
+                position: Int,
+                id: Long
+            ) {
+                emailUseToRegister = emails[position]
+            }
+
+            override fun onNothingSelected(parentView: AdapterView<*>?) {
+                emailUseToRegister = null
+            }
+        }
+    }
+
+    private fun login(email:String){
+        DemoAPI.login(email, "1234"){
+            val user = UserModel(it.data.customerID, email)
+            AppData.setUser(user)
+            Pam.userLogin(it.data.customerID)
+
+            val intent = Intent(this, ProductPage::class.java)
+            startActivity(intent)
+            this.finish()
+        }
     }
 
     private fun registerButtonRegister() {
@@ -35,16 +78,18 @@ class RegisterPage : AppCompatActivity() {
 
             contactConsentManager?.applyConsent {
                 Log.d("APP", "Consent ID = ${it.consentID}")
-                val email = binding?.inputEmail?.text
-                MockAPI.getInstance().register(email.toString())
 
-                Pam.track("register", mutableMapOf())
-
-                val intent = Intent(this, ProductPage::class.java)
-                startActivity(intent)
-                this.finish()
+                //MockAPI.getInstance().register(email.toString())
+                Pam.track("click_register", mutableMapOf())
+                DemoAPI.register(
+                    email = (emailUseToRegister ?: ""),
+                    mobile = (binding?.inputMobile?.text?.toString() ?: ""),
+                    password = "1234",
+                    consentId = (it.consentID ?: ""))
+                { response ->
+                    login(response.data.email)
+                }
             }
-
         }
 
         binding?.checkboxContact?.setOnCheckedChangeListener { _, isChecked ->

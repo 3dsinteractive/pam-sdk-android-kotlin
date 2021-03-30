@@ -147,7 +147,7 @@ class ConsentInfoViewHolder(itemView: View) : ConsentViewHolder(itemView) {
     private val infoText: TextView = itemView.findViewById(R.id.info_text)
     private val switch: SwitchCompat = itemView.findViewById(R.id.switch_btn)
     private val requireLabel: TextView = itemView.findViewById(R.id.require_label)
-    private val fullVersionBtn: TextView = itemView.findViewById(R.id.full_version_btn)
+    private val fullVersionBtn: View = itemView.findViewById(R.id.full_version_btn)
 
     private var consent: ConsentOption? = null
 
