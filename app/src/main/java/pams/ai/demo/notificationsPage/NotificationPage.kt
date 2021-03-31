@@ -3,6 +3,7 @@ package pams.ai.demo.notificationsPage
 import ai.pams.android.kotlin.Pam
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,30 +26,26 @@ class NotificationPage : AppCompatActivity() {
         }
 
         registerNotificationView()
-        registerRefreshButton()
         registerUserButton()
         registerLoginButton()
         registerLogoutButton()
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         fetchNotifications()
     }
 
     private fun registerNotificationView() {
         adapter = NotificationListAdapter()
-        binding?.listView?.adapter = adapter
 
         val layoutManager =
             LinearLayoutManager(this@NotificationPage, LinearLayoutManager.VERTICAL, false)
         binding?.listView?.layoutManager = layoutManager
+        binding?.listView?.adapter = adapter
     }
 
-    private fun registerRefreshButton() {
-        binding?.btnRefresh?.let {
-            it.setOnClickListener {
-                fetchNotifications()
-            }
-        }
-    }
 
     private fun registerUserButton() {
         binding?.let {
@@ -97,7 +94,10 @@ class NotificationPage : AppCompatActivity() {
     }
 
     private fun fetchNotifications() {
-        val notifications = MockAPI.getInstance().getNotifications()
-        adapter?.setNotifications(notifications = notifications)
+        Pam.fetchNotificationHistory { notiList ->
+            notiList?.let{
+                adapter?.setNotifications(notifications = it)
+            }
+        }
     }
 }

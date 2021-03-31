@@ -64,6 +64,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
+                android:visibility="invisible"
                 android:id="@+id/btn_user"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
@@ -82,18 +83,6 @@
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/top_bar"/>
-
-        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/btn_refresh"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:backgroundTint="@color/primary"
-            android:text="Refresh"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

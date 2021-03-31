@@ -1,6 +1,5 @@
 package webservices
 
-import models.Notification
 import models.Product
 import models.UserModel
 

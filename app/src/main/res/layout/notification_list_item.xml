@@ -7,90 +7,87 @@
     <data>
 
         <variable
-            name="notification"
-            type="models.Notification" />
+            name="title"
+            type="String" />
+
+        <variable
+            name="description"
+            type="String" />
+
+        <variable
+            name="date"
+            type="String" />
+
+        <variable
+            name="isRead"
+            type="Boolean" />
     </data>
 
-    <androidx.cardview.widget.CardView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:background="@{isRead ? @color/noti_read : @color/noti_unread}"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/notification_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:adjustViewBounds="true"
+            android:padding="8dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_launcher_round"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/notification_title"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="4dp"
-            android:paddingVertical="8dp">
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:maxLines="3"
+            android:singleLine="true"
+            android:text="@{title}"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/notification_image"
+            app:layout_constraintTop_toTopOf="@id/notification_image"
+            tools:text="TITLE" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="100dp">
+        <TextView
+            android:id="@+id/text_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:maxLines="2"
+            android:text="@{date}"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="@id/notification_title"
+            app:layout_constraintStart_toStartOf="@id/notification_title"
+            app:layout_constraintTop_toBottomOf="@id/notification_title"
+            tools:text="DATE"
 
-                <ImageView
-                    android:id="@+id/notification_image"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:padding="8dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_launcher_background"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+            />
 
-                <TextView
-                    android:id="@+id/notification_title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:ellipsize="end"
-                    android:hint="Mock TitleMock TitleMock TitleMock TitleMock TitleMock TitleMock Title"
-                    android:singleLine="true"
-                    android:text="@{notification.title}"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toTopOf="@id/notification_message"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/notification_image"
-                    app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/notification_message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="9999"
+            android:text="@{description}"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="@id/notification_title"
+            app:layout_constraintStart_toStartOf="@id/text_date"
+            app:layout_constraintTop_toBottomOf="@id/text_date"
+            tools:text="detail" />
 
-                <TextView
-                    android:id="@+id/notification_message"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_marginBottom="4dp"
-                    android:ellipsize="end"
-                    android:hint="Mock MessageMock MessageMock MessageMock MessageMock MessageMock MessageMock MessageMock MessageMock MessageMock MessageMock MessageMock Message"
-                    android:maxLines="2"
-                    android:paddingEnd="8dp"
-                    android:text="@{notification.message}"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toTopOf="@id/notification_guide_line"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/notification_image" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#BFBFBF"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="4dp"
-                    android:ellipsize="none"
-                    android:hint="2020-03-05 12:26:11"
-                    android:inputType="none"
-                    android:maxLines="2"
-                    android:paddingEnd="8dp"
-                    android:text="@{notification.date}"
-                    android:textSize="14sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/notification_guide_line" />
-
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/notification_guide_line"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    app:layout_constraintGuide_percent="0.75" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </RelativeLayout>
-    </androidx.cardview.widget.CardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

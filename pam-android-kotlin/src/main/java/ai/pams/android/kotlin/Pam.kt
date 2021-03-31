@@ -1,6 +1,8 @@
 package ai.pams.android.kotlin
 
 import ai.pams.android.kotlin.http.Http
+import ai.pams.android.kotlin.models.notification.NotificationItem
+import ai.pams.android.kotlin.models.notification.NotificationList
 import ai.pams.android.kotlin.queue.QueueTrackerManager
 import android.app.Application
 import android.content.Context
@@ -115,6 +117,7 @@ class Pam {
             shared.userLogin(customerID, callBack)
 
         fun askNotificationPermission() = shared.askNotificationPermission()
+        fun fetchNotificationHistory(callBack: (List<NotificationItem>?)->Unit ) = shared.fetchNotificationHistory(callBack)
     }
 
     enum class SaveKey(val keyName: String) {
@@ -305,6 +308,36 @@ class Pam {
         }
 
         return this.sessionID ?: ""
+    }
+
+    fun fetchNotificationHistory(callBack: (List<NotificationItem>?)->Unit ){
+        if(custID == null && getContactID() == null) {
+            callBack(null)
+        }
+
+        val url = "${options?.pamServer!!}/api/app-notifications"
+
+        val query = mutableMapOf<String, String>(
+            "_database" to (getDatabaseAlias() ?: "")
+        )
+
+        custID?.let{
+            query["customer"] = it
+        }
+
+        getContactID()?.let{
+            query["_contact_id"] = it
+        }
+
+        Http.getInstance().get(
+            url=url,
+            queryString = query
+        ){ result, _ ->
+            val model = Gson().fromJson(result, NotificationList::class.java)
+            CoroutineScope(Dispatchers.Main).launch {
+                callBack.invoke(model.items)
+            }
+        }
     }
 
     fun userLogin(customerID: String, callBack: (() -> Unit)? = null) {

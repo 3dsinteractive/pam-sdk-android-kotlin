@@ -11,7 +11,6 @@ class MockAPI {
     }
 
     private var cart = CartModel(TotalPrice = 0.0)
-    private var notifications = mutableListOf<Notification>()
     private var favourite = mutableListOf<String>()
 
     fun addToFavourite(productID: String) {
@@ -117,17 +116,6 @@ class MockAPI {
         return null
     }
 
-    fun addToNotification(image: String, title: String, message: String, date: String) {
-        notifications.add(
-            Notification(
-                Image = image,
-                Title = title,
-                Message = message,
-                Date = date
-            )
-        )
-    }
-
     fun getCart(): CartModel {
         cart.Products?.let { ps ->
             var totalPrice = 0.0
@@ -143,8 +131,6 @@ class MockAPI {
     }
 
     fun getProducts() = mockProducts
-
-    fun getNotifications() = notifications
 
     fun getProductFromID(productID: String): Product? {
         for (p in mockProducts) {
