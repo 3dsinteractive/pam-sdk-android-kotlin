@@ -358,7 +358,7 @@ public class Pam {
         return custID != null
     }
 
-    private fun buildPayload(eventName: String, payload: Map<String, Any>?): Map<String, Any> {
+    private fun buildPayload(eventName: String, payload: Map<String, Any>?=null, trackingConsentMessageID:String? = null): Map<String, Any> {
 
         if (platformVersionCache == null) {
             val pInfo = app?.packageManager?.getPackageInfo(app?.packageName ?: "", 0)
@@ -380,6 +380,10 @@ public class Pam {
             "app_version" to (appVersionCache ?: ""),
             "_session_id" to getSessionID()
         )
+
+        trackingConsentMessageID?.let{
+            formField["_consent_message_id"] = it
+        }
 
         getContactID()?.let {
             formField["_contact_id"] = it
@@ -415,7 +419,7 @@ public class Pam {
     ) {
         val url = "${options?.pamServer!!}/trackers/events"
 
-        val body = buildPayload(eventName, payload)
+        val body = buildPayload(eventName, payload, options?.trackingConsentMessageID)
 
         if (isLogEnable) {
             Log.d("PAM", "🦄 : POST Event = 🍀$eventName🍀")
