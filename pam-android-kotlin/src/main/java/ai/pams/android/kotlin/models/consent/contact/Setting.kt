@@ -31,6 +31,8 @@ data class Setting(
     val sms: ConsentOption? = null,
     @SerializedName("terms_and_conditions")
     val termsAndConditions: ConsentOption? = null,
+    @SerializedName("push_notification")
+    val pushNotification: ConsentOption? = null,
     @SerializedName("version")
     val version: Int? = null
 )

@@ -100,6 +100,12 @@ class ContactConsentManager(val consentMessageID:String, val fragmentManager: Fr
             }
         }
 
+        consentMessage?.setting?.pushNotification?.let{
+            if(it.is_enabled == true){
+                allowMap["push_notification"] = it.is_allow
+            }
+        }
+
         return allowMap
     }
 
@@ -122,6 +128,10 @@ class ContactConsentManager(val consentMessageID:String, val fragmentManager: Fr
         }
 
         consentMessage?.setting?.facebookMessenger?.let{
+            it.is_allow = isAccept
+        }
+
+        consentMessage?.setting?.pushNotification?.let{
             it.is_allow = isAccept
         }
 
@@ -163,6 +173,10 @@ class ContactConsentManager(val consentMessageID:String, val fragmentManager: Fr
 
         consentMessage?.setting?.facebookMessenger?.let{
             payload["_allow_facebook_messenger"] = it.is_allow
+        }
+
+        consentMessage?.setting?.pushNotification?.let{
+            payload["_allow_push_notification"] = it.is_allow
         }
 
         Pam.track("allow_consent", payload){

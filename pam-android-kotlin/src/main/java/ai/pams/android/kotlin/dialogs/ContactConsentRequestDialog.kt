@@ -145,6 +145,14 @@ class ContactConsentRequestDialog(
             }
         }
 
+        consentMessage?.setting?.pushNotification?.let{
+            if(it.is_enabled == true) {
+                it.title = "Push Notification"
+                it.require = false
+                consentOptions.add(it)
+            }
+        }
+
         consentMessage?.setting?.email?.let{
             if(it.is_enabled == true) {
                 it.title = "Email"
@@ -204,6 +212,10 @@ class ContactConsentRequestDialog(
 
         consentMessage?.setting?.facebookMessenger?.is_enabled?.let{
             if(it) acceptList["_allow_facebook_messenger"] = true
+        }
+
+        consentMessage?.setting?.pushNotification?.is_enabled?.let{
+            if(it) acceptList["_allow_push_notification"] = true
         }
 
         onAccept?.invoke(acceptList)
