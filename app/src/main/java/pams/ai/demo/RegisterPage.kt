@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
@@ -27,8 +28,8 @@ class RegisterPage : AppCompatActivity() {
     private var appConsentManager: ContactConsentManager? = null
     private var groupConsentManager: ContactConsentManager? = null
 
-    val APP_CONSENT_MESSAGE_ID = "1qDQgHFygpAhuX0gBxHkYAPiwBN"
-    val GROUP_CONSENT_MESSAGE_ID = "1qVSxfOdnEZQAu48Ue8xrvjV6JN"
+    private val APP_CONSENT_MESSAGE_ID = "1qDQgHFygpAhuX0gBxHkYAPiwBN"
+    private val GROUP_CONSENT_MESSAGE_ID = "1qVSxfOdnEZQAu48Ue8xrvjV6JN"
 
     var appConsentID:String? = null
     var groupConsentID:String? = null
@@ -85,6 +86,7 @@ class RegisterPage : AppCompatActivity() {
     }
 
     private fun setupConsent(){
+        binding?.allowRegister = false
         //Disable button when consent manager is loading
         binding?.openSettingBtn1?.isEnabled = false
         binding?.openSettingBtn2?.isEnabled = false
@@ -121,6 +123,7 @@ class RegisterPage : AppCompatActivity() {
             val termAccept = allowList["terms_and_conditions"] ?: false
             val privacyAccept = allowList["privacy_overview"] ?: false
             this.binding?.checkboxConsentApp?.isChecked = termAccept && privacyAccept
+            binding?.allowRegister = termAccept && privacyAccept
         }
 
         groupConsentManager?.setOnStatusChangedListener { allowList ->
@@ -131,16 +134,16 @@ class RegisterPage : AppCompatActivity() {
     }
 
 
-    private fun applayConsentApp(){
+    private fun applyConsentApp(){
         appConsentManager?.applyConsent {
             AppData.contactConsent = it.consentID
             appConsentID = it.consentID
-            applayConsentGroup()
+            applyConsentGroup()
         }
     }
 
-    private fun applayConsentGroup(){
-        appConsentManager?.applyConsent {
+    private fun applyConsentGroup(){
+        groupConsentManager?.applyConsent {
             groupConsentID = it.consentID
 
             var consentID = appConsentID
@@ -153,8 +156,15 @@ class RegisterPage : AppCompatActivity() {
                 mobile = (binding?.inputMobile?.text?.toString() ?: ""),
                 password = "1234",
                 consentId = (consentID ?: ""))
-            { response ->
-                login(response.data.email)
+            { _ ->
+                CoroutineScope(Dispatchers.Main).launch {
+                    AlertDialog.Builder(this@RegisterPage)
+                        .setTitle("Thank you!")
+                        .setMessage("Register was Successful.")
+                        .setPositiveButton("Back to Login."){ _,_->
+                            finish()
+                        }.show()
+                }
             }
         }
     }
@@ -162,15 +172,21 @@ class RegisterPage : AppCompatActivity() {
     private fun registerButtonRegister() {
         binding?.btnRegister?.setOnClickListener {
             Pam.track("click_register", mutableMapOf())
-            applayConsentApp()
+            applyConsentApp()
         }
 
-        binding?.checkboxConsentApp?.setOnCheckedChangeListener { _, isChecked ->
-            appConsentManager?.setAcceptAllContactPermissions(isChecked)
+        binding?.checkboxConsentApp?.setOnCheckedChangeListener { checkbox, isChecked ->
+            if(checkbox.isPressed) {
+                //Accept to all only when user click the checkbox but not from the code
+                appConsentManager?.setAcceptAllPermissions(isChecked)
+            }
         }
 
-        binding?.checkboxConsentGroup?.setOnCheckedChangeListener { _, isChecked ->
-            groupConsentManager?.setAcceptAllTermsAndPrivacy(isChecked)
+        binding?.checkboxConsentGroup?.setOnCheckedChangeListener { checkbox, isChecked ->
+            if(checkbox.isPressed) {
+                //Accept to all only when user click the checkbox but not from the code
+                groupConsentManager?.setAcceptAllPermissions(isChecked)
+            }
         }
 
         binding?.openSettingBtn1?.setOnClickListener{

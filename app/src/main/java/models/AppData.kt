@@ -13,6 +13,15 @@ class AppData {
         var trackingConsent: String? = null
 
         fun clean(){
+            val sharePref = MainApplication.appContext?.getSharedPreferences(
+                "app_pref",
+                Context.MODE_PRIVATE
+            )!!
+            sharePref.edit()?.also {
+                it.remove("login-user")
+                it.apply()
+            }
+
             user = null
             contactConsent = null
             trackingConsent = null

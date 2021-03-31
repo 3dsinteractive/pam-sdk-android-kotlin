@@ -6,6 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools" >
 
     <data>
+        <import type="android.view.View"/>
         <variable
             name="email"
             type="String" />
@@ -24,6 +25,10 @@
         <variable
             name="contactConsent"
             type="String" />
+
+        <variable
+            name="isLogin"
+            type="Boolean" />
 
         <variable
             name="presenter"
@@ -153,20 +158,34 @@
                     />
 
                 <Button
-                    android:text="ONLY LOGOUT"
-                    android:backgroundTint="#FF9800"
+                    android:text="LOGOUT"
+                    android:backgroundTint="#DD0202"
                     android:layout_marginTop="20dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:visibility="@{isLogin? View.VISIBLE : View.GONE}"
                     android:onClick="@{(view) -> presenter.clickLogout()}"
                     />
 
                 <Button
-                    android:text="LOGOUT &amp; Clean"
+                    android:text="LOGOUT &amp; DELETE COOKIES"
                     android:layout_marginTop="20dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="#000000"
+                    android:visibility="@{isLogin? View.VISIBLE : View.GONE}"
                     android:onClick="@{(view) -> presenter.clickClean()}"
+                    />
+
+                <Button
+                    android:text="BACK TO HOME"
+                    android:layout_marginTop="20dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#00ffcc"
+                    android:textColor="#000000"
+                    android:visibility="@{isLogin? View.GONE : View.VISIBLE}"
+                    android:onClick="@{(view) -> presenter.clickBackToHome()}"
                     />
 
             </LinearLayout>

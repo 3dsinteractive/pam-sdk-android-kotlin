@@ -11,6 +11,7 @@ import pams.ai.demo.databinding.ActivityUserProfilePageBinding
 interface UserProfilePresenter {
     fun clickLogout()
     fun clickClean()
+    fun clickBackToHome()
 }
 
 class UserProfilePage : AppCompatActivity(), UserProfilePresenter {
@@ -26,6 +27,7 @@ class UserProfilePage : AppCompatActivity(), UserProfilePresenter {
     override fun onResume() {
         super.onResume()
 
+        binding?.isLogin = AppData.getUser() != null
         binding?.presenter = this
         binding?.dbAlias = Pam.shared.getDatabaseAlias()
         binding?.email = AppData.getUser()?.Email
@@ -38,7 +40,7 @@ class UserProfilePage : AppCompatActivity(), UserProfilePresenter {
 
 
     override fun clickLogout() {
-        Pam.userLogout(){
+        Pam.userLogout{
             val intent = Intent(this, LoginPage::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             startActivity(intent)
@@ -47,7 +49,7 @@ class UserProfilePage : AppCompatActivity(), UserProfilePresenter {
     }
 
     override fun clickClean() {
-        Pam.userLogout(){
+        Pam.userLogout{
             AppData.clean()
             Pam.cleanEverything()
             val intent = Intent(this, LoginPage::class.java)
@@ -57,4 +59,10 @@ class UserProfilePage : AppCompatActivity(), UserProfilePresenter {
         }
     }
 
+    override fun clickBackToHome(){
+        val intent = Intent(this, LoginPage::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
+        this.finish()
+    }
 }

@@ -48,6 +48,9 @@ class ContactConsentManager(val consentMessageID:String, val fragmentManager: Fr
 
     fun openConsentRequestDialog(){
         consentMessage?.let{
+            it.setting?.privacyOverview?.is_allow = true
+            it.setting?.termsAndConditions?.is_allow = true
+
             val dialog = ContactConsentRequestDialog(it)
             dialog.isCancelable = false
             dialog.onAccept = {
@@ -100,16 +103,11 @@ class ContactConsentManager(val consentMessageID:String, val fragmentManager: Fr
         return allowMap
     }
 
-    fun setAcceptAllTermsAndPrivacy(isAccept: Boolean){
+    fun setAcceptAllPermissions(isAccept: Boolean){
         if(!ready){return}
+
         consentMessage?.setting?.termsAndConditions?.is_allow = isAccept
         consentMessage?.setting?.privacyOverview?.is_allow = isAccept
-
-        onStatusChanged?.invoke(createAllowMap())
-    }
-
-    fun setAcceptAllContactPermissions(isAccept: Boolean){
-        if(!ready){return}
 
         consentMessage?.setting?.email?.let{
             it.is_allow = isAccept
