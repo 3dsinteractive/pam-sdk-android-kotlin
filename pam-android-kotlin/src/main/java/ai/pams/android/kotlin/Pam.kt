@@ -428,7 +428,7 @@ class Pam {
         }
 
         payload?.forEach {
-            if (it.key != "page_url" || it.key != "page_title") {
+            if (it.key != "page_url" && it.key != "page_title") {
                 formField[it.key] = it.value
             } else {
                 body[it.key] = it.value
