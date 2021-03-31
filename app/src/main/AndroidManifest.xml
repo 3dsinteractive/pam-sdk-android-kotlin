@@ -12,9 +12,9 @@
         android:roundIcon="@mipmap/ic_logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PamDemo">
+        <activity android:name=".UserProfilePage"/>
         <activity android:name=".ConsentRequestActivity" />
         <activity android:name=".cartPage.CartPage" /> <!-- Configs -->
-
         <meta-data
             android:name="pam-server"
             android:value="https://stgx.pams.ai" />
@@ -27,16 +27,12 @@
         <meta-data
             android:name="pam-enable-log"
             android:value="true" />
-
         <meta-data
             android:name="pam-tracking-consent-message-id"
-            android:value="1qDQOyMeBv64LYnXi6dJOcZp2YQ"/>
-
+            android:value="1qDQOyMeBv64LYnXi6dJOcZp2YQ" />
         <meta-data
             android:name="pam-tracking-consent-message-interval"
-            android:value="300"/>
-        <!-- 300 second = 5 minute -->
-
+            android:value="300" /> <!-- 300 second = 5 minute -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/logo_3digits" />
@@ -65,10 +61,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".UserProfileActivity"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
+
         <activity
             android:name=".LoginPage"
             android:configChanges="orientation"

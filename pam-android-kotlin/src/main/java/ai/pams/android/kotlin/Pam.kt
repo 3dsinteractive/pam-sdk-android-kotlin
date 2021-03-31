@@ -42,7 +42,7 @@ data class PamOption(
 typealias ListenerFunction = (Map<String, Any>) -> Unit
 typealias TrackerCallback = (PamResponse) -> Unit
 
-public class Pam {
+class Pam {
     companion object {
         var shared = Pam()
 
@@ -52,7 +52,12 @@ public class Pam {
             shared.removeValue(SaveKey.CustomerID)
             shared.removeValue(SaveKey.ContactID)
             shared.removeValue(SaveKey.AllowTracking)
-            shared = Pam()
+            shared.loginContactID = null
+            shared.custID = null
+            shared.publicContactID = null
+            shared.sessionID = null
+            shared.sessionExpire = null
+            shared.allowTracking = false
         }
 
         fun initialize(application: Application, enableLog: Boolean = false) {

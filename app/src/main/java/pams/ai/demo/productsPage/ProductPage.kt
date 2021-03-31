@@ -9,10 +9,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import models.AppData
-import pams.ai.demo.LoginPage
-import pams.ai.demo.ProductDetailPage
-import pams.ai.demo.R
-import pams.ai.demo.UserProfileActivity
+import pams.ai.demo.*
 import pams.ai.demo.cartPage.CartPage
 import pams.ai.demo.databinding.ActivityProductPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
@@ -90,7 +87,7 @@ class ProductPage : AppCompatActivity() {
 
     private fun registerUserButton() {
         binding?.btnUser?.setOnClickListener {
-            val intent = Intent(this, UserProfileActivity::class.java)
+            val intent = Intent(this, UserProfilePage::class.java)
             startActivity(intent)
         }
     }

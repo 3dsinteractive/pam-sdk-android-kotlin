@@ -52,6 +52,38 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
 
                         if (consentAllowModel?.code == "NOT_FOUND" || consentAllowModel?.needConsentReview == true) {
                             showConsentRequestPopup()
+                        }else{
+                            val allow = mutableMapOf<String, Boolean>()
+
+                            consentAllowModel?.trackingPermission?.analyticsCookies?.let{
+                                allow["_allow_analytics_cookies"] = it
+                            }
+
+                            consentAllowModel?.trackingPermission?.marketingCookies?.let{
+                                allow["_allow_marketing_cookies"] = it
+                            }
+
+                            consentAllowModel?.trackingPermission?.necessaryCookies?.let{
+                                allow["_allow_necessary_cookies"] = it
+                            }
+
+                            consentAllowModel?.trackingPermission?.preferencesCookies?.let{
+                                allow["_allow_preferences_cookies"] = it
+                            }
+
+                            consentAllowModel?.trackingPermission?.privacyOverview?.let{
+                                allow["_allow_privacy_overview"] = it
+                            }
+
+                            consentAllowModel?.trackingPermission?.socialMediaCookies?.let{
+                                allow["_allow_social_media_cookies"] = it
+                            }
+
+                            consentAllowModel?.trackingPermission?.termsAndConditions?.let{
+                                allow["_allow_terms_and_conditions"] = it
+                            }
+
+                            onAcceptConsent?.invoke(consentAllowModel?.consentId, allow)
                         }
                     }
                 }
