@@ -157,22 +157,24 @@ class ProductDetailPage : AppCompatActivity() {
 
     private fun registerUserButton() {
         binding?.btnUser?.setOnClickListener {
-            binding?.let { b ->
-                val user = AppData.getUser()
-                if (user == null) {
-                    if (b.btnLogin.visibility == View.INVISIBLE) {
-                        b.btnLogin.visibility = View.VISIBLE
-                    } else {
-                        b.btnLogin.visibility = View.INVISIBLE
-                    }
-                } else {
-                    if (b.btnLogout.visibility == View.INVISIBLE) {
-                        b.btnLogout.visibility = View.VISIBLE
-                    } else {
-                        b.btnLogout.visibility = View.INVISIBLE
-                    }
-                }
-            }
+            val intent = Intent(this, UserProfilePage::class.java)
+            startActivity(intent)
+//            binding?.let { b ->
+//                val user = AppData.getUser()
+//                if (user == null) {
+//                    if (b.btnLogin.visibility == View.INVISIBLE) {
+//                        b.btnLogin.visibility = View.VISIBLE
+//                    } else {
+//                        b.btnLogin.visibility = View.INVISIBLE
+//                    }
+//                } else {
+//                    if (b.btnLogout.visibility == View.INVISIBLE) {
+//                        b.btnLogout.visibility = View.VISIBLE
+//                    } else {
+//                        b.btnLogout.visibility = View.INVISIBLE
+//                    }
+//                }
+//            }
         }
     }
 

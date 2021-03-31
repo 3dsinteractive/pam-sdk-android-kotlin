@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import models.AppData
 import pams.ai.demo.LoginPage
 import pams.ai.demo.R
+import pams.ai.demo.UserProfilePage
 import pams.ai.demo.databinding.ActivityCartPageBinding
 import pams.ai.demo.notificationsPage.NotificationPage
 import webservices.MockAPI
@@ -92,20 +93,21 @@ class CartPage : AppCompatActivity() {
     private fun registerUserButton() {
         binding?.btnUser?.setOnClickListener {
 
-
-            if (AppData.getUser() == null) {
-                if (binding?.btnLogin?.visibility == View.INVISIBLE) {
-                    binding?.btnLogin?.visibility = View.VISIBLE
-                } else {
-                    binding?.btnLogin?.visibility = View.INVISIBLE
-                }
-            } else {
-                if (binding?.btnLogout?.visibility == View.INVISIBLE) {
-                    binding?.btnLogout?.visibility = View.VISIBLE
-                } else {
-                    binding?.btnLogout?.visibility = View.INVISIBLE
-                }
-            }
+            val intent = Intent(this, UserProfilePage::class.java)
+            startActivity(intent)
+//            if (AppData.getUser() == null) {
+//                if (binding?.btnLogin?.visibility == View.INVISIBLE) {
+//                    binding?.btnLogin?.visibility = View.VISIBLE
+//                } else {
+//                    binding?.btnLogin?.visibility = View.INVISIBLE
+//                }
+//            } else {
+//                if (binding?.btnLogout?.visibility == View.INVISIBLE) {
+//                    binding?.btnLogout?.visibility = View.VISIBLE
+//                } else {
+//                    binding?.btnLogout?.visibility = View.INVISIBLE
+//                }
+//            }
         }
     }
 
