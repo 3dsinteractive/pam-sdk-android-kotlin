@@ -80,7 +80,7 @@
                 android:layout_height="wrap_content">
 
                 <CheckBox
-                    android:id="@+id/checkbox_term"
+                    android:id="@+id/checkbox_consent_app"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="ยอมรับข้อตกลงการใช้งาน"
@@ -107,10 +107,10 @@
                 android:layout_height="wrap_content">
 
                 <CheckBox
-                    android:id="@+id/checkbox_contact"
+                    android:id="@+id/checkbox_consent_group"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="อนุญาตให้เราส่งโปรโมชั่น"
+                    android:text="ยอมรับข้อตกลงสำหรับบริษัทในเครือ"
                     android:textSize="16sp"
                     />
 

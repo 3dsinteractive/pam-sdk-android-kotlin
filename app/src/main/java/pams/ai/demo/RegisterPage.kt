@@ -23,7 +23,16 @@ import webservices.MockAPI
 class RegisterPage : AppCompatActivity() {
     var binding: ActivityRegisterPageBinding? = null
     private val emails = listOf("a@a.com", "b@b.com", "c@c.com")
-    private var contactConsentManager: ContactConsentManager? = null
+
+    private var appConsentManager: ContactConsentManager? = null
+    private var groupConsentManager: ContactConsentManager? = null
+
+    val APP_CONSENT_MESSAGE_ID = "1qDQgHFygpAhuX0gBxHkYAPiwBN"
+    val GROUP_CONSENT_MESSAGE_ID = "1qVSxfOdnEZQAu48Ue8xrvjV6JN"
+
+    var appConsentID:String? = null
+    var groupConsentID:String? = null
+
     var emailUseToRegister: String? = null
     var spinnerAdapter: ArrayAdapter<String>? = null
 
@@ -36,6 +45,7 @@ class RegisterPage : AppCompatActivity() {
             setContentView(it.root)
         }
 
+        setupConsent()
         registerButtonRegister()
         registerSpinner()
     }
@@ -74,88 +84,102 @@ class RegisterPage : AppCompatActivity() {
         }
     }
 
-    private fun registerButtonRegister() {
-        binding?.btnRegister?.setOnClickListener {
+    private fun setupConsent(){
+        //Disable button when consent manager is loading
+        binding?.openSettingBtn1?.isEnabled = false
+        binding?.openSettingBtn2?.isEnabled = false
+        binding?.checkboxConsentApp?.isEnabled = false
+        binding?.checkboxConsentGroup?.isEnabled = false
 
-            contactConsentManager?.applyConsent {
-                Log.d("APP", "Consent ID = ${it.consentID}")
-
-                AppData.contactConsent = it.consentID
-
-                //MockAPI.getInstance().register(email.toString())
-                Pam.track("click_register", mutableMapOf())
-                DemoAPI.register(
-                    email = (emailUseToRegister ?: ""),
-                    mobile = (binding?.inputMobile?.text?.toString() ?: ""),
-                    password = "1234",
-                    consentId = (it.consentID ?: ""))
-                { response ->
-                    login(response.data.email)
-                }
-            }
-        }
-
-        binding?.checkboxContact?.setOnCheckedChangeListener { _, isChecked ->
-            contactConsentManager?.setAcceptAllContactPermissions(isChecked)
-        }
-
-        binding?.checkboxTerm?.setOnCheckedChangeListener { _, isChecked ->
-            contactConsentManager?.setAcceptAllTermsAndPrivacy(isChecked)
-        }
-
-        contactConsentManager = ContactConsentManager(
-            consentMessageID = "1qDQgHFygpAhuX0gBxHkYAPiwBN",
+        appConsentManager = ContactConsentManager(
+            consentMessageID = APP_CONSENT_MESSAGE_ID,
             fragmentManager = supportFragmentManager,
             lifecycle
         )
 
+        groupConsentManager = ContactConsentManager(
+            consentMessageID = GROUP_CONSENT_MESSAGE_ID,
+            fragmentManager = supportFragmentManager,
+            lifecycle
+        )
+
+        appConsentManager?.setOnReadyListener {
+            CoroutineScope(Dispatchers.Main).launch {
+                binding?.checkboxConsentApp?.isEnabled = true
+                binding?.openSettingBtn1?.isEnabled = true
+            }
+        }
+
+        groupConsentManager?.setOnReadyListener {
+            CoroutineScope(Dispatchers.Main).launch {
+                binding?.checkboxConsentGroup?.isEnabled = true
+                binding?.openSettingBtn2?.isEnabled = true
+            }
+        }
+
+        appConsentManager?.setOnStatusChangedListener { allowList ->
+            val termAccept = allowList["terms_and_conditions"] ?: false
+            val privacyAccept = allowList["privacy_overview"] ?: false
+            this.binding?.checkboxConsentApp?.isChecked = termAccept && privacyAccept
+        }
+
+        groupConsentManager?.setOnStatusChangedListener { allowList ->
+            val termAccept = allowList["terms_and_conditions"] ?: false
+            val privacyAccept = allowList["privacy_overview"] ?: false
+            this.binding?.checkboxConsentGroup?.isChecked = termAccept && privacyAccept
+        }
+    }
+
+
+    private fun applayConsentApp(){
+        appConsentManager?.applyConsent {
+            AppData.contactConsent = it.consentID
+            appConsentID = it.consentID
+            applayConsentGroup()
+        }
+    }
+
+    private fun applayConsentGroup(){
+        appConsentManager?.applyConsent {
+            groupConsentID = it.consentID
+
+            var consentID = appConsentID
+            groupConsentID?.let{
+                consentID = "$consentID,$it"
+            }
+
+            DemoAPI.register(
+                email = (emailUseToRegister ?: ""),
+                mobile = (binding?.inputMobile?.text?.toString() ?: ""),
+                password = "1234",
+                consentId = (consentID ?: ""))
+            { response ->
+                login(response.data.email)
+            }
+        }
+    }
+
+    private fun registerButtonRegister() {
+        binding?.btnRegister?.setOnClickListener {
+            Pam.track("click_register", mutableMapOf())
+            applayConsentApp()
+        }
+
+        binding?.checkboxConsentApp?.setOnCheckedChangeListener { _, isChecked ->
+            appConsentManager?.setAcceptAllContactPermissions(isChecked)
+        }
+
+        binding?.checkboxConsentGroup?.setOnCheckedChangeListener { _, isChecked ->
+            groupConsentManager?.setAcceptAllTermsAndPrivacy(isChecked)
+        }
+
         binding?.openSettingBtn1?.setOnClickListener{
-            contactConsentManager?.openConsentRequestDialog()
+            appConsentManager?.openConsentRequestDialog()
         }
 
         binding?.openSettingBtn2?.setOnClickListener{
-            contactConsentManager?.openConsentRequestDialog()
+            groupConsentManager?.openConsentRequestDialog()
         }
 
-        binding?.checkboxTerm?.isEnabled = false
-        binding?.checkboxContact?.isEnabled = false
-
-        contactConsentManager?.setOnReadyListener {
-            CoroutineScope(Dispatchers.Main).launch {
-                binding?.checkboxTerm?.isEnabled = true
-                binding?.checkboxContact?.isEnabled = true
-            }
-        }
-
-
-        contactConsentManager?.setOnStatusChangedListener { allowList ->
-            Log.d("PDPA!", allowList.toString())
-            val termAccept = allowList["terms_and_conditions"] ?: false
-            val privacyAccept = allowList["privacy_overview"] ?: false
-            val emailAccept = allowList["email"] ?: false
-            val smsAccept = allowList["sms"] ?: false
-
-            this.binding?.btnRegister?.isEnabled = termAccept && privacyAccept
-
-            this.binding?.checkboxTerm?.isChecked = termAccept && privacyAccept
-
-            if( emailAccept && !smsAccept){
-                this.binding?.checkboxContact
-                this.binding?.checkboxContact?.isChecked = true
-                this.binding?.checkboxContact?.buttonTintList = ContextCompat.getColorStateList(this, R.color.checkbox_apart_bg)
-            }else if(!emailAccept && smsAccept) {
-                this.binding?.checkboxContact
-                this.binding?.checkboxContact?.isChecked = true
-                this.binding?.checkboxContact?.buttonTintList = ContextCompat.getColorStateList(this, R.color.checkbox_apart_bg)
-            }else if(emailAccept && smsAccept){
-                this.binding?.checkboxContact?.isChecked = true
-                this.binding?.checkboxContact?.buttonTintList = ContextCompat.getColorStateList(this, R.color.checkbox_full_bg)
-            }else{
-                this.binding?.checkboxContact?.buttonTintList = ContextCompat.getColorStateList(this, R.color.checkbox_apart_bg)
-                this.binding?.checkboxContact?.isChecked = false
-            }
-
-            //android:buttonTint="#F18A8A"
-        }
     }
 }
