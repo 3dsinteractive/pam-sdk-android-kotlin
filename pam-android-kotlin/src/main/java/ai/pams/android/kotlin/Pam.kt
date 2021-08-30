@@ -1,9 +1,6 @@
 package ai.pams.android.kotlin
 
-import ai.pams.android.kotlin.consent.AllowConsentResult
-import ai.pams.android.kotlin.consent.BaseConsentMessage
-import ai.pams.android.kotlin.consent.ConsentAPI
-import ai.pams.android.kotlin.consent.ConsentMessage
+import ai.pams.android.kotlin.consent.*
 import ai.pams.android.kotlin.http.Http
 import ai.pams.android.kotlin.models.notification.NotificationItem
 import ai.pams.android.kotlin.models.notification.NotificationList
@@ -52,15 +49,40 @@ class Pam {
     companion object {
         var shared = Pam()
 
-        fun loadConsentsDetails(consentMessageIds: List<String>, onLoad: (Map<String, BaseConsentMessage>)->Unit ){
+        fun loadConsentPermissions(
+            consentMessageIds: List<String>,
+            onLoad: (Map<String, UserConsentPermissions>) -> Unit
+        ) {
+            val api = ConsentAPI()
+            api.setOnPermissionLoadCallBack(onLoad)
+            api.loadConsentPermissions(consentMessageIds)
+        }
+
+        fun loadConsentPermissions(
+            consentMessageIds: String,
+            onLoad: (UserConsentPermissions) -> Unit
+        ) {
+            loadConsentPermissions(listOf(consentMessageIds)) {
+                it[consentMessageIds]?.let { userPermissions ->
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onLoad.invoke(userPermissions)
+                    }
+                }
+            }
+        }
+
+        fun loadConsentDetails(
+            consentMessageIds: List<String>,
+            onLoad: (Map<String, BaseConsentMessage>) -> Unit
+        ) {
             val api = ConsentAPI()
             api.setOnConsentLoaded(onLoad)
             api.loadConsent(consentMessageIds)
         }
 
-        fun loadConsentDetails(consentMessageIds: String, onLoad: (BaseConsentMessage)->Unit){
-            loadConsentsDetails(listOf(consentMessageIds)){
-                it[consentMessageIds]?.let{ msg->
+        fun loadConsentDetails(consentMessageIds: String, onLoad: (BaseConsentMessage) -> Unit) {
+            loadConsentDetails(listOf(consentMessageIds)) {
+                it[consentMessageIds]?.let { msg ->
                     CoroutineScope(Dispatchers.Main).launch {
                         onLoad.invoke(msg)
                     }
@@ -68,30 +90,40 @@ class Pam {
             }
         }
 
-        fun submitConsents(consents: List<BaseConsentMessage>, onSubmit: (result: Map<String, AllowConsentResult>, consentIDs: String)->Unit){
+        fun submitConsent(
+            consents: List<BaseConsentMessage>,
+            onSubmit: (result: Map<String, AllowConsentResult>, consentIDs: String) -> Unit
+        ) {
             val api = ConsentAPI()
-            api.setOnConsentSubmit{
+            api.setOnConsentSubmit {
                 val ids = mutableListOf<String>()
-                it.forEach{ (_, v) ->
-                    v.consentID?.let{ id->
+                it.forEach { (_, v) ->
+                    v.consentID?.let { id ->
                         ids.add(id)
                     }
                 }
-                onSubmit.invoke(it, ids.joinToString(","))
+                CoroutineScope(Dispatchers.Main).launch {
+                    onSubmit.invoke(it, ids.joinToString(","))
+                }
             }
             api.submitConsents(consents)
         }
 
-        fun submitConsent(consent: BaseConsentMessage, onSubmit: (result: AllowConsentResult,consentID:String)->Unit){
-            submitConsents(listOf(consent)){ result, consentIDs->
+        fun submitConsent(
+            consent: BaseConsentMessage,
+            onSubmit: (result: AllowConsentResult, consentID: String) -> Unit
+        ) {
+            submitConsent(listOf(consent)) { result, consentIDs ->
                 val consentMessage = consent as ConsentMessage
-                result[consentMessage.id]?.let{ result->
-                    onSubmit.invoke(result, consentIDs)
+                result[consentMessage.id]?.let { result ->
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onSubmit.invoke(result, consentIDs)
+                    }
                 }
             }
         }
 
-        fun cleanEverything(){
+        fun cleanEverything() {
             shared.removeValue(SaveKey.PushKey)
             shared.removeValue(SaveKey.LoginContactID)
             shared.removeValue(SaveKey.CustomerID)
@@ -159,7 +191,8 @@ class Pam {
             shared.userLogin(customerID, callBack)
 
         fun askNotificationPermission() = shared.askNotificationPermission()
-        fun fetchNotificationHistory(callBack: (List<NotificationItem>?)->Unit ) = shared.fetchNotificationHistory(callBack)
+        fun fetchNotificationHistory(callBack: (List<NotificationItem>?) -> Unit) =
+            shared.fetchNotificationHistory(callBack)
     }
 
     enum class SaveKey(val keyName: String) {
@@ -200,8 +233,8 @@ class Pam {
     private var sharedPreferences: SharedPreferences? = null
 
     init {
-        queueTrackerManager.callback = { eventName, payload, deleteLoginContactAfterPost ->
-            postTracker(eventName, payload, deleteLoginContactAfterPost)
+        queueTrackerManager.onNext = { eventName, payload, trackerCallback ->
+            postTracker(eventName, payload, trackerCallback)
         }
     }
 
@@ -352,8 +385,8 @@ class Pam {
         return this.sessionID ?: ""
     }
 
-    fun fetchNotificationHistory(callBack: (List<NotificationItem>?)->Unit ){
-        if(custID == null && getContactID() == null) {
+    fun fetchNotificationHistory(callBack: (List<NotificationItem>?) -> Unit) {
+        if (custID == null && getContactID() == null) {
             callBack(null)
         }
 
@@ -363,18 +396,18 @@ class Pam {
             "_database" to (getDatabaseAlias() ?: "")
         )
 
-        custID?.let{
+        custID?.let {
             query["customer"] = it
         }
 
-        getContactID()?.let{
+        getContactID()?.let {
             query["_contact_id"] = it
         }
 
         Http.getInstance().get(
-            url=url,
+            url = url,
             queryString = query
-        ){ result, _ ->
+        ) { result, _ ->
             val model = Gson().fromJson(result, NotificationList::class.java)
             CoroutineScope(Dispatchers.Main).launch {
                 callBack.invoke(model.items)
@@ -402,9 +435,9 @@ class Pam {
             this.loginContactID = null
             this.removeValue(SaveKey.CustomerID)
             this.removeValue(SaveKey.LoginContactID)
-
             callBack?.invoke()
         }
+
     }
 
     fun setDeviceToken(deviceToken: String) {
@@ -438,7 +471,11 @@ class Pam {
         return custID != null
     }
 
-    private fun buildPayload(eventName: String, payload: Map<String, Any>?=null, trackingConsentMessageID:String? = null): Map<String, Any> {
+    private fun buildPayload(
+        eventName: String,
+        payload: Map<String, Any>? = null,
+        trackingConsentMessageID: String? = null
+    ): Map<String, Any> {
 
         if (platformVersionCache == null) {
             val pInfo = app?.packageManager?.getPackageInfo(app?.packageName ?: "", 0)
@@ -461,7 +498,7 @@ class Pam {
             "_session_id" to getSessionID()
         )
 
-        trackingConsentMessageID?.let{
+        trackingConsentMessageID?.let {
             formField["_consent_message_id"] = it
         }
 

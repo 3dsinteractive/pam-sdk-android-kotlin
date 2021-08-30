@@ -102,6 +102,57 @@ data class ConsentMessage(
     val defaultLanguage: String,
     val permission: List<ConsentPermission>
 ): BaseConsentMessage(){
+
+    companion object{
+
+        private fun getText(json:JSONObject?): Text?{
+            if(json == null ) return null
+            return Text(
+                en = json.optString("en"),
+                th = json.optString("th"),
+            )
+        }
+
+        fun parse(json: JSONObject): ConsentMessage {
+            val id = json.optString("consent_message_id")
+            val name = json.optString("name")
+            val description = json.optString("description")
+            val style = StyleConfiguration.parse(json.optJSONObject("style_configuration"))
+            val setting = json.optJSONObject("setting") ?: JSONObject()
+            val version = setting.optInt("version")
+            val revision = setting.optInt("version")
+            val displayText = getText(setting.optJSONObject("display_text"))
+            val acceptButtonText = getText(setting.optJSONObject("accept_button_text"))
+            val consentDetailTitle = getText(setting.optJSONObject("consent_detail_title"))
+
+            val availableLanguages = mutableListOf<String>()
+            setting.optJSONArray("available_languages")?.let {
+                for (i in 0 until it.length()) {
+                    availableLanguages.add(it.getString(i))
+                }
+            }
+
+            val defaultLanguage = setting.optString("default_language")
+            val permissions = ConsentPermission.parse(setting)
+
+            return ConsentMessage(
+                id = id,
+                type = ConsentType.Tracking,
+                name = name,
+                description = description,
+                style = style,
+                version = version,
+                revision = revision,
+                displayText = displayText,
+                acceptButtonText = acceptButtonText,
+                consentDetailTitle = consentDetailTitle,
+                availableLanguages = availableLanguages.toList(),
+                defaultLanguage = defaultLanguage,
+                permission = permissions
+            )
+        }
+    }
+
     fun acceptAll(){
         permission.forEach{
             it.accept = true
@@ -157,7 +208,7 @@ data class ConsentPermission(
             )
         }
 
-        private fun parsePermission(json:JSONObject?, key: String, name: String, require: Boolean ): ConsentPermission?{
+        fun parsePermission(json:JSONObject?, key: String, name: String, require: Boolean ): ConsentPermission?{
             json?.optJSONObject(key)?.let{ item->
                 return ConsentPermission(
                     name = name,
@@ -174,14 +225,6 @@ data class ConsentPermission(
 
         fun parse(json: JSONObject?): List<ConsentPermission>{
             val list = mutableListOf<ConsentPermission>()
-
-            parsePermission(
-                json,
-                "terms_and_conditions",
-                "Terms and Conditions",
-                true)?.let { perm ->
-                list.add(perm)
-            }
 
             parsePermission(
                 json,

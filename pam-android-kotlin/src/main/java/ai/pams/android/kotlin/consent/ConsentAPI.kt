@@ -2,10 +2,15 @@ package ai.pams.android.kotlin.consent
 
 import ai.pams.android.kotlin.Pam
 import ai.pams.android.kotlin.http.Http
+import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 typealias OnLoadConsentMessage = (messages: Map<String, BaseConsentMessage>)->Unit
 typealias OnSubmitConsent = (messages: Map<String, AllowConsentResult>)->Unit
+typealias OnLoadPermission = (messages: Map<String, UserConsentPermissions>)->Unit
 
 class ConsentAPI {
     private var consentMessagesIdQueue: List<String>? = null
@@ -15,10 +20,17 @@ class ConsentAPI {
     private var resultMessages: MutableMap<String, BaseConsentMessage>? =null
     private var _onConsentLoadCallBack: OnLoadConsentMessage? = null
 
+
     private var submitConsentQueue: List<BaseConsentMessage>? = null
     private var resultSubmit: MutableMap<String, AllowConsentResult>? = null
     private var _onConsentSubmitCallBack: OnSubmitConsent? = null
 
+    private var resultUserConsentLoad: MutableMap<String, UserConsentPermissions>? = null
+    private var _onPermissionLoadCallBack: OnLoadPermission? = null
+
+    fun setOnPermissionLoadCallBack(callBack: OnLoadPermission){
+        _onPermissionLoadCallBack = callBack
+    }
 
     fun setOnConsentLoaded(callBack: OnLoadConsentMessage){
         _onConsentLoadCallBack = callBack
@@ -28,12 +40,21 @@ class ConsentAPI {
         _onConsentSubmitCallBack = callBack
     }
 
-    fun loadConsent(consentMessageID: List<String>) {
+    fun loadConsent(consentMessageIDs: List<String>) {
         if (!isLoading) {
-            consentMessagesIdQueue = consentMessageID
+            consentMessagesIdQueue = consentMessageIDs
             index = 0
             resultMessages = mutableMapOf()
-            startLoad()
+            startLoadConsentMessage()
+        }
+    }
+
+    fun loadConsentPermissions(consentMessageIDs: List<String>){
+        if (!isLoading) {
+            consentMessagesIdQueue = consentMessageIDs
+            index = 0
+            resultUserConsentLoad = mutableMapOf()
+            startLoadPermissions()
         }
     }
 
@@ -49,7 +70,9 @@ class ConsentAPI {
     private fun startSubmit(){
         if(index == (submitConsentQueue?.size ?: 0) ){
             resultSubmit?.toMap()?.let{
-                _onConsentSubmitCallBack?.invoke(it)
+                CoroutineScope(Dispatchers.Main).launch {
+                    _onConsentSubmitCallBack?.invoke(it)
+                }
             }
             isLoading = false
             return
@@ -90,10 +113,12 @@ class ConsentAPI {
         }
     }
 
-    private fun startLoad(){
+    private fun startLoadPermissions(){
         if(index == (consentMessagesIdQueue?.size ?: 0) ){
-            resultMessages?.toMap()?.let{
-                _onConsentLoadCallBack?.invoke(it)
+            resultUserConsentLoad?.toMap()?.let{
+                CoroutineScope(Dispatchers.Main).launch {
+                    _onPermissionLoadCallBack?.invoke(it)
+                }
             }
             isLoading = false
             return
@@ -103,12 +128,47 @@ class ConsentAPI {
 
         index++
         if(consentMessageID == ""){
-            startLoad()
+            startLoadPermissions()
             return
         }
 
         isLoading = true
-        consentMessagesIdQueue
+        val pamServerURL = Pam.shared.options?.pamServer ?: ""
+        val contactID = Pam.shared.getContactID() ?: ""
+
+        Http.getInstance()
+            .get("${pamServerURL ?: ""}/contacts/$contactID/consents/$consentMessageID") { result, error ->
+                if (error == null) {
+                    if(result != null) {
+                        val json = JSONObject(result)
+                        val userConsent = UserConsentPermissions.parse(json)
+                        resultUserConsentLoad?.put(consentMessageID, userConsent)
+                    }
+                }
+                startLoadPermissions()
+            }
+    }
+
+    private fun startLoadConsentMessage(){
+        if(index == (consentMessagesIdQueue?.size ?: 0) ){
+            resultMessages?.toMap()?.let{
+                CoroutineScope(Dispatchers.Main).launch {
+                    _onConsentLoadCallBack?.invoke(it)
+                }
+            }
+            isLoading = false
+            return
+        }
+
+        val consentMessageID = consentMessagesIdQueue?.get(index) ?: ""
+
+        index++
+        if(consentMessageID == ""){
+            startLoadConsentMessage()
+            return
+        }
+
+        isLoading = true
         val pamServerURL = Pam.shared.options?.pamServer ?: ""
 
         Http.getInstance()
@@ -116,82 +176,25 @@ class ConsentAPI {
                 if (error == null) {
                     if(result != null) {
                         val json = JSONObject(result)
-                        when(json.optString("consent_message_type")){
-                            "tracking_type"->parseConsentMessage(json, ConsentType.Tracking)
-                            "contacting_type"->parseConsentMessage(json, ConsentType.Contacting)
-                            else->parseErrorConsent(consentMessageID, json)
-                        }
+                        val consentMessage = ConsentMessage.parse(json)
+                        resultMessages?.put(consentMessageID, consentMessage)
                     }else{
-                        val json = JSONObject("{\"code\": \"SERVER_EMPTY_RESPONSE\",\"message\":\"Empty Response From Server.\"}")
-                        parseErrorConsent(consentMessageID, json)
+                        val msg = ConsentMessageError(
+                            errorMessage = "Empty Response From Server.",
+                            errorCode = "SERVER_EMPTY_RESPONSE"
+                        )
+                        resultMessages?.put(consentMessageID, msg)
                     }
                 }else{
-                    val msg = error.localizedMessage
-                    val json = JSONObject("{\"code\": \"NETWORK_REQUEST_ERROR\",\"message\":\"${msg}\"}")
-                    parseErrorConsent(consentMessageID, json)
+                    val msg = ConsentMessageError(
+                        errorMessage = error.localizedMessage,
+                        errorCode = "NETWORK_REQUEST_ERROR"
+                    )
+                    resultMessages?.put(consentMessageID, msg)
                 }
 
-                startLoad()
+                startLoadConsentMessage()
             }
-    }
-
-    private fun parseErrorConsent(id:String, json:JSONObject){
-        val errorMessage = json.optString("message")
-        val errorCode = json.optString("code")
-        val msg = ConsentMessageError(
-            errorMessage = errorMessage,
-            errorCode = errorCode
-        )
-        resultMessages?.put(id, msg)
-    }
-
-    private fun getText(json:JSONObject?): Text?{
-        if(json == null ) return null
-        return Text(
-            en = json.optString("en"),
-            th = json.optString("th"),
-        )
-    }
-
-    private fun parseConsentMessage(json:JSONObject, type: ConsentType){
-        val id = json.optString("consent_message_id")
-        val name = json.optString("name")
-        val description = json.optString("description")
-        val style = StyleConfiguration.parse(json.optJSONObject("style_configuration"))
-        val setting = json.optJSONObject("setting") ?: JSONObject()
-        val version = setting.optInt("version")
-        val revision = setting.optInt("version")
-        val displayText = getText(setting.optJSONObject("display_text"))
-        val acceptButtonText = getText(setting.optJSONObject("accept_button_text"))
-        val consentDetailTitle = getText(setting.optJSONObject("consent_detail_title"))
-
-        val availableLanguages = mutableListOf<String>()
-        setting.optJSONArray("available_languages")?.let{
-            for(i in 0 until it.length()){
-                availableLanguages.add(it.getString(i))
-            }
-        }
-
-        val defaultLanguage = setting.optString("default_language")
-        val permissions = ConsentPermission.parse(setting)
-
-        val msg = ConsentMessage(
-            id = id,
-            type = ConsentType.Tracking,
-            name = name,
-            description = description,
-            style = style,
-            version = version,
-            revision = revision,
-            displayText = displayText,
-            acceptButtonText = acceptButtonText,
-            consentDetailTitle = consentDetailTitle,
-            availableLanguages = availableLanguages.toList(),
-            defaultLanguage = defaultLanguage,
-            permission = permissions
-        )
-
-        resultMessages?.put(id, msg)
     }
 
 }

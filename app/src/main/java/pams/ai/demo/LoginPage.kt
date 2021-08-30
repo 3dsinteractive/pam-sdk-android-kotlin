@@ -43,16 +43,20 @@ class LoginPage : AppCompatActivity() {
         registerButtonSkip()
         registerSpinner()
 
-        Pam.loadConsentDetails("1qDQOyMeBv64LYnXi6dJOcZp2YQ") {
-            when (it) {
-                is ConsentMessage -> {
-                    trackingConsentMessage = it
-                    askTrackingPermission()
-                }
-                is ConsentMessageError -> {
-                    Log.e("CONSENT", "Error Code: ${it.errorCode}, Message: ${it.errorMessage}")
-                }
-            }
+//        Pam.loadConsentDetails("1qDQOyMeBv64LYnXi6dJOcZp2YQ") {
+//            when (it) {
+//                is ConsentMessage -> {
+//                    trackingConsentMessage = it
+//                    askTrackingPermission()
+//                }
+//                is ConsentMessageError -> {
+//                    Log.e("CONSENT", "Error Code: ${it.errorCode}, Message: ${it.errorMessage}")
+//                }
+//            }
+//        }
+
+        Pam.loadConsentPermissions("1qDQOyMeBv64LYnXi6dJOcZp2YQ"){
+            Log.d("PERMS", it.toString())
         }
 
     }
