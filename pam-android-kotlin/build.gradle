@@ -62,6 +62,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-analytics'
 
+    implementation 'com.github.mrmike:ok2curl:0.7.0'
+
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.4.31"
     compileOnly 'com.google.android.wearable:wearable:2.8.1'
 }

@@ -15,7 +15,7 @@ data class TrackingPermission(
 
 data class ContactPermissions(val allow_something: Boolean? = null)
 
-data class ConsentModel(
+data class TrackingConsentUserPermissions(
     @SerializedName("consent_id") val consentId: String? = null,
     @SerializedName("consent_message_id") val consentMessageId: String? = null,
     @SerializedName("version") val version: Int? = null,

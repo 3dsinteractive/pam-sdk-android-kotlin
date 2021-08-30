@@ -51,10 +51,10 @@ class ProductPage : AppCompatActivity() {
             pageURL = "digits3://products-list",
             payload = null).track()
 
-        trackingConsentManager = TrackingConsentManager(supportFragmentManager, lifecycle)
-        trackingConsentManager?.onAcceptConsent = {consentID , _ ->
-            AppData.trackingConsent = consentID
-        }
+//        trackingConsentManager = TrackingConsentManager(supportFragmentManager, lifecycle)
+//        trackingConsentManager?.onAcceptConsent = {consentID , _ ->
+//            AppData.trackingConsent = consentID
+//        }
     }
 
     private fun registerProductView() {

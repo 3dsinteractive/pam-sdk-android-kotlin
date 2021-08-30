@@ -1,6 +1,6 @@
 package ai.pams.android.kotlin.models.consent.tracking.message
 
-data class TrackingConsentModel(
+data class TrackingConsentMessageConfigurations(
     val code: String? = null,
     val message: String,
     val consent_message_id: String? = null,

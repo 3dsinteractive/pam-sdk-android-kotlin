@@ -1,35 +1,78 @@
 package ai.pams.android.kotlin
 
 import ai.pams.android.kotlin.http.Http
-import ai.pams.android.kotlin.models.consent.tracking.allow.ConsentModel
-import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentModel
+import ai.pams.android.kotlin.models.consent.tracking.allow.TrackingConsentUserPermissions
+import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentMessageConfigurations
 import ai.pams.android.kotlin.dialogs.TrackingConsentRequestDialog
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
 import com.google.gson.Gson
 
-class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Lifecycle) :
-    LifecycleObserver {
+typealias OnUserConsentChangedListener = (consentID: String?, allow: Map<String,Boolean>?)->Unit
+typealias OnConsentLoadedListener = (trackingConsentMessageConfigurations:TrackingConsentMessageConfigurations, trackingConsent: TrackingConsent, requireUserReview: Boolean)->Unit
 
-    var consentMessageID: String? = null
-    var pamServerURL: String? = null
-    var consentMessage: TrackingConsentModel? = null
-    var consentAllowModel: ConsentModel? = null
+data class TrackingConsent(
+    val consentID: String? = null
+    ){
 
-    var onAcceptConsent: ((String?, Map<String,Boolean>?)->Unit)? = null
-    init {
-        lifeCycle.addObserver(this)
+    companion object{
+        fun fromMap(consentID: String, map: Map<String, Boolean>): TrackingConsent{
+            return TrackingConsent(consentID).apply {
+                analyticsCookie = map["_allow_analytics_cookies"] ?: false
+                marketingCookies = map["_allow_marketing_cookies"] ?: false
+                necessaryCookies = map["_allow_necessary_cookies"] ?: false
+                preferencesCookies = map["_allow_preferences_cookies"] ?: false
+                privacyOverview = map["_allow_privacy_overview"] ?: false
+                socialMediaCookies = map["_allow_social_media_cookies"] ?: false
+                termsAndConditions = map["_allow_terms_and_conditions"] ?: false
+            }
+        }
     }
 
-    private fun loadConsentMessage() {
+    var analyticsCookie = false
+    var marketingCookies = false
+    var necessaryCookies = false
+    var preferencesCookies = false
+    var privacyOverview = false
+    var socialMediaCookies = false
+    var termsAndConditions = false
+
+    fun toMap(): Map<String, Boolean>{
+        return mapOf(
+            "_allow_analytics_cookies" to analyticsCookie,
+            "_allow_marketing_cookies" to marketingCookies,
+            "_allow_necessary_cookies" to necessaryCookies,
+            "_allow_preferences_cookies" to preferencesCookies,
+            "_allow_privacy_overview" to privacyOverview,
+            "_allow_social_media_cookies" to socialMediaCookies,
+            "_allow_terms_and_conditions" to termsAndConditions
+        )
+    }
+}
+
+class TrackingConsentManager{
+
+    private var consentMessageID: String? = null
+    private var pamServerURL: String? = null
+    private var trackingConsentMessageConfigurations: TrackingConsentMessageConfigurations? = null
+    private var trackingConsentUserPermissions: TrackingConsentUserPermissions? = null
+    private var _onAcceptConsent: OnUserConsentChangedListener? = null
+    private var _onLoad: OnConsentLoadedListener? = null
+
+    fun setOnUserConsentChangedListener(listener: OnUserConsentChangedListener){
+        _onAcceptConsent = listener
+    }
+
+    fun setOnConsentLoadedListener(listener: OnConsentLoadedListener){
+        _onLoad = listener
+    }
+
+    fun load() {
         consentMessageID = Pam.shared.options?.trackingConsentMessageID
         pamServerURL = Pam.shared.options?.pamServer
         Http.getInstance()
             .get("${pamServerURL ?: ""}/consent-message/$consentMessageID") { result, error ->
                 if (error == null) {
-                    consentMessage = Gson().fromJson(result, TrackingConsentModel::class.java)
+                    trackingConsentMessageConfigurations = Gson().fromJson(result, TrackingConsentMessageConfigurations::class.java)
                     checkConsentPermission()
                 }
             }
@@ -39,51 +82,36 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
         val contact = Pam.shared.getContactID()
 
         if (contact == null) {
-            showConsentRequestPopup()
+            trackingConsentMessageConfigurations?.let{
+               // _onLoad?.invoke(it, true)
+            }
         } else {
             Http.getInstance()
                 .get("${pamServerURL ?: ""}/contacts/$contact/consents/$consentMessageID") { result, error ->
                     if (error == null) {
-                        consentAllowModel =
-                            Gson().fromJson(result, ConsentModel::class.java)
+                        trackingConsentUserPermissions =
+                            Gson().fromJson(result, TrackingConsentUserPermissions::class.java)
 
                         //Allow Tracking if preferencesCookies is allowed
-                        Pam.shared.allowTracking = consentAllowModel?.trackingPermission?.preferencesCookies == true
+                        Pam.shared.allowTracking = trackingConsentUserPermissions?.trackingPermission?.preferencesCookies == true
 
-                        if (consentAllowModel?.code == "NOT_FOUND" || consentAllowModel?.needConsentReview == true) {
-                            showConsentRequestPopup()
+                        if (trackingConsentUserPermissions?.code == "NOT_FOUND" || trackingConsentUserPermissions?.needConsentReview == true) {
+                            trackingConsentMessageConfigurations?.let{
+                                //_onLoad?.invoke(it, true)
+                            }
                         }else{
-                            val allow = mutableMapOf<String, Boolean>()
+                            val trackingConsent = TrackingConsent(trackingConsentUserPermissions?.consentId)
+                            trackingConsent.analyticsCookie = trackingConsentUserPermissions?.trackingPermission?.analyticsCookies ?: false
+                            trackingConsent.marketingCookies = trackingConsentUserPermissions?.trackingPermission?.marketingCookies ?: false
+                            trackingConsent.necessaryCookies = trackingConsentUserPermissions?.trackingPermission?.necessaryCookies ?: false
+                            trackingConsent.preferencesCookies = trackingConsentUserPermissions?.trackingPermission?.preferencesCookies ?: false
+                            trackingConsent.privacyOverview = trackingConsentUserPermissions?.trackingPermission?.privacyOverview ?: false
+                            trackingConsent.socialMediaCookies = trackingConsentUserPermissions?.trackingPermission?.socialMediaCookies ?: false
+                            trackingConsent.termsAndConditions = trackingConsentUserPermissions?.trackingPermission?.termsAndConditions ?: false
 
-                            consentAllowModel?.trackingPermission?.analyticsCookies?.let{
-                                allow["_allow_analytics_cookies"] = it
+                            trackingConsentMessageConfigurations?.let{
+                               // _onLoad?.invoke(it, false)
                             }
-
-                            consentAllowModel?.trackingPermission?.marketingCookies?.let{
-                                allow["_allow_marketing_cookies"] = it
-                            }
-
-                            consentAllowModel?.trackingPermission?.necessaryCookies?.let{
-                                allow["_allow_necessary_cookies"] = it
-                            }
-
-                            consentAllowModel?.trackingPermission?.preferencesCookies?.let{
-                                allow["_allow_preferences_cookies"] = it
-                            }
-
-                            consentAllowModel?.trackingPermission?.privacyOverview?.let{
-                                allow["_allow_privacy_overview"] = it
-                            }
-
-                            consentAllowModel?.trackingPermission?.socialMediaCookies?.let{
-                                allow["_allow_social_media_cookies"] = it
-                            }
-
-                            consentAllowModel?.trackingPermission?.termsAndConditions?.let{
-                                allow["_allow_terms_and_conditions"] = it
-                            }
-
-                            onAcceptConsent?.invoke(consentAllowModel?.consentId, allow)
                         }
                     }
                 }
@@ -95,7 +123,7 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
             "_consent_message_id" to (consentMessageID ?: ""),
         )
 
-        consentMessage?.setting?.version?.let{
+        trackingConsentMessageConfigurations?.setting?.version?.let{
             payload["_version"] = it
         }
 
@@ -133,22 +161,17 @@ class TrackingConsentManager(val fragmentManager: FragmentManager, lifeCycle: Li
         }
 
         Pam.track("allow_consent", payload){
-            onAcceptConsent?.invoke(it.consentID, consentAllow)
+            _onAcceptConsent?.invoke(it.consentID, consentAllow)
         }
     }
 
-    private fun showConsentRequestPopup() {
-        val dialog = TrackingConsentRequestDialog(consentMessage, consentAllowModel)
+    private fun showConsentRequestPopup(fragmentManager: FragmentManager) {
+        val dialog = TrackingConsentRequestDialog(trackingConsentMessageConfigurations, trackingConsentUserPermissions)
         dialog.isCancelable = false
         dialog.show(fragmentManager, "tracking_consent_request")
         dialog.onAccept = {
             saveConsent(it)
         }
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    fun resume() {
-        loadConsentMessage()
     }
 
 }
