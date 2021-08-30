@@ -23,11 +23,11 @@ data class StyleConfiguration(
     companion object{
         fun parse(json: JSONObject?): StyleConfiguration?{
             if(json == null) return null
-            val backgroundColor = json.optString("bar_background_color", "#0")
-            val textColor = json.optString("bar_text_color", "#0")
+            val backgroundColor = json.optString("bar_background_color", "#000000")
+            val textColor = json.optString("bar_text_color", "#000000")
             val barBackgroundOpacity = json.optDouble("bar_background_opacity_percentage", 100.0)/100.0
             val buttonBackgroundColor = json.optString("bar_text_color", "#FFFFFF")
-            val buttonTextColor = json.optString("button_text_color", "#0")
+            val buttonTextColor = json.optString("button_text_color", "#000000")
 
             var dialogStyle: ConsentDialogStyleConfiguration? = null
             json.optJSONObject("consent_detail")?.let{
@@ -35,8 +35,8 @@ data class StyleConfiguration(
                 val icon = it.optString("popup_main_icon")
                 val primaryColor = it.optString("primary_color", "#FFFFFF")
                 val secondaryColor = it.optString("secondary_color", "#5C5C5C")
-                val buttonTextColor = it.optString("button_text_color", "#0")
-                val textColor = it.optString("text_color", "#0")
+                val buttonTextColor = it.optString("button_text_color", "#000000")
+                val textColor = it.optString("text_color", "#000000")
 
                 dialogStyle = ConsentDialogStyleConfiguration(
                     icon = icon,
@@ -242,6 +242,14 @@ data class ConsentPermission(
             parsePermission(
                 json,
                 "email",
+                "Email",
+                false)?.let { perm ->
+                list.add(perm)
+            }
+
+            parsePermission(
+                json,
+                "sms",
                 "SMS",
                 false)?.let { perm ->
                 list.add(perm)
