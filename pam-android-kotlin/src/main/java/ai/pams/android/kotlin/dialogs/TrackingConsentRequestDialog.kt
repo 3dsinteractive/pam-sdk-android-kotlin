@@ -2,9 +2,9 @@ package ai.pams.android.kotlin.dialogs
 
 import ai.pams.android.kotlin.R
 import ai.pams.android.kotlin.databinding.ConsentFragmentBinding
-import ai.pams.android.kotlin.models.consent.tracking.allow.ConsentModel
+import ai.pams.android.kotlin.models.consent.tracking.allow.TrackingConsentUserPermissions
 import ai.pams.android.kotlin.models.consent.tracking.message.ConsentOption
-import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentModel
+import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentMessageConfigurations
 import ai.pams.android.kotlin.dialogs.adapters.ConsentOptionListAdapter
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -20,8 +20,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 
 
 class TrackingConsentRequestDialog(
-    val consentMessage: TrackingConsentModel?,
-    private val consentAllowModel: ConsentModel?
+    val consentMessage: TrackingConsentMessageConfigurations?,
+    private val trackingConsentAllowUserPermissions: TrackingConsentUserPermissions?
 ) : DialogFragment() {
 
     private var _binding: ConsentFragmentBinding? = null
@@ -131,7 +131,7 @@ class TrackingConsentRequestDialog(
 
         consentMessage?.setting?.terms_and_conditions?.let{
             if(it.is_enabled == true) {
-                if(consentAllowModel == null){
+                if(trackingConsentAllowUserPermissions == null){
                     it.is_allow = true
                 }
                 it.title = "Term & Conditions"
@@ -142,7 +142,7 @@ class TrackingConsentRequestDialog(
 
         consentMessage?.setting?.privacy_overview?.let{
             if(it.is_enabled == true) {
-                if(consentAllowModel == null){
+                if(trackingConsentAllowUserPermissions == null){
                     it.is_allow = true
                 }
                 it.title = "Privacy OverView"
@@ -153,7 +153,7 @@ class TrackingConsentRequestDialog(
 
         consentMessage?.setting?.necessary_cookies?.let{
             if(it.is_enabled == true) {
-                if(consentAllowModel == null){
+                if(trackingConsentAllowUserPermissions == null){
                     it.is_allow = true
                 }
                 it.title = "Necessary Cookies"
@@ -164,7 +164,7 @@ class TrackingConsentRequestDialog(
 
         consentMessage?.setting?.preferences_cookies?.let{
             if(it.is_enabled == true) {
-                if(consentAllowModel == null){
+                if(trackingConsentAllowUserPermissions == null){
                     it.is_allow = true
                 }
                 it.title = "Preferences Cookies"
@@ -175,7 +175,7 @@ class TrackingConsentRequestDialog(
 
         consentMessage?.setting?.analytics_cookies?.let{
             if(it.is_enabled == true) {
-                if(consentAllowModel == null){
+                if(trackingConsentAllowUserPermissions == null){
                     it.is_allow = true
                 }
                 it.title = "Analytics Cookies"
@@ -186,7 +186,7 @@ class TrackingConsentRequestDialog(
 
         consentMessage?.setting?.marketing_cookies?.let{
             if(it.is_enabled == true) {
-                if(consentAllowModel == null){
+                if(trackingConsentAllowUserPermissions == null){
                     it.is_allow = true
                 }
                 it.title = "Marketing Cookies"
@@ -197,7 +197,7 @@ class TrackingConsentRequestDialog(
 
         consentMessage?.setting?.social_media_cookies?.let{
             if(it.is_enabled == true) {
-                if(consentAllowModel == null){
+                if(trackingConsentAllowUserPermissions == null){
                     it.is_allow = true
                 }
                 it.title = "Social Media Cookies"
@@ -208,7 +208,7 @@ class TrackingConsentRequestDialog(
 
         consentMessage?.setting?.sms?.let{
             if(it.is_enabled == true){
-                if(consentAllowModel == null){
+                if(trackingConsentAllowUserPermissions == null){
                     it.is_allow = true
                 }
                 it.require = false
@@ -218,7 +218,7 @@ class TrackingConsentRequestDialog(
 
         consentMessage?.setting?.line?.let{
             if(it.is_enabled == true) {
-                if(consentAllowModel == null){
+                if(trackingConsentAllowUserPermissions == null){
                     it.is_allow = true
                 }
                 it.require = false
@@ -228,7 +228,7 @@ class TrackingConsentRequestDialog(
 
         consentMessage?.setting?.facebook_messenger?.let{
             if(it.is_enabled == true) {
-                if(consentAllowModel == null){
+                if(trackingConsentAllowUserPermissions == null){
                     it.is_allow = true
                 }
                 it.require = false

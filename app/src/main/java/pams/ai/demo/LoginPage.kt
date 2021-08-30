@@ -1,7 +1,10 @@
 package pams.ai.demo
 
-import ai.pams.android.kotlin.TrackingConsentManager
 import ai.pams.android.kotlin.Pam
+import ai.pams.android.kotlin.consent.ConsentMessage
+import ai.pams.android.kotlin.consent.ConsentMessageError
+import ai.pams.android.kotlin.consent.LocaleText
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,14 +12,13 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.Gson
 import models.AppData
 import models.UserModel
 import pams.ai.demo.databinding.ActivityLoginPageBinding
 import pams.ai.demo.productsPage.ProductPage
 import webservices.DemoAPI
-import webservices.MockAPI
 
 
 class LoginPage : AppCompatActivity() {
@@ -26,7 +28,7 @@ class LoginPage : AppCompatActivity() {
     var emailUseToLogin: String? = null
     var spinnerAdapter: ArrayAdapter<String>? = null
 
-    var trackingConsentManager:TrackingConsentManager? = null
+    var trackingConsentMessage: ConsentMessage? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,12 +43,60 @@ class LoginPage : AppCompatActivity() {
         registerButtonSkip()
         registerSpinner()
 
-        trackingConsentManager = TrackingConsentManager(supportFragmentManager, lifecycle)
-
-        trackingConsentManager?.onAcceptConsent = {consentID, _ ->
-            AppData.trackingConsent = consentID
+        Pam.loadConsentDetails("1qDQOyMeBv64LYnXi6dJOcZp2YQ") {
+            when (it) {
+                is ConsentMessage -> {
+                    trackingConsentMessage = it
+                    askTrackingPermission()
+                }
+                is ConsentMessageError -> {
+                    Log.e("CONSENT", "Error Code: ${it.errorCode}, Message: ${it.errorMessage}")
+                }
+            }
         }
+
     }
+
+    fun askTrackingPermission() {
+        Log.d("CONSENT", trackingConsentMessage?.name ?: "")
+        trackingConsentMessage?.permission?.forEach {
+            Log.d("CONSENT", it.name)
+            Log.d("CONSENT", it.shortDescription?.get(LocaleText.Th) ?: "")
+            Log.d("CONSENT", "Require = ${it.require}")
+            Log.d("CONSENT", "Allow = ${it.allow}")
+            Log.d("CONSENT", "---------------------")
+        }
+
+        val builder = AlertDialog.Builder(this)
+        builder.setCancelable(false)
+        builder.setTitle(trackingConsentMessage?.name)
+        builder.setMessage(trackingConsentMessage?.description)
+        builder.setPositiveButton("Accept All") { _, _ ->
+            trackingConsentMessage?.acceptAll()
+            trackingConsentMessage?.let {
+                val validationResult = it.validate()
+                if (validationResult.isValid) {
+                    Pam.submitConsent(it) { result, id ->
+
+                    }
+                }
+            }
+        }
+        builder.setNegativeButton("Deny All") { _, _ ->
+            trackingConsentMessage?.denyAll()
+            trackingConsentMessage?.let {
+                val validationResult = it.validate()
+                if (validationResult.isValid) {
+                    Pam.submitConsent(it) { result, id ->
+
+                    }
+                }
+            }
+        }
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+    }
+
 
     override fun onResume() {
         super.onResume()
@@ -59,15 +109,15 @@ class LoginPage : AppCompatActivity() {
 
     private fun registerButtonLogin() {
         binding?.btnLogin?.setOnClickListener {
-            emailUseToLogin?.let{ email ->
+            emailUseToLogin?.let { email ->
 
-                  DemoAPI.login( email, password = "1234"){
-                      val user = UserModel(it.data.customerID, email)
-                      AppData.setUser(user)
-                      Pam.userLogin(it.data.customerID)
-                      val intent = Intent(this, ProductPage::class.java)
-                      startActivity(intent)
-                  }
+                DemoAPI.login(email, password = "1234") {
+                    val user = UserModel(it.data.customerID, email)
+                    AppData.setUser(user)
+                    Pam.userLogin(it.data.customerID)
+                    val intent = Intent(this, ProductPage::class.java)
+                    startActivity(intent)
+                }
 
 //                MockAPI.getInstance().login(email)?.let{ user ->
 //                    AppData.setUser(user)

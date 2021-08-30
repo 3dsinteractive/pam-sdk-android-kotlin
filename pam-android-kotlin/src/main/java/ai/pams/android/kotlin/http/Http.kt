@@ -1,6 +1,9 @@
 package ai.pams.android.kotlin.http
 
+import ai.pams.android.kotlin.Pam
 import android.util.Log
+import com.moczul.ok2curl.CurlInterceptor
+import com.moczul.ok2curl.logger.Loggable
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -17,6 +20,11 @@ class Http {
         private fun sharedHttpClient(): OkHttpClient {
             if (httpclient == null) {
                 val clientBuilder = OkHttpClient.Builder()
+
+                clientBuilder.addInterceptor(CurlInterceptor(Loggable {
+                    Log.d("PAM-HTTP!", it);
+                }))
+
                 httpclient = clientBuilder.build()
             }
             return httpclient!!
@@ -77,7 +85,6 @@ class Http {
         queryString: Map<String, String> = mapOf(),
         callBack: HttpCallBack? = null
     ) {
-        Log.d("HTTP!", "GET >> $url")
 
         val urlBuilder = url.toHttpUrlOrNull()?.newBuilder()
         for ((k, v) in queryString) {
@@ -95,14 +102,14 @@ class Http {
 
         sharedHttpClient().newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.d("HTTP!", "ERROR >> ${e.localizedMessage}")
+                Log.d("PAM-HTTP!", "ERROR >> ${e.localizedMessage}")
                 callBack?.invoke(null, e)
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use { res ->
                     val bodyResult = res.body!!.string()
-                    Log.d("HTTP!", "${res.code} >> $bodyResult")
+                    Log.d("PAM-HTTP!", "${res.code} >> $bodyResult")
                     callBack?.invoke(bodyResult, null)
                 }
             }

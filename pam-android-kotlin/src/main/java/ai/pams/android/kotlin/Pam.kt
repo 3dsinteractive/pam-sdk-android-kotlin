@@ -1,5 +1,9 @@
 package ai.pams.android.kotlin
 
+import ai.pams.android.kotlin.consent.AllowConsentResult
+import ai.pams.android.kotlin.consent.BaseConsentMessage
+import ai.pams.android.kotlin.consent.ConsentAPI
+import ai.pams.android.kotlin.consent.ConsentMessage
 import ai.pams.android.kotlin.http.Http
 import ai.pams.android.kotlin.models.notification.NotificationItem
 import ai.pams.android.kotlin.models.notification.NotificationList
@@ -47,6 +51,45 @@ typealias TrackerCallback = (PamResponse) -> Unit
 class Pam {
     companion object {
         var shared = Pam()
+
+        fun loadConsentsDetails(consentMessageIds: List<String>, onLoad: (Map<String, BaseConsentMessage>)->Unit ){
+            val api = ConsentAPI()
+            api.setOnConsentLoaded(onLoad)
+            api.loadConsent(consentMessageIds)
+        }
+
+        fun loadConsentDetails(consentMessageIds: String, onLoad: (BaseConsentMessage)->Unit){
+            loadConsentsDetails(listOf(consentMessageIds)){
+                it[consentMessageIds]?.let{ msg->
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onLoad.invoke(msg)
+                    }
+                }
+            }
+        }
+
+        fun submitConsents(consents: List<BaseConsentMessage>, onSubmit: (result: Map<String, AllowConsentResult>, consentIDs: String)->Unit){
+            val api = ConsentAPI()
+            api.setOnConsentSubmit{
+                val ids = mutableListOf<String>()
+                it.forEach{ (_, v) ->
+                    v.consentID?.let{ id->
+                        ids.add(id)
+                    }
+                }
+                onSubmit.invoke(it, ids.joinToString(","))
+            }
+            api.submitConsents(consents)
+        }
+
+        fun submitConsent(consent: BaseConsentMessage, onSubmit: (result: AllowConsentResult,consentID:String)->Unit){
+            submitConsents(listOf(consent)){ result, consentIDs->
+                val consentMessage = consent as ConsentMessage
+                result[consentMessage.id]?.let{ result->
+                    onSubmit.invoke(result, consentIDs)
+                }
+            }
+        }
 
         fun cleanEverything(){
             shared.removeValue(SaveKey.PushKey)
@@ -110,7 +153,6 @@ class Pam {
         fun appReady() = shared.appReady()
         fun listen(eventName: String, callback: ListenerFunction) =
             shared.listen(eventName, callback)
-
 
         fun userLogout(callBack: (() -> Unit)? = null) = shared.userLogout(callBack)
         fun userLogin(customerID: String, callBack: (() -> Unit)? = null) =
