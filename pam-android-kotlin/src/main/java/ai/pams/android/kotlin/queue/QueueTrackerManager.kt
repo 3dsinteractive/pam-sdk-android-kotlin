@@ -11,7 +11,7 @@ class QueueTrackerManager() {
     private var isProcessing: Boolean = false
     private val queue = mutableListOf<TrackingQueue>()
 
-    var callback: QueueTrackerCallback? = null
+    var onNext: QueueTrackerCallback? = null
 
     fun enqueue(eventName: String, payload: Map<String, Any>? = null, trackerCallback:TrackerCallback? = null) {
         val tracking = TrackingQueue(eventName, payload, trackerCallback)
@@ -30,7 +30,7 @@ class QueueTrackerManager() {
             this.isProcessing = true
             val task = queue.removeFirst()
             Log.d("PAM", "Queue = ${queue.size}")
-            callback?.invoke(task.eventName, task.payload, task.trackerCallback)
+            onNext?.invoke(task.eventName, task.payload, task.trackerCallback)
         } else {
             this.isProcessing = false
 

@@ -55,6 +55,10 @@ class LoginPage : AppCompatActivity() {
             }
         }
 
+        Pam.loadConsentPermissions("1qDQOyMeBv64LYnXi6dJOcZp2YQ"){
+            Log.d("PERMS", it.toString())
+        }
+
     }
 
     fun askTrackingPermission() {
