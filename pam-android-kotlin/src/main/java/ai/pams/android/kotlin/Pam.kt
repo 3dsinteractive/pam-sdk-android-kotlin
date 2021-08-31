@@ -193,6 +193,8 @@ class Pam {
         fun askNotificationPermission() = shared.askNotificationPermission()
         fun fetchNotificationHistory(callBack: (List<NotificationItem>?) -> Unit) =
             shared.fetchNotificationHistory(callBack)
+
+        fun setPushNotificationToken(token: String) = shared.setPushNotificationToken(token)
     }
 
     enum class SaveKey(val keyName: String) {
@@ -307,9 +309,13 @@ class Pam {
             if (!task.isSuccessful) {
                 return@OnCompleteListener
             }
-            saveValue(SaveKey.PushKey, task.result.toString())
-            setDeviceToken(task.result.toString())
+            setPushNotificationToken(task.result.toString())
         })
+    }
+
+    fun setPushNotificationToken(token: String){
+        saveValue(SaveKey.PushKey, token)
+        setDeviceToken(token)
     }
 
     fun appReady() {

@@ -20,7 +20,6 @@ class ConsentAPI {
     private var resultMessages: MutableMap<String, BaseConsentMessage>? =null
     private var _onConsentLoadCallBack: OnLoadConsentMessage? = null
 
-
     private var submitConsentQueue: List<BaseConsentMessage>? = null
     private var resultSubmit: MutableMap<String, AllowConsentResult>? = null
     private var _onConsentSubmitCallBack: OnSubmitConsent? = null

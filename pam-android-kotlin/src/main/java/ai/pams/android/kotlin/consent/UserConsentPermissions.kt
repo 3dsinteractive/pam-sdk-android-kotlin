@@ -44,7 +44,7 @@ data class UserConsentPermissions(
                 lastConsentVersion = lastConsentVersion,
                 permissions = permissions,
                 contactID = contactID,
-                lastConsentAt = lastConsentAt
+                lastConsentAt = lastConsentAt,
             )
         }
 
