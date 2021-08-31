@@ -22,7 +22,9 @@ class Http {
                 val clientBuilder = OkHttpClient.Builder()
 
                 clientBuilder.addInterceptor(CurlInterceptor(Loggable {
-                    Log.d("PAM-HTTP!", it);
+                    if(Pam.shared.enableLog){
+                        Log.d("PAM-HTTP!", it);
+                    }
                 }))
 
                 httpclient = clientBuilder.build()
@@ -65,14 +67,18 @@ class Http {
 
         sharedHttpClient().newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.d("HTTP!", ">> ${e.localizedMessage}")
+                if(Pam.shared.enableLog){
+                    Log.d("HTTP!", ">> ${e.localizedMessage}")
+                }
                 callBack?.invoke(null, e)
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use { res ->
                     val bodyResult = res.body!!.string()
-                    Log.d("HTTP!", ">> $bodyResult")
+                    if(Pam.shared.enableLog){
+                        Log.d("HTTP!", ">> $bodyResult")
+                    }
                     callBack?.invoke(bodyResult, null)
                 }
             }
@@ -102,14 +108,18 @@ class Http {
 
         sharedHttpClient().newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Log.d("PAM-HTTP!", "ERROR >> ${e.localizedMessage}")
+                if(Pam.shared.enableLog){
+                    Log.d("PAM-HTTP!", "ERROR >> ${e.localizedMessage}")
+                }
                 callBack?.invoke(null, e)
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use { res ->
                     val bodyResult = res.body!!.string()
-                    Log.d("PAM-HTTP!", "${res.code} >> $bodyResult")
+                    if(Pam.shared.enableLog){
+                        Log.d("PAM-HTTP!", "${res.code} >> $bodyResult")
+                    }
                     callBack?.invoke(bodyResult, null)
                 }
             }
