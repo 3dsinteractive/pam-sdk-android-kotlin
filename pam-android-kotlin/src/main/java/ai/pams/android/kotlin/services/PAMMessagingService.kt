@@ -90,7 +90,6 @@ open class PAMMessagingService : FirebaseMessagingService() {
         val payloadJson = remoteMessage.data["pam"] ?: ""
         try{
             val model =  Gson().fromJson(payloadJson, PamMessagePayload::class.java)
-            Log.d("PAM", "MODEL=$model")
             return model
         }catch (e: JsonSyntaxException){
             e.printStackTrace()
