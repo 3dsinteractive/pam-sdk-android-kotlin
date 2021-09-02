@@ -3,26 +3,25 @@ package ai.pams.android.kotlin.consent
 import org.json.JSONObject
 
 data class UserConsentPermissions(
-    val consentID:String?,
+    val consentID: String?,
     val type: ConsentType?,
-    val consentMessageId:String?,
+    val consentMessageId: String?,
     val version: Int?,
     val permissions: List<ConsentPermission>?,
     val needToReview: Boolean?,
     val lastConsentVersion: Int?,
     val contactID: String?,
     val lastConsentAt: String?
-)
-{
-    companion object{
-        fun parse(json: JSONObject): UserConsentPermissions{
+) {
+    companion object {
+        fun parse(json: JSONObject): UserConsentPermissions {
 
             val consentID = json.optString("consent_id")
 
-            val type = when( json.optString("consent_message_type") ){
-                "tracking_type"-> ConsentType.Tracking
-                "contacting_type"-> ConsentType.Contacting
-                else-> null
+            val type = when (json.optString("consent_message_type")) {
+                "tracking_type" -> ConsentType.Tracking
+                "contacting_type" -> ConsentType.Contacting
+                else -> null
             }
 
             val consentMessageId = json.optString("consent_message_id")
@@ -48,17 +47,16 @@ data class UserConsentPermissions(
             )
         }
 
-        private fun parsePermission(json:JSONObject?): List<ConsentPermission>{
+        private fun parsePermission(json: JSONObject?): List<ConsentPermission> {
             val list = mutableListOf<ConsentPermission>()
 
-            json?.optJSONObject("tracking_permission")?.let{ json->
+            json?.optJSONObject("tracking_permission")?.let { json ->
 
-                json.optBoolean("terms_and_conditions")?.let{
+                json.optBoolean(ConsentPermissionName.TermsAndConditions.key)?.let {
                     val perm = ConsentPermission(
-                        name = "Terms and Conditions",
-                        key="terms_and_conditions",
+                        name = ConsentPermissionName.TermsAndConditions,
                         require = true,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false
@@ -66,12 +64,11 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean("privacy_overview")?.let{
+                json.optBoolean(ConsentPermissionName.PrivacyOverview.key)?.let {
                     val perm = ConsentPermission(
-                        name = "Privacy overview",
-                        key="privacy_overview",
+                        name = ConsentPermissionName.PrivacyOverview,
                         require = true,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false
@@ -79,12 +76,11 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean("necessary_cookies")?.let{
+                json.optBoolean(ConsentPermissionName.NecessaryCookies.key)?.let {
                     val perm = ConsentPermission(
-                        name = "Necessary cookies",
-                        key="necessary_cookies",
+                        name = ConsentPermissionName.NecessaryCookies,
                         require = true,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false
@@ -92,12 +88,11 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean("preferences_cookies")?.let{
+                json.optBoolean(ConsentPermissionName.PreferencesCookies.key)?.let {
                     val perm = ConsentPermission(
-                        name = "Preferences cookies",
-                        key="preferences_cookies",
+                        name = ConsentPermissionName.PreferencesCookies,
                         require = false,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false
@@ -105,12 +100,11 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean("analytics_cookies")?.let{
+                json.optBoolean(ConsentPermissionName.AnalyticsCookies.key)?.let {
                     val perm = ConsentPermission(
-                        name = "Analytics cookies",
-                        key="analytics_cookies",
+                        name = ConsentPermissionName.AnalyticsCookies,
                         require = false,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false
@@ -118,12 +112,11 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean("marketing_cookies")?.let{
+                json.optBoolean(ConsentPermissionName.MarketingCookies.key)?.let {
                     val perm = ConsentPermission(
-                        name = "Marketing cookies",
-                        key="marketing_cookies",
+                        name = ConsentPermissionName.MarketingCookies,
                         require = false,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false
@@ -131,12 +124,11 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean("social_media_cookies")?.let{
+                json.optBoolean(ConsentPermissionName.SocialMediaCookies.key)?.let {
                     val perm = ConsentPermission(
-                        name = "Social media cookies",
-                        key="social_media_cookies",
+                        name = ConsentPermissionName.SocialMediaCookies,
                         require = false,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false
@@ -146,14 +138,13 @@ data class UserConsentPermissions(
 
             }
 
-            json?.optJSONObject("contacting_permission")?.let{ json->
+            json?.optJSONObject("contacting_permission")?.let { json ->
 
-                json.optBoolean("email")?.let{
+                json.optBoolean(ConsentPermissionName.Email.key)?.let {
                     val perm = ConsentPermission(
-                        name = "Email",
-                        key="email",
+                        name = ConsentPermissionName.Email,
                         require = false,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false
@@ -161,12 +152,11 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean("sms")?.let{
+                json.optBoolean(ConsentPermissionName.SMS.key)?.let {
                     val perm = ConsentPermission(
-                        name = "SMS",
-                        key="sms",
+                        name = ConsentPermissionName.SMS,
                         require = false,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false
@@ -174,12 +164,11 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean("line")?.let{
+                json.optBoolean(ConsentPermissionName.Line.key)?.let {
                     val perm = ConsentPermission(
-                        name = "Line",
-                        key="line",
+                        name = ConsentPermissionName.Line,
                         require = false,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false
@@ -187,12 +176,11 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean("facebook_messenger")?.let{
+                json.optBoolean(ConsentPermissionName.FacebookMessenger.key)?.let {
                     val perm = ConsentPermission(
-                        name = "Facebook Messenger",
-                        key="facebook_messenger",
+                        name = ConsentPermissionName.FacebookMessenger,
                         require = false,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false
@@ -200,12 +188,11 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean("push_notification")?.let{
+                json.optBoolean(ConsentPermissionName.PushNotification.key)?.let {
                     val perm = ConsentPermission(
-                        name = "Push notification",
-                        key="push_notification",
+                        name = ConsentPermissionName.PushNotification,
                         require = false,
-                        accept = it,
+                        allow = it,
                         fullDescription = null,
                         shortDescription = null,
                         fullDescriptionEnabled = false

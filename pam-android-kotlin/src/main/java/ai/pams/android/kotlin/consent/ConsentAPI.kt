@@ -2,7 +2,6 @@ package ai.pams.android.kotlin.consent
 
 import ai.pams.android.kotlin.Pam
 import ai.pams.android.kotlin.http.Http
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,7 +19,7 @@ class ConsentAPI {
     private var resultMessages: MutableMap<String, BaseConsentMessage>? =null
     private var _onConsentLoadCallBack: OnLoadConsentMessage? = null
 
-    private var submitConsentQueue: List<BaseConsentMessage>? = null
+    private var submitConsentQueue: List<BaseConsentMessage?>? = null
     private var resultSubmit: MutableMap<String, AllowConsentResult>? = null
     private var _onConsentSubmitCallBack: OnSubmitConsent? = null
 
@@ -57,7 +56,7 @@ class ConsentAPI {
         }
     }
 
-    fun submitConsents(consents: List<BaseConsentMessage>){
+    fun submitConsents(consents: List<ConsentMessage?>){
         if (!isLoading) {
             submitConsentQueue = consents
             index = 0
@@ -92,10 +91,10 @@ class ConsentAPI {
         payload["_version"] = consent.version
 
         consent.permission.forEach{
-            payload[it.getSubmitKey()] = it.accept
+            payload[it.getSubmitKey()] = it.allow
             Pam.shared.options?.trackingConsentMessageID?.let{ trackingConsentMessageID ->
                 if(consent.id == trackingConsentMessageID && it.getSubmitKey() == "_allow_preferences_cookies"){
-                    Pam.shared.allowTracking = it.accept
+                    Pam.shared.allowTracking = it.allow
                 }
             }
         }

@@ -153,14 +153,23 @@ data class ConsentMessage(
         }
     }
 
-    fun acceptAll(){
+    fun allowAll(){
         permission.forEach{
-            it.accept = true
+            it.allow = true
         }
     }
+
     fun denyAll(){
         permission.forEach{
-            it.accept = false
+            it.allow = false
+        }
+    }
+
+    fun setPermission(name: ConsentPermissionName, isAllow: Boolean) {
+        for(item in this.permission){
+            if( item.name.key == name.key ){
+                item.allow = false
+            }
         }
     }
 
@@ -169,12 +178,12 @@ data class ConsentMessage(
         var errorField: MutableList<String>? = null
         var errorMessage:String? = null
         for(p in permission){
-            if(p.require && !p.accept){
+            if(p.require && !p.allow){
                 pass = false
                 if(errorField == null){
                     errorField = mutableListOf()
                 }
-                errorField.add(p.name)
+                errorField.add(p.name.nameStr)
             }
         }
         if(!pass){
@@ -191,13 +200,12 @@ data class ConsentMessage(
 data class ConsentMessageError(val errorMessage: String, val errorCode: String): BaseConsentMessage()
 
 data class ConsentPermission(
-    val name: String,
-    val key: String,
+    val name: ConsentPermissionName,
     val shortDescription: Text?,
     val fullDescription: Text?,
     val fullDescriptionEnabled: Boolean,
     val require: Boolean,
-    var accept: Boolean
+    var allow: Boolean
 ){
     companion object {
         private fun getText(json:JSONObject?): Text?{
@@ -208,16 +216,15 @@ data class ConsentPermission(
             )
         }
 
-        fun parsePermission(json:JSONObject?, key: String, name: String, require: Boolean ): ConsentPermission?{
-            json?.optJSONObject(key)?.let{ item->
+        private fun parsePermission(json:JSONObject?, name: ConsentPermissionName, require: Boolean ): ConsentPermission?{
+            json?.optJSONObject(name.key)?.let{ item->
                 return ConsentPermission(
                     name = name,
-                    key = key,
                     shortDescription = getText(item.optJSONObject("brief_description")),
                     fullDescription = getText(item.optJSONObject("full_description")),
                     require = require,
                     fullDescriptionEnabled = item.optBoolean("is_full_description_enabled"),
-                    accept = true
+                    allow = true
                 )
             }
             return null
@@ -228,96 +235,84 @@ data class ConsentPermission(
 
             parsePermission(
                 json,
-                "terms_and_conditions",
-                "Terms and Conditions",
+                ConsentPermissionName.TermsAndConditions,
                 true)?.let { perm ->
                 list.add(perm)
             }
 
             parsePermission(
                 json,
-                "privacy_overview",
-                "Privacy overview",
+                ConsentPermissionName.PrivacyOverview,
                 true)?.let { perm ->
                 list.add(perm)
             }
 
             parsePermission(
                 json,
-                "necessary_cookies",
-                "Necessary cookies",
+                ConsentPermissionName.NecessaryCookies,
                 true)?.let { perm ->
                 list.add(perm)
             }
 
             parsePermission(
                 json,
-                "preferences_cookies",
-                "Preferences cookies",
+                ConsentPermissionName.PreferencesCookies,
                 false)?.let { perm ->
                 list.add(perm)
             }
 
             parsePermission(
                 json,
-                "analytics_cookies",
-                "Analytics cookies",
+                ConsentPermissionName.AnalyticsCookies,
                 false)?.let { perm ->
                 list.add(perm)
             }
 
             parsePermission(
                 json,
-                "marketing_cookies",
-                "Marketing cookies",
+                ConsentPermissionName.MarketingCookies,
                 false)?.let { perm ->
                 list.add(perm)
             }
 
             parsePermission(
                 json,
-                "social_media_cookies",
-                "Social media cookies",
+                ConsentPermissionName.SocialMediaCookies,
                 false)?.let { perm ->
                 list.add(perm)
             }
 
             parsePermission(
                 json,
-                "email",
-                "Email",
+                ConsentPermissionName.Email,
                 false)?.let { perm ->
                 list.add(perm)
             }
 
             parsePermission(
                 json,
-                "sms",
-                "SMS",
+                ConsentPermissionName.SMS,
                 false)?.let { perm ->
                 list.add(perm)
             }
 
             parsePermission(
                 json,
-                "line",
-                "LINE",
+                ConsentPermissionName.Line,
                 false)?.let { perm ->
                 list.add(perm)
             }
 
             parsePermission(
                 json,
-                "facebook_messenger",
-                "Facebook Messenger",
+                ConsentPermissionName.FacebookMessenger,
                 false)?.let { perm ->
                 list.add(perm)
             }
 
             parsePermission(
                 json,
-                "push_notification",
-                "Push notification",
+                ConsentPermissionName.PushNotification,
                 false)?.let { perm ->
                 list.add(perm)
             }
@@ -326,7 +321,6 @@ data class ConsentPermission(
         }
     }
 
-    var allow = true
-    fun getSubmitKey() = "_allow_${key}"
+    fun getSubmitKey() = "_allow_${name}"
 }
 

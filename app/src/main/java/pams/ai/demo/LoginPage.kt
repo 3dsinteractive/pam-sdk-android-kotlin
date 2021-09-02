@@ -3,8 +3,8 @@ package pams.ai.demo
 import ai.pams.android.kotlin.Pam
 import ai.pams.android.kotlin.consent.ConsentMessage
 import ai.pams.android.kotlin.consent.ConsentMessageError
+import ai.pams.android.kotlin.consent.ConsentPermissionName
 import ai.pams.android.kotlin.consent.LocaleText
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -55,6 +55,47 @@ class LoginPage : AppCompatActivity() {
             }
         }
 
+        val consentMessageIDs = listOf(
+            "consent_message_id_1",
+            "consent_message_id_2",
+            "consent_message_id_3",
+            "consent_message_id_4",
+        )
+        var consentMessage1: ConsentMessage? = null
+        var consentMessage2: ConsentMessage? = null
+        var consentMessage3: ConsentMessage? = null
+        var consentMessage4: ConsentMessage? = null
+
+        consentMessage1?.allowAll()
+        consentMessage2?.allowAll()
+        consentMessage3?.allowAll()
+        consentMessage4?.allowAll()
+
+        val allConsent = listOf(consentMessage1,
+            consentMessage2,
+            consentMessage3,
+            consentMessage4)
+
+        val payload = mapOf(
+            "product_name" to ".......",
+            "price" to 999,
+            "category" to "food"
+        )
+        Pam.track("add_to_cart",  payload)
+
+        Pam.submitConsent(allConsent){ result, consentIDs->
+            Log.d("CONSENT","$result, $consentIDs")
+        }
+
+        Pam.loadConsentDetails(consentMessageIDs){ result ->
+            consentMessage1 = result["consent_message_id_1"] as ConsentMessage
+            consentMessage1 = result["consent_message_id_2"] as ConsentMessage
+            consentMessage1 = result["consent_message_id_3"] as ConsentMessage
+            consentMessage1 = result["consent_message_id_4"] as ConsentMessage
+        }
+
+
+
         Pam.loadConsentPermissions("1qDQOyMeBv64LYnXi6dJOcZp2YQ"){
             Log.d("PERMS", it.toString())
         }
@@ -64,7 +105,7 @@ class LoginPage : AppCompatActivity() {
     fun askTrackingPermission() {
         Log.d("CONSENT", trackingConsentMessage?.name ?: "")
         trackingConsentMessage?.permission?.forEach {
-            Log.d("CONSENT", it.name)
+            Log.d("CONSENT", it.name.nameStr)
             Log.d("CONSENT", it.shortDescription?.get(LocaleText.Th) ?: "")
             Log.d("CONSENT", "Require = ${it.require}")
             Log.d("CONSENT", "Allow = ${it.allow}")
@@ -76,7 +117,7 @@ class LoginPage : AppCompatActivity() {
         builder.setTitle(trackingConsentMessage?.name)
         builder.setMessage(trackingConsentMessage?.description)
         builder.setPositiveButton("Accept All") { _, _ ->
-            trackingConsentMessage?.acceptAll()
+            trackingConsentMessage?.allowAll()
             trackingConsentMessage?.let {
                 val validationResult = it.validate()
                 if (validationResult.isValid) {
