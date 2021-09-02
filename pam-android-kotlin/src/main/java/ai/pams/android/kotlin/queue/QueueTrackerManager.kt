@@ -1,5 +1,6 @@
 package ai.pams.android.kotlin.queue
 
+import ai.pams.android.kotlin.Pam
 import ai.pams.android.kotlin.TrackerCallback
 import android.util.Log
 

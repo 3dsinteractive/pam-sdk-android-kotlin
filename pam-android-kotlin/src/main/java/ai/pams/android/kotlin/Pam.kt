@@ -91,7 +91,7 @@ class Pam {
         }
 
         fun submitConsent(
-            consents: List<BaseConsentMessage>,
+            consent: List<ConsentMessage?>,
             onSubmit: (result: Map<String, AllowConsentResult>, consentIDs: String) -> Unit
         ) {
             val api = ConsentAPI()
@@ -106,11 +106,11 @@ class Pam {
                     onSubmit.invoke(it, ids.joinToString(","))
                 }
             }
-            api.submitConsents(consents)
+            api.submitConsents(consent)
         }
 
         fun submitConsent(
-            consent: BaseConsentMessage,
+            consent: ConsentMessage?,
             onSubmit: (result: AllowConsentResult, consentID: String) -> Unit
         ) {
             submitConsent(listOf(consent)) { result, consentIDs ->
@@ -122,6 +122,8 @@ class Pam {
                 }
             }
         }
+
+
 
         fun cleanEverything() {
             shared.removeValue(SaveKey.PushKey)
@@ -195,6 +197,7 @@ class Pam {
             shared.fetchNotificationHistory(callBack)
 
         fun setPushNotificationToken(token: String) = shared.setPushNotificationToken(token)
+
     }
 
     enum class SaveKey(val keyName: String) {

@@ -22,9 +22,9 @@ class Http {
                 val clientBuilder = OkHttpClient.Builder()
 
                 clientBuilder.addInterceptor(CurlInterceptor(Loggable {
-                    if(Pam.shared.enableLog){
+                    //if(Pam.shared.enableLog){
                         Log.d("PAM-HTTP!", it);
-                    }
+                    //}
                 }))
 
                 httpclient = clientBuilder.build()

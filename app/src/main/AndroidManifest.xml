@@ -15,6 +15,7 @@
         <activity android:name=".UserProfilePage"/>
         <activity android:name=".ConsentRequestActivity" />
         <activity android:name=".cartPage.CartPage" /> <!-- Configs -->
+
         <meta-data
             android:name="pam-server"
             android:value="https://stgx.pams.ai" />
@@ -27,9 +28,12 @@
         <meta-data
             android:name="pam-enable-log"
             android:value="true" />
+
         <meta-data
             android:name="pam-tracking-consent-message-id"
             android:value="1qDQOyMeBv64LYnXi6dJOcZp2YQ" />
+
+
         <meta-data
             android:name="pam-tracking-consent-message-interval"
             android:value="300" /> <!-- 300 second = 5 minute -->
