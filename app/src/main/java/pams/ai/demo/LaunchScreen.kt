@@ -21,16 +21,6 @@ class LaunchScreen : AppCompatActivity() {
             setContentView(it.root)
         }
 
-        Log.d("PAM Push>", "START")
-
-        val bundle = intent.extras
-        bundle?.keySet()?.forEach {
-            Log.d("PAMPush","$it" )
-        }
-        intent.extras?.keySet()?.forEach {
-            Log.d("PAM Push>","$it = ${intent.extras?.getString(it)}" )
-        }
-
         CoroutineScope(Dispatchers.Default).launch {
             sleep(1000)
             withContext(Dispatchers.Main) {

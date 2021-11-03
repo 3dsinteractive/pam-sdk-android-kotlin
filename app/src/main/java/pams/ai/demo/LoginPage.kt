@@ -103,15 +103,6 @@ class LoginPage : AppCompatActivity() {
     }
 
     fun askTrackingPermission() {
-        Log.d("CONSENT", trackingConsentMessage?.name ?: "")
-        trackingConsentMessage?.permission?.forEach {
-            Log.d("CONSENT", it.name.nameStr)
-            Log.d("CONSENT", it.shortDescription?.get(LocaleText.Th) ?: "")
-            Log.d("CONSENT", "Require = ${it.require}")
-            Log.d("CONSENT", "Allow = ${it.allow}")
-            Log.d("CONSENT", "---------------------")
-        }
-
         val builder = AlertDialog.Builder(this)
         builder.setCancelable(false)
         builder.setTitle(trackingConsentMessage?.name)

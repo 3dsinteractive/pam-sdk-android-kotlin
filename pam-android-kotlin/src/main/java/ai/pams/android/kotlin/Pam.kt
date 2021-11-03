@@ -97,11 +97,12 @@ class Pam {
             val api = ConsentAPI()
             api.setOnConsentSubmit {
                 val ids = mutableListOf<String>()
-                it.forEach { (_, v) ->
+                for( (_,v) in it){
                     v.consentID?.let { id ->
                         ids.add(id)
                     }
                 }
+
                 CoroutineScope(Dispatchers.Main).launch {
                     onSubmit.invoke(it, ids.joinToString(","))
                 }
@@ -515,11 +516,11 @@ class Pam {
             formField["_contact_id"] = it
         }
 
-        payload?.forEach {
-            if (it.key != "page_url" && it.key != "page_title") {
-                formField[it.key] = it.value
+        for( (k,v) in payload ?: mapOf() ){
+            if (k != "page_url" && k != "page_title") {
+                formField[k] = v
             } else {
-                body[it.key] = it.value
+                body[k] = v
             }
         }
 

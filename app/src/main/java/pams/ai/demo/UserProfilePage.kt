@@ -27,14 +27,14 @@ class UserProfilePage : AppCompatActivity(), UserProfilePresenter {
     override fun onResume() {
         super.onResume()
 
-        binding?.isLogin = AppData.getUser() != null
-        binding?.presenter = this
-        binding?.dbAlias = Pam.shared.getDatabaseAlias()
-        binding?.email = AppData.getUser()?.Email
-        binding?.custID = Pam.shared.getCustomerID()
-        binding?.contactConsent = AppData.contactConsent
-        binding?.trackingConsent = AppData.trackingConsent
-        binding?.contactID = Pam.shared.getContactID()
+//        binding?.isLogin = AppData.getUser() != null
+//        binding?.presenter = this
+//        binding?.dbAlias = Pam.shared.getDatabaseAlias()
+//        binding?.email = AppData.getUser()?.Email
+//        binding?.custID = Pam.shared.getCustomerID()
+//        binding?.contactConsent = AppData.contactConsent
+//        binding?.trackingConsent = AppData.trackingConsent
+//        binding?.contactID = Pam.shared.getContactID()
 
     }
 

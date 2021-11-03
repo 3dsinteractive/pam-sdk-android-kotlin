@@ -54,7 +54,7 @@ class CartViewHolder(val binding: CartListItemBinding) :
     var onRemoveProductClick: ((productID: String) -> Unit)? = null
 
     fun setCartProduct(product: CartProductModel?) {
-        binding.cartProduct = product
+//        binding.cartProduct = product
 
         Glide.with(this.itemView.context).load(product?.Image).into(binding.productImage)
 

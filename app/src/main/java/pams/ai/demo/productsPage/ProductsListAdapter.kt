@@ -45,7 +45,7 @@ class ProductViewHolder(val binding: ProductListItemBinding) :
     var onClickProduct: ((Product) -> Unit)? = null
 
     fun setProduct(product: Product) {
-        binding.product = product
+        //binding.product = product
 
         Glide.with(this.itemView.context).load(product.Image).into(binding.productImage);
 

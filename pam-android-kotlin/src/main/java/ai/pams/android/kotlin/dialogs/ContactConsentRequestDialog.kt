@@ -18,6 +18,14 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import android.os.Build
+
+import android.text.SpannableString
+
+import android.text.Spanned
+
+
+
 
 
 class ContactConsentRequestDialog(
@@ -114,10 +122,23 @@ class ContactConsentRequestDialog(
         }
     }
 
+    fun fromHtml(html: String?): Spanned? {
+        return if (html == null) {
+            // return an empty spannable if the html is null
+            SpannableString("")
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            // FROM_HTML_MODE_LEGACY is the behaviour that was used for versions below android N
+            // we are using this flag to give a consistent behaviour
+            Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
+        } else {
+            Html.fromHtml(html)
+        }
+    }
+
     private fun showFullVersion(text:String){
         binding.languageSpinner.visibility = View.GONE
         binding.scrollView.visibility = View.VISIBLE
-        val html = Html.fromHtml(text,  Html.FROM_HTML_MODE_COMPACT)
+        val html = fromHtml(text)
         binding.fullVersionText.text = html
         binding.scrollView.visibility = View.VISIBLE
         binding.closeFullVersionBtn.visibility = View.VISIBLE
