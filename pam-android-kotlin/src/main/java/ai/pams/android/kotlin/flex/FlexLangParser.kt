@@ -1,5 +1,7 @@
 package ai.pams.android.kotlin.flex
 
+import java.util.*
+
 class FlexLangParser {
     val whiteSpacaeChar = "\n\r\t "
 
@@ -109,7 +111,7 @@ class FlexLangParser {
         for (char in flex) {
             if (char == '(') {
                 state = ParseState.startView
-                if (buffer.toString().toLowerCase() == "root") {
+                if (buffer.toString().lowercase(Locale.getDefault()) == "root") {
                     if (renderStack.size == 0) {
                         root = FlexElement(ElementType.root)
                         root.let {
@@ -118,22 +120,22 @@ class FlexLangParser {
                     } else {
                         return null
                     }
-                } else if (buffer.toString().toLowerCase() == "vbox") {
+                } else if (buffer.toString().lowercase(Locale.getDefault()) == "vbox") {
                     val ele = FlexElement(ElementType.vbox)
                     ele.root = root
                     renderStack.last().addChild(ele)
                     renderStack.add(ele)
-                } else if (buffer.toString().toLowerCase() == "label") {
+                } else if (buffer.toString().lowercase(Locale.getDefault()) == "label") {
                     val ele = FlexElement(ElementType.label)
                     ele.root = root
                     renderStack.last().addChild(ele)
                     renderStack.add(ele)
-                } else if (buffer.toString().toLowerCase() == "hbox") {
+                } else if (buffer.toString().lowercase(Locale.getDefault()) == "hbox") {
                     val ele = FlexElement(ElementType.hbox)
                     ele.root = root
                     renderStack.last().addChild(ele)
                     renderStack.add(ele)
-                } else if (buffer.toString().toLowerCase() == "image") {
+                } else if (buffer.toString().lowercase(Locale.getDefault()) == "image") {
                     val ele = FlexElement(ElementType.image)
                     ele.root = root
                     renderStack.last().addChild(ele)

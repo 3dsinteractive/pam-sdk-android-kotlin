@@ -54,10 +54,10 @@ class NotificationViewHolder(val binding: NotificationListItemBinding) :
     }
 
     fun setNotification(notification: NotificationItem) {
-        binding.title = notification.title
-        binding.description = notification.description
-        binding.date = notification.createdDate
-        binding.isRead = notification.isOpen ?: false
+//        binding.title = notification.title
+//        binding.description = notification.description
+//        binding.date = notification.createdDate
+//        binding.isRead = notification.isOpen ?: false
 
         binding.root.setOnClickListener{
             notification.trackOpen()

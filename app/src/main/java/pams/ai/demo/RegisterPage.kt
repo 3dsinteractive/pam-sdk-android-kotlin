@@ -86,7 +86,7 @@ class RegisterPage : AppCompatActivity() {
     }
 
     private fun setupConsent(){
-        binding?.allowRegister = false
+      //  binding?.allowRegister = false
         //Disable button when consent manager is loading
         binding?.openSettingBtn1?.isEnabled = false
         binding?.openSettingBtn2?.isEnabled = false
@@ -123,7 +123,7 @@ class RegisterPage : AppCompatActivity() {
             val termAccept = allowList["terms_and_conditions"] ?: false
             val privacyAccept = allowList["privacy_overview"] ?: false
             this.binding?.checkboxConsentApp?.isChecked = termAccept && privacyAccept
-            binding?.allowRegister = termAccept && privacyAccept
+           // binding?.allowRegister = termAccept && privacyAccept
         }
 
         groupConsentManager?.setOnStatusChangedListener { allowList ->

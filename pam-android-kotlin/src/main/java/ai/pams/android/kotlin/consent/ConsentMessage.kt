@@ -154,13 +154,13 @@ data class ConsentMessage(
     }
 
     fun allowAll(){
-        permission.forEach{
+        for(it in permission){
             it.allow = true
         }
     }
 
     fun denyAll(){
-        permission.forEach{
+        for(it in permission){
             it.allow = false
         }
     }

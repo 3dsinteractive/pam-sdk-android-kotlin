@@ -90,7 +90,7 @@ class ConsentAPI {
         )
         payload["_version"] = consent.version
 
-        consent.permission.forEach{
+        for(it in consent.permission){
             payload[it.getSubmitKey()] = it.allow
             Pam.shared.options?.trackingConsentMessageID?.let{ trackingConsentMessageID ->
                 if(consent.id == trackingConsentMessageID && it.getSubmitKey() == "_allow_preferences_cookies"){

@@ -137,7 +137,7 @@ class CartPage : AppCompatActivity() {
         val cart = MockAPI.getInstance().getCart()
 
         adapter?.setCart(cart = cart)
-        binding?.cart = cart
+        //binding?.cart = cart
     }
 
     private fun alert(title: String, body: String) {

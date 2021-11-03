@@ -54,7 +54,7 @@ class ProductDetailPage : AppCompatActivity() {
             }
         }
 
-        binding?.product = product
+        //binding?.product = product
 
         binding?.productImage?.let{
             Glide.with(this).load(product?.Image).into(it)

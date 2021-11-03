@@ -12,9 +12,8 @@ class PamStandardEvent {
             contentID?.let {
                 newPayload["id"] = it
             }
-
-            payload?.forEach{ item->
-                newPayload[item.key] = item.value
+            for( (k,v) in payload ?: mapOf()){
+                newPayload[k] = v
             }
 
             Pam.track("page_view", newPayload)
