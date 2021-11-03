@@ -109,7 +109,7 @@ class FlexLangParser {
         for (char in flex) {
             if (char == '(') {
                 state = ParseState.startView
-                if (buffer.toString().lowercase() == "root") {
+                if (buffer.toString().toLowerCase() == "root") {
                     if (renderStack.size == 0) {
                         root = FlexElement(ElementType.root)
                         root.let {
@@ -118,22 +118,22 @@ class FlexLangParser {
                     } else {
                         return null
                     }
-                } else if (buffer.toString().lowercase() == "vbox") {
+                } else if (buffer.toString().toLowerCase() == "vbox") {
                     val ele = FlexElement(ElementType.vbox)
                     ele.root = root
                     renderStack.last().addChild(ele)
                     renderStack.add(ele)
-                } else if (buffer.toString().lowercase() == "label") {
+                } else if (buffer.toString().toLowerCase() == "label") {
                     val ele = FlexElement(ElementType.label)
                     ele.root = root
                     renderStack.last().addChild(ele)
                     renderStack.add(ele)
-                } else if (buffer.toString().lowercase() == "hbox") {
+                } else if (buffer.toString().toLowerCase() == "hbox") {
                     val ele = FlexElement(ElementType.hbox)
                     ele.root = root
                     renderStack.last().addChild(ele)
                     renderStack.add(ele)
-                } else if (buffer.toString().lowercase() == "image") {
+                } else if (buffer.toString().toLowerCase() == "image") {
                     val ele = FlexElement(ElementType.image)
                     ele.root = root
                     renderStack.last().addChild(ele)
