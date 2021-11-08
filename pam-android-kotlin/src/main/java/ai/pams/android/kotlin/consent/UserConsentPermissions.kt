@@ -1,5 +1,6 @@
 package ai.pams.android.kotlin.consent
 
+import android.util.Log
 import org.json.JSONObject
 
 data class UserConsentPermissions(
@@ -11,7 +12,9 @@ data class UserConsentPermissions(
     val needToReview: Boolean?,
     val lastConsentVersion: Int?,
     val contactID: String?,
-    val lastConsentAt: String?
+    val lastConsentAt: String?,
+    val code: String?,
+    val message: String?,
 ) {
     companion object {
         fun parse(json: JSONObject): UserConsentPermissions {
@@ -34,6 +37,9 @@ data class UserConsentPermissions(
             val contactID = json.optString("contact_id")
             val lastConsentAt = json.optString("last_consent_at")
 
+            val code = json.optString("code")
+            val message = json.optString("message")
+
             return UserConsentPermissions(
                 consentID = consentID,
                 type = type,
@@ -44,15 +50,17 @@ data class UserConsentPermissions(
                 permissions = permissions,
                 contactID = contactID,
                 lastConsentAt = lastConsentAt,
+                code = code,
+                message = message,
             )
         }
 
         private fun parsePermission(json: JSONObject?): List<ConsentPermission> {
             val list = mutableListOf<ConsentPermission>()
 
-            json?.optJSONObject("tracking_permission")?.let { json ->
+            json?.optJSONObject("tracking_permission")?.let { jsonPermission ->
 
-                json.optBoolean(ConsentPermissionName.TermsAndConditions.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.TermsAndConditions.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.TermsAndConditions,
                         require = true,
@@ -64,7 +72,7 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean(ConsentPermissionName.PrivacyOverview.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.PrivacyOverview.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.PrivacyOverview,
                         require = true,
@@ -76,7 +84,7 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean(ConsentPermissionName.NecessaryCookies.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.NecessaryCookies.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.NecessaryCookies,
                         require = true,
@@ -88,7 +96,7 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean(ConsentPermissionName.PreferencesCookies.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.PreferencesCookies.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.PreferencesCookies,
                         require = false,
@@ -100,7 +108,7 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean(ConsentPermissionName.AnalyticsCookies.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.AnalyticsCookies.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.AnalyticsCookies,
                         require = false,
@@ -112,7 +120,7 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean(ConsentPermissionName.MarketingCookies.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.MarketingCookies.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.MarketingCookies,
                         require = false,
@@ -124,7 +132,7 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean(ConsentPermissionName.SocialMediaCookies.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.SocialMediaCookies.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.SocialMediaCookies,
                         require = false,
@@ -138,9 +146,9 @@ data class UserConsentPermissions(
 
             }
 
-            json?.optJSONObject("contacting_permission")?.let { json ->
+            json?.optJSONObject("contacting_permission")?.let { jsonPermission ->
 
-                json.optBoolean(ConsentPermissionName.Email.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.Email.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.Email,
                         require = false,
@@ -152,7 +160,7 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean(ConsentPermissionName.SMS.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.SMS.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.SMS,
                         require = false,
@@ -164,7 +172,7 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean(ConsentPermissionName.Line.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.Line.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.Line,
                         require = false,
@@ -176,7 +184,7 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean(ConsentPermissionName.FacebookMessenger.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.FacebookMessenger.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.FacebookMessenger,
                         require = false,
@@ -188,7 +196,7 @@ data class UserConsentPermissions(
                     list.add(perm)
                 }
 
-                json.optBoolean(ConsentPermissionName.PushNotification.key)?.let {
+                jsonPermission.optBoolean(ConsentPermissionName.PushNotification.key).let {
                     val perm = ConsentPermission(
                         name = ConsentPermissionName.PushNotification,
                         require = false,

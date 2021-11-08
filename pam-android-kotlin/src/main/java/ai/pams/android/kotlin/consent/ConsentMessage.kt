@@ -35,15 +35,15 @@ data class StyleConfiguration(
                 val icon = it.optString("popup_main_icon")
                 val primaryColor = it.optString("primary_color", "#FFFFFF")
                 val secondaryColor = it.optString("secondary_color", "#5C5C5C")
-                val buttonTextColor = it.optString("button_text_color", "#000000")
-                val textColor = it.optString("text_color", "#000000")
+                val dialogButtonTextColor = it.optString("button_text_color", "#000000")
+                val dialogTextColor = it.optString("text_color", "#000000")
 
                 dialogStyle = ConsentDialogStyleConfiguration(
                     icon = icon,
                     primaryColor = Color.parseColor(primaryColor),
                     secondaryColor  = Color.parseColor(secondaryColor),
-                    buttonTextColor = Color.parseColor(buttonTextColor),
-                    textColor = Color.parseColor(textColor),
+                    buttonTextColor = Color.parseColor(dialogButtonTextColor),
+                    textColor = Color.parseColor(dialogTextColor),
                 )
             }
 
@@ -67,12 +67,20 @@ data class Text(val en:String?, val th: String?){
     fun get(prefer: LocaleText):String{
         when(prefer){
             LocaleText.En->{
-                if(en != null){ getSome@return en }
-                else if(th != null){getSome@return th}
+                if(en != null){
+                    return en
+                }
+                else if(th != null){
+                    return th
+                }
             }
             LocaleText.Th->{
-                if(th != null){ getSome@return th }
-                else if(en != null){getSome@return en}
+                if(th != null){
+                    return th
+                }
+                else if(en != null){
+                    return en
+                }
             }
         }
         return ""
@@ -154,13 +162,13 @@ data class ConsentMessage(
     }
 
     fun allowAll(){
-        for(it in permission){
+        permission.forEach{
             it.allow = true
         }
     }
 
     fun denyAll(){
-        for(it in permission){
+        permission.forEach{
             it.allow = false
         }
     }
@@ -168,7 +176,7 @@ data class ConsentMessage(
     fun setPermission(name: ConsentPermissionName, isAllow: Boolean) {
         for(item in this.permission){
             if( item.name.key == name.key ){
-                item.allow = false
+                item.allow = isAllow
             }
         }
     }
@@ -218,6 +226,9 @@ data class ConsentPermission(
 
         private fun parsePermission(json:JSONObject?, name: ConsentPermissionName, require: Boolean ): ConsentPermission?{
             json?.optJSONObject(name.key)?.let{ item->
+                if( !item.optBoolean("is_enabled") ){
+                    return null
+                }
                 return ConsentPermission(
                     name = name,
                     shortDescription = getText(item.optJSONObject("brief_description")),
@@ -321,6 +332,6 @@ data class ConsentPermission(
         }
     }
 
-    fun getSubmitKey() = "_allow_${name}"
+    fun getSubmitKey() = "_allow_${name.key}"
 }
 

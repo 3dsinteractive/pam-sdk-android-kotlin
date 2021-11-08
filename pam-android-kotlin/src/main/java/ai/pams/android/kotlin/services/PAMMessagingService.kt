@@ -13,7 +13,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -28,7 +27,6 @@ open class PAMMessagingService : FirebaseMessagingService() {
 
     var notificationManager: NotificationManagerCompat? = null
     var notificationChannel: NotificationChannel? = null
-
 
     private val channelId = "i.apps.notifications"
     private val description = "Test notification"

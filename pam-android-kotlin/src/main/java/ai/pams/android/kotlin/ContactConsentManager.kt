@@ -1,15 +1,15 @@
 package ai.pams.android.kotlin
 
+import ai.pams.android.kotlin.dialogs.ContactConsentRequestDialog
 import ai.pams.android.kotlin.http.Http
 import ai.pams.android.kotlin.models.consent.contact.ContactConsentModel
-import ai.pams.android.kotlin.dialogs.ContactConsentRequestDialog
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import com.google.gson.Gson
 
 typealias OnStatusChanged = (Map<String, Boolean>)->Unit
 
-class ContactConsentManager(val consentMessageID:String, val fragmentManager: FragmentManager, lifeCycle: Lifecycle) {
+class ContactConsentManager(private val consentMessageID:String, private val fragmentManager: FragmentManager) {
 
     private var onReady: (()->Unit)? = null
     var ready = false

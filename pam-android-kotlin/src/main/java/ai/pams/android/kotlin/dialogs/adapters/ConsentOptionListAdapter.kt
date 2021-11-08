@@ -11,14 +11,6 @@ import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import android.os.Build
-
-import android.text.SpannableString
-
-import android.text.Spanned
-
-
-
 
 class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
 
@@ -38,7 +30,7 @@ class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
         val list: MutableList<CellTypes> = mutableListOf()
         this.consentList = consentList
 
-        for(it in consentList){
+        consentList.forEach {
             list.add(CellTypes.Header(it))
             if (it.is_expanded) {
                 list.add(CellTypes.Info(it))
@@ -56,7 +48,7 @@ class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
     }
 
     private fun collapseAll() {
-        for(it in cellList){
+        cellList.forEach {
             if (it is CellTypes.Header) {
                 it.consent.is_expanded = false
             }
@@ -83,7 +75,7 @@ class ConsentOptionListAdapter : RecyclerView.Adapter<ConsentViewHolder>() {
         when (holder) {
             is ConsentHeaderViewHolder -> {
                 val data = cellList[position] as CellTypes.Header
-                holder.setContent(data.consent, language)
+                holder.setContent(data.consent)
                 holder.onClick = {
                     val isExpanded = it.is_expanded
                     //collapseAll()
@@ -124,7 +116,7 @@ class ConsentHeaderViewHolder(itemView: View) : ConsentViewHolder(itemView) {
     var onClick: ((ConsentOption) -> Unit)? = null
     var onChange: ((ConsentOption) -> Unit)? = null
 
-    fun setContent(consent: ConsentOption?, language: String) {
+    fun setContent(consent: ConsentOption?) {
         this.consent = consent
 
         titleText.text = consent?.title
@@ -181,7 +173,7 @@ class ConsentInfoViewHolder(itemView: View) : ConsentViewHolder(itemView) {
         }
 
         htmlStr?.let {
-            infoText.text = fromHtml(it)
+            infoText.text = Html.fromHtml(it, Html.FROM_HTML_MODE_COMPACT)
         }
 
         requireLabel.visibility = when (consent?.require) {
@@ -201,20 +193,6 @@ class ConsentInfoViewHolder(itemView: View) : ConsentViewHolder(itemView) {
             }
         }else{
             fullVersionBtn.visibility = View.GONE
-        }
-    }
-
-    private fun fromHtml(html: String?): Spanned? {
-        return when {
-            html == null -> {
-                SpannableString("")
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
-                Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
-            }
-            else -> {
-                Html.fromHtml(html)
-            }
         }
     }
 }
