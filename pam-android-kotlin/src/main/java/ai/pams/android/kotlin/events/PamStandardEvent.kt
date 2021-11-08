@@ -21,8 +21,8 @@ class PamStandardEvent {
                 "page_title" to pageTitle,
                 "page_url" to pageURL,
             )
-            for((k,v) in payload ?: mapOf() ){
-                eventPayload[k] = v
+            payload?.forEach{
+                eventPayload[it.key] = it.value
             }
             return eventPayload
         }

@@ -96,13 +96,13 @@ class RegisterPage : AppCompatActivity() {
         appConsentManager = ContactConsentManager(
             consentMessageID = APP_CONSENT_MESSAGE_ID,
             fragmentManager = supportFragmentManager,
-            lifecycle
+
         )
 
         groupConsentManager = ContactConsentManager(
             consentMessageID = GROUP_CONSENT_MESSAGE_ID,
             fragmentManager = supportFragmentManager,
-            lifecycle
+
         )
 
         appConsentManager?.setOnReadyListener {

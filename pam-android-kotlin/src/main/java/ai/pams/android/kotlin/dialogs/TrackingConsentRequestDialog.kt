@@ -2,10 +2,10 @@ package ai.pams.android.kotlin.dialogs
 
 import ai.pams.android.kotlin.R
 import ai.pams.android.kotlin.databinding.ConsentFragmentBinding
+import ai.pams.android.kotlin.dialogs.adapters.ConsentOptionListAdapter
 import ai.pams.android.kotlin.models.consent.tracking.allow.TrackingConsentUserPermissions
 import ai.pams.android.kotlin.models.consent.tracking.message.ConsentOption
 import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentMessageConfigurations
-import ai.pams.android.kotlin.dialogs.adapters.ConsentOptionListAdapter
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -17,14 +17,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import android.os.Build
-
-import android.text.SpannableString
-
-import android.text.Spanned
-
-
-
 
 
 class TrackingConsentRequestDialog(
@@ -125,7 +117,7 @@ class TrackingConsentRequestDialog(
     private fun showFullVersion(text:String){
         binding.languageSpinner.visibility = View.GONE
         binding.scrollView.visibility = View.VISIBLE
-        val html = fromHtml(text)
+        val html = Html.fromHtml(text,  Html.FROM_HTML_MODE_COMPACT)
         binding.fullVersionText.text = html
         binding.scrollView.visibility = View.VISIBLE
         binding.closeFullVersionBtn.visibility = View.VISIBLE
@@ -133,22 +125,6 @@ class TrackingConsentRequestDialog(
         binding.saveSettingBtn.visibility = View.GONE
     }
 
-    private fun fromHtml(html: String?): Spanned? {
-        return when {
-            html == null -> {
-                // return an empty spannable if the html is null
-                SpannableString("")
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
-                // FROM_HTML_MODE_LEGACY is the behaviour that was used for versions below android N
-                // we are using this flag to give a consistent behaviour
-                Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
-            }
-            else -> {
-                Html.fromHtml(html)
-            }
-        }
-    }
 
     private fun createConsentOptionArray(){
         consentOptions = mutableListOf()

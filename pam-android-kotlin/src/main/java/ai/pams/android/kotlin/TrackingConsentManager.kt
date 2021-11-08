@@ -1,9 +1,9 @@
 package ai.pams.android.kotlin
 
+import ai.pams.android.kotlin.dialogs.TrackingConsentRequestDialog
 import ai.pams.android.kotlin.http.Http
 import ai.pams.android.kotlin.models.consent.tracking.allow.TrackingConsentUserPermissions
 import ai.pams.android.kotlin.models.consent.tracking.message.TrackingConsentMessageConfigurations
-import ai.pams.android.kotlin.dialogs.TrackingConsentRequestDialog
 import androidx.fragment.app.FragmentManager
 import com.google.gson.Gson
 

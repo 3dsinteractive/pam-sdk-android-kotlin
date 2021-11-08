@@ -2,6 +2,7 @@ package ai.pams.android.kotlin.consent
 
 import ai.pams.android.kotlin.Pam
 import ai.pams.android.kotlin.http.Http
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -90,7 +91,7 @@ class ConsentAPI {
         )
         payload["_version"] = consent.version
 
-        for(it in consent.permission){
+        consent.permission.forEach{
             payload[it.getSubmitKey()] = it.allow
             Pam.shared.options?.trackingConsentMessageID?.let{ trackingConsentMessageID ->
                 if(consent.id == trackingConsentMessageID && it.getSubmitKey() == "_allow_preferences_cookies"){
@@ -123,6 +124,7 @@ class ConsentAPI {
         }
 
         val consentMessageID = consentMessagesIdQueue?.get(index) ?: ""
+        Log.d("PAMHTTP","consentMessageID=$consentMessageID" )
 
         index++
         if(consentMessageID == ""){
@@ -134,8 +136,11 @@ class ConsentAPI {
         val pamServerURL = Pam.shared.options?.pamServer ?: ""
         val contactID = Pam.shared.getContactID() ?: ""
 
+        Log.d("PAMHTTP","${pamServerURL}/contacts/$contactID/consents/$consentMessageID" )
+
         Http.getInstance()
-            .get("${pamServerURL ?: ""}/contacts/$contactID/consents/$consentMessageID") { result, error ->
+            .get("${pamServerURL}/contacts/$contactID/consents/$consentMessageID") { result, error ->
+                Log.d("PAMHTTP","$result" )
                 if (error == null) {
                     if(result != null) {
                         val json = JSONObject(result)
@@ -170,7 +175,7 @@ class ConsentAPI {
         val pamServerURL = Pam.shared.options?.pamServer ?: ""
 
         Http.getInstance()
-            .get("${pamServerURL ?: ""}/consent-message/$consentMessageID") { result, error ->
+            .get("${pamServerURL}/consent-message/$consentMessageID") { result, error ->
                 if (error == null) {
                     if(result != null) {
                         val json = JSONObject(result)
@@ -185,7 +190,7 @@ class ConsentAPI {
                     }
                 }else{
                     val msg = ConsentMessageError(
-                        errorMessage = error.localizedMessage,
+                        errorMessage = error.localizedMessage ?: "",
                         errorCode = "NETWORK_REQUEST_ERROR"
                     )
                     resultMessages?.put(consentMessageID, msg)

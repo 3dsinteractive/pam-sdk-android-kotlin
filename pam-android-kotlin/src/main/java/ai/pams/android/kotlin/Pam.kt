@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
@@ -49,6 +50,10 @@ class Pam {
     companion object {
         var shared = Pam()
 
+        fun getDatabaseAlias() = shared.getDatabaseAlias()
+        fun getDeviceUUID() = shared.getDeviceUUID()
+        fun getContactID() = shared.getContactID()
+        fun isUserLoggedin() = shared.isUserLoggedin()
         fun loadConsentPermissions(
             consentMessageIds: List<String>,
             onLoad: (Map<String, UserConsentPermissions>) -> Unit
@@ -97,12 +102,11 @@ class Pam {
             val api = ConsentAPI()
             api.setOnConsentSubmit {
                 val ids = mutableListOf<String>()
-                for( (_,v) in it){
+                it.forEach { (_, v) ->
                     v.consentID?.let { id ->
                         ids.add(id)
                     }
                 }
-
                 CoroutineScope(Dispatchers.Main).launch {
                     onSubmit.invoke(it, ids.joinToString(","))
                 }
@@ -116,9 +120,9 @@ class Pam {
         ) {
             submitConsent(listOf(consent)) { result, consentIDs ->
                 val consentMessage = consent as ConsentMessage
-                result[consentMessage.id]?.let { result ->
+                result[consentMessage.id]?.let { consent ->
                     CoroutineScope(Dispatchers.Main).launch {
-                        onSubmit.invoke(result, consentIDs)
+                        onSubmit.invoke(consent, consentIDs)
                     }
                 }
             }
@@ -162,8 +166,8 @@ class Pam {
             val loginDBAlias = config.metaData.get("login-db-alias").toString()
             val teckingConsentMessageID =
                 config.metaData.get("pam-tracking-consent-message-id").toString()
-            val trackingConsentInterval =
-                config.metaData.get("pam-tracking-consent-message-interval").toString().toLong()
+            val trackingConsentInterval = (config.metaData.get("pam-tracking-consent-message-interval") ?: "150").toString().toLong()
+
 
             shared.options = PamOption(
                 pamServer = pamServer,
@@ -206,7 +210,8 @@ class Pam {
         ContactID("@_pam_contact_id"),
         LoginContactID("@_pam_login_contact_id"),
         PushKey("@_pam_push_key"),
-        AllowTracking("@_pam_allow_tracking")
+        AllowTracking("@_pam_allow_tracking"),
+        DeviceUUID("@_pam_device_UUID")
     }
 
     private var sessionID: String? = null
@@ -229,6 +234,8 @@ class Pam {
     private var publicContactID: String? = null
     private var loginContactID: String? = null
     private var custID: String? = null
+
+    private var cacheDeviceUUID: String? = null
 
     var allowTracking = false
         set(value) {
@@ -256,7 +263,7 @@ class Pam {
     }
 
     fun getDatabaseAlias(): String? {
-        return when (isUserLogin()) {
+        return when (isUserLoggedin()) {
             true -> {
                 if (isLogEnable) {
                     Log.d("PAM", "🪣🪣 : USE : 🍎DB-LOGIN")
@@ -290,14 +297,14 @@ class Pam {
     }
 
     fun listen(eventName: String, callback: ListenerFunction) {
-        when (eventName.toLowerCase(Locale.ENGLISH)) {
+        when (eventName.lowercase(Locale.ENGLISH)) {
             "ontoken" -> onTokenListener.add(callback)
             "onmessage" -> onMessageListener.add(callback)
         }
     }
 
     private fun dispatch(eventName: String, args: Map<String, Any>) {
-        val listenerList = when (eventName.toLowerCase(Locale.ENGLISH)) {
+        val listenerList = when (eventName.lowercase(Locale.ENGLISH)) {
             "ontoken" -> onTokenListener
             "onmessage" -> onMessageListener
             else -> null
@@ -372,6 +379,23 @@ class Pam {
     private fun readBoolValue(key: SaveKey): Boolean? {
         val sharedPref = getSharedPreference()
         return sharedPref?.getBoolean(key.keyName, false)
+    }
+
+    private fun getDeviceUUID(): String{
+        cacheDeviceUUID?.let{
+            return@getDeviceUUID it
+        }
+
+        val deviceID = readValue(SaveKey.DeviceUUID)
+        if( deviceID != null ){
+            cacheDeviceUUID = deviceID
+            return deviceID
+        }
+
+        val newDeviceID = UUID.randomUUID().toString()
+        cacheDeviceUUID = newDeviceID
+        saveValue(SaveKey.DeviceUUID, newDeviceID)
+        return newDeviceID
     }
 
     private fun getSessionID(): String {
@@ -464,17 +488,18 @@ class Pam {
         payload: Map<String, Any>? = null,
         trackerCallback: TrackerCallback?
     ) {
-        if (!allowTracking && (eventName != "save_push" && eventName != "allow_consent")) {
-            if (isLogEnable) {
-                Log.d("PAM", "🤡 NOTRACKING $eventName")
-            }
-            return
-        }
+
+//        if(eventName != "login" && eventName != "save_push" && eventName != "allow_consent") {
+//            if (!allowTracking) {
+//                Log.d("PAM", "🤡 NOTRACKING $eventName")
+//                return
+//            }
+//        }
 
         this.queueTrackerManager.enqueue(eventName, payload, trackerCallback)
     }
 
-    private fun isUserLogin(): Boolean {
+    fun isUserLoggedin(): Boolean {
         if (custID == null) {
             custID = readValue(SaveKey.CustomerID)
         }
@@ -516,11 +541,11 @@ class Pam {
             formField["_contact_id"] = it
         }
 
-        for( (k,v) in payload ?: mapOf() ){
-            if (k != "page_url" && k != "page_title") {
-                formField[k] = v
+        payload?.forEach {
+            if (it.key != "page_url" && it.key != "page_title") {
+                formField[it.key] = it.value
             } else {
-                body[k] = v
+                body[it.key] = it.value
             }
         }
 
@@ -528,11 +553,13 @@ class Pam {
             formField["_database"] = it
         }
 
-        if (isUserLogin()) {
+        if (isUserLoggedin()) {
             getCustomerID()?.let {
                 formField["customer"] = it
             }
         }
+
+        formField["uuid"] = Settings.Secure.ANDROID_ID
 
         body["form_fields"] = formField
 
@@ -561,14 +588,14 @@ class Pam {
             data = body
         ) { text, err ->
             if (enableLog) {
-                Log.d("Pam", "track response is $text\n")
+                Log.d("PAM", "track response is $text\n")
             }
 
             try {
                 val response = Gson().fromJson(text, PamResponse::class.java)
                 if (response.contactID != null) {
 
-                    if (isUserLogin()) {
+                    if (isUserLoggedin()) {
                         saveValue(SaveKey.LoginContactID, response.contactID)
                         this.loginContactID = response.contactID
                     } else {
