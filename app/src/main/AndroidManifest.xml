@@ -12,9 +12,6 @@
         android:roundIcon="@mipmap/ic_logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PamDemo">
-        <activity android:name=".UserProfilePage"/>
-        <activity android:name=".ConsentRequestActivity" />
-        <activity android:name=".cartPage.CartPage" /> <!-- Configs -->
 
         <meta-data
             android:name="pam-server"
@@ -47,15 +44,8 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="pam" />
 
-        <service
-            android:name="services.MyMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
         <activity
+            android:exported="true"
             android:name=".LaunchScreen"
             android:configChanges="orientation"
             android:screenOrientation="portrait">
@@ -66,31 +56,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".LoginPage"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".notificationsPage.NotificationPage"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ProductDetailPage"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".RegisterPage"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".productsPage.ProductPage"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name="services.NotiReaderActivity"
-            android:excludeFromRecents="true"
-            android:launchMode="singleTask"
-            android:taskAffinity="" />
     </application>
 
 </manifest>

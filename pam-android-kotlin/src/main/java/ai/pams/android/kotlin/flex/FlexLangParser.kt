@@ -1,5 +1,7 @@
 package ai.pams.android.kotlin.flex
 
+import android.util.Log
+
 class FlexLangParser {
     val whiteSpacaeChar = "\n\r\t "
 

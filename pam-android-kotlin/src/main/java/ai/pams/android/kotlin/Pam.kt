@@ -14,7 +14,7 @@ import android.provider.Settings
 import android.util.Log
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.*
@@ -442,7 +442,7 @@ class Pam {
             url = url,
             queryString = query
         ) { result, _ ->
-            val model = Gson().fromJson(result, NotificationList::class.java)
+            val model = createGson().fromJson(result, NotificationList::class.java)
             CoroutineScope(Dispatchers.Main).launch {
                 callBack.invoke(model.items)
             }
@@ -566,6 +566,11 @@ class Pam {
         return body
     }
 
+    private fun createGson() = GsonBuilder()
+            .registerTypeAdapterFactory(NullableTypAdapterFactory())
+            .create()
+
+
     private fun postTracker(
         eventName: String,
         payload: Map<String, Any>?,
@@ -592,20 +597,15 @@ class Pam {
             }
 
             try {
-                val response = Gson().fromJson(text, PamResponse::class.java)
-                if (response.contactID != null) {
+                val response = createGson().fromJson(text, PamResponse::class.java)
 
+                response?.contactID?.let{ contactID ->
                     if (isUserLoggedin()) {
-                        saveValue(SaveKey.LoginContactID, response.contactID)
-                        this.loginContactID = response.contactID
+                        saveValue(SaveKey.LoginContactID, contactID)
+                        this.loginContactID = contactID
                     } else {
-                        saveValue(SaveKey.ContactID, response.contactID)
-                        this.publicContactID = response.contactID
-                    }
-
-                } else if (response.code != null && response.message != null) {
-                    if (enableLog) {
-                        Log.d("Pam", "track error $err\n")
+                        saveValue(SaveKey.ContactID, contactID)
+                        this.publicContactID = contactID
                     }
                 }
 

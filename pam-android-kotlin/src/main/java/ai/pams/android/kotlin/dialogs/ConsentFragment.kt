@@ -1,6 +1,6 @@
 package ai.pams.android.kotlin.dialogs
 
-import ai.pams.android.kotlin.databinding.ConsentFragmentBinding
+import ai.pams.android.kotlin.R
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,9 +9,6 @@ import androidx.fragment.app.Fragment
 
 class ConsentFragment: Fragment() {
 
-    private var _binding: ConsentFragmentBinding? = null
-    private val binding get() = _binding!!
-
     private var currentLang = "th"
 
     override fun onCreateView(
@@ -19,8 +16,7 @@ class ConsentFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = ConsentFragmentBinding.inflate(inflater, container, false)
-        return binding.root
+        return inflater.inflate(R.layout.consent_fragment, container)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
