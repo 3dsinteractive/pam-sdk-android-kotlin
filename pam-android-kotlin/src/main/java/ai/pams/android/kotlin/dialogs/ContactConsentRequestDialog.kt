@@ -1,29 +1,28 @@
 package ai.pams.android.kotlin.dialogs
 
 import ai.pams.android.kotlin.R
-import ai.pams.android.kotlin.databinding.ConsentFragmentBinding
 import ai.pams.android.kotlin.dialogs.adapters.ConsentOptionListAdapter
 import ai.pams.android.kotlin.models.consent.contact.ContactConsentModel
 import ai.pams.android.kotlin.models.consent.tracking.message.ConsentOption
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
 import android.text.Html
+import android.text.Spanned
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
+import android.widget.*
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 
 class ContactConsentRequestDialog(
     val consentMessage: ContactConsentModel?
 ) : DialogFragment() {
-
-    private var _binding: ConsentFragmentBinding? = null
-    private val binding get() = _binding!!
 
     private var currentLang = "th"
     private var consentOptions: MutableList<ConsentOption> = mutableListOf()
@@ -31,18 +30,40 @@ class ContactConsentRequestDialog(
     private val listAdapter = ConsentOptionListAdapter()
 
     var onAccept: ((Map<String,Boolean>)->Unit)? = null
+    var languageSpinner: Spinner? = null
+    var acceptAllBtn:Button? = null
+    var saveSettingBtn:Button? = null
+    var listview:RecyclerView? = null
+    var scrollView: ConstraintLayout? = null
+    var closeFullVersionBtn:Button? = null
+    var fullVersionText: TextView? = null
+    var titleText: TextView? = null
+    var iconText: TextView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = ConsentFragmentBinding.inflate(inflater, container, false)
-        return binding.root
+        return inflater.inflate(R.layout.consent_fragment, container)
+    }
+
+    private fun findView(view: View){
+        languageSpinner = view.findViewById(R.id.languageSpinner)
+        acceptAllBtn = view.findViewById(R.id.accept_all_btn)
+        saveSettingBtn = view.findViewById(R.id.save_setting_btn)
+        listview = view.findViewById(R.id.listview)
+        scrollView = view.findViewById(R.id.scroll_view)
+        closeFullVersionBtn = view.findViewById(R.id.close_full_version_btn)
+        fullVersionText = view.findViewById(R.id.full_version_text)
+        titleText = view.findViewById(R.id.title_text)
+        iconText = view.findViewById(R.id.icon_text)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        findView(view)
 
         val width = view.context.resources.displayMetrics.widthPixels * 0.98
         val height = view.context.resources.displayMetrics.heightPixels * 0.75
@@ -53,9 +74,9 @@ class ContactConsentRequestDialog(
             consentMessage?.setting?.availableLanguages?.toTypedArray() ?: arrayOf()
         val adapter = ArrayAdapter(view.context, R.layout.spinner_item, langs)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.languageSpinner.adapter = adapter
+        languageSpinner?.adapter = adapter
 
-        binding.languageSpinner.onItemSelectedListener =
+        languageSpinner?.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(
                     parent: AdapterView<*>?,
@@ -73,11 +94,11 @@ class ContactConsentRequestDialog(
                 }
             }
 
-        binding.acceptAllBtn.setOnClickListener {
+        acceptAllBtn?.setOnClickListener {
             acceptAll()
         }
 
-        binding.saveSettingBtn.setOnClickListener {
+        saveSettingBtn?.setOnClickListener {
             saveSetting()
         }
 
@@ -86,8 +107,8 @@ class ContactConsentRequestDialog(
         val layoutManager = LinearLayoutManager(this.context)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
 
-        binding.listview.layoutManager = layoutManager
-        binding.listview.adapter = listAdapter
+        listview?.layoutManager = layoutManager
+        listview?.adapter = listAdapter
 
         dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
@@ -100,27 +121,35 @@ class ContactConsentRequestDialog(
             showFullVersion(it)
         }
 
-        binding.scrollView.visibility = View.GONE
-        binding.closeFullVersionBtn.visibility = View.GONE
-        binding.closeFullVersionBtn.setOnClickListener{
+        scrollView?.visibility = View.GONE
+        closeFullVersionBtn?.visibility = View.GONE
+        closeFullVersionBtn?.setOnClickListener{
             it.visibility = View.GONE
-            binding.scrollView.visibility = View.GONE
-            binding.languageSpinner.visibility = View.VISIBLE
-            binding.closeFullVersionBtn.visibility = View.GONE
-            binding.acceptAllBtn.visibility = View.VISIBLE
-            binding.saveSettingBtn.visibility = View.VISIBLE
+            scrollView?.visibility = View.GONE
+            languageSpinner?.visibility = View.VISIBLE
+            closeFullVersionBtn?.visibility = View.GONE
+            acceptAllBtn?.visibility = View.VISIBLE
+            saveSettingBtn?.visibility = View.VISIBLE
+        }
+    }
+
+    private fun fromHtml(source: String?): Spanned? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(source, Html.FROM_HTML_MODE_LEGACY)
+        } else {
+            Html.fromHtml(source)
         }
     }
 
     private fun showFullVersion(text:String){
-        binding.languageSpinner.visibility = View.GONE
-        binding.scrollView.visibility = View.VISIBLE
-        val html = Html.fromHtml(text,  Html.FROM_HTML_MODE_COMPACT)
-        binding.fullVersionText.text = html
-        binding.scrollView.visibility = View.VISIBLE
-        binding.closeFullVersionBtn.visibility = View.VISIBLE
-        binding.acceptAllBtn.visibility = View.GONE
-        binding.saveSettingBtn.visibility = View.GONE
+        languageSpinner?.visibility = View.GONE
+        scrollView?.visibility = View.VISIBLE
+        val html = fromHtml(text)
+        fullVersionText?.text = html
+        scrollView?.visibility = View.VISIBLE
+        closeFullVersionBtn?.visibility = View.VISIBLE
+        acceptAllBtn?.visibility = View.GONE
+        saveSettingBtn?.visibility = View.GONE
     }
 
     private fun createConsentOptionArray(){
@@ -255,11 +284,11 @@ class ContactConsentRequestDialog(
     private fun renderPopup(){
         createConsentOptionArray()
         listAdapter.updateList(consentOptions, currentLang)
-        binding.titleText.text = when(currentLang){
+        titleText?.text = when(currentLang){
             "th"->consentMessage?.setting?.consentDetailTitle?.th
             else->consentMessage?.setting?.consentDetailTitle?.en
         }
-        binding.iconText.text = consentMessage?.styleConfiguration?.consentDetail?.popupMainIcon?.uppercase()
+        iconText?.text = consentMessage?.styleConfiguration?.consentDetail?.popupMainIcon?.uppercase()
     }
 
 }
