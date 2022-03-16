@@ -1,5 +1,6 @@
-package ai.pams.android.kotlin.consent
+package ai.pams.android.kotlin.consent.models
 
+import ai.pams.android.kotlin.consent.ConsentPermissionName
 import android.graphics.Color
 import androidx.annotation.ColorInt
 import org.json.JSONObject
@@ -66,7 +67,7 @@ enum class LocaleText{
 data class Text(val en:String?, val th: String?){
     fun get(prefer: LocaleText):String{
         when(prefer){
-            LocaleText.En->{
+            LocaleText.En ->{
                 if(en != null){
                     return en
                 }
@@ -74,7 +75,7 @@ data class Text(val en:String?, val th: String?){
                     return th
                 }
             }
-            LocaleText.Th->{
+            LocaleText.Th ->{
                 if(th != null){
                     return th
                 }
@@ -181,7 +182,7 @@ data class ConsentMessage(
         }
     }
 
-    fun validate(): ValidationResult{
+    fun validate(): ValidationResult {
         var pass = true
         var errorField: MutableList<String>? = null
         var errorMessage:String? = null
