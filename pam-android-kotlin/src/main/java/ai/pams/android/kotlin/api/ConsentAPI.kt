@@ -1,6 +1,11 @@
-package ai.pams.android.kotlin.consent
+package ai.pams.android.kotlin.api
 
 import ai.pams.android.kotlin.Pam
+import ai.pams.android.kotlin.consent.*
+import ai.pams.android.kotlin.consent.models.AllowConsentResult
+import ai.pams.android.kotlin.consent.models.BaseConsentMessage
+import ai.pams.android.kotlin.consent.models.ConsentMessage
+import ai.pams.android.kotlin.consent.models.ConsentMessageError
 import ai.pams.android.kotlin.http.Http
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope

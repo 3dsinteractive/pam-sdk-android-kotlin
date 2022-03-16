@@ -1,6 +1,7 @@
 package ai.pams.android.kotlin.consent
 
-import android.util.Log
+import ai.pams.android.kotlin.consent.models.ConsentPermission
+import ai.pams.android.kotlin.consent.models.ConsentType
 import org.json.JSONObject
 
 data class UserConsentPermissions(

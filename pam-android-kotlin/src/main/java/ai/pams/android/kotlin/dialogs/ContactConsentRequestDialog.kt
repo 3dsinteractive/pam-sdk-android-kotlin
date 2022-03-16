@@ -133,6 +133,7 @@ class ContactConsentRequestDialog(
         }
     }
 
+    @SuppressWarnings("deprecation")
     private fun fromHtml(source: String?): Spanned? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(source, Html.FROM_HTML_MODE_LEGACY)

@@ -1,6 +1,11 @@
 package ai.pams.android.kotlin
 
+import ai.pams.android.kotlin.api.ConsentAPI
+import ai.pams.android.kotlin.api.NotificationAPI
 import ai.pams.android.kotlin.consent.*
+import ai.pams.android.kotlin.consent.models.AllowConsentResult
+import ai.pams.android.kotlin.consent.models.BaseConsentMessage
+import ai.pams.android.kotlin.consent.models.ConsentMessage
 import ai.pams.android.kotlin.http.Http
 import ai.pams.android.kotlin.models.notification.NotificationItem
 import ai.pams.android.kotlin.models.notification.NotificationList
@@ -202,6 +207,15 @@ class Pam {
             shared.fetchNotificationHistory(callBack)
 
         fun setPushNotificationToken(token: String) = shared.setPushNotificationToken(token)
+
+        fun loadPushNotificationsFromCustomerID(customerID: String, callBack: ((List<NotificationItem>) -> Unit)?)
+        = NotificationAPI.loadPushNotificationsFromCustomerID(customerID, callBack)
+
+        fun loadPushNotificationsMobile(mobile: String, callBack: ((List<NotificationItem>) -> Unit)?)
+        = NotificationAPI.loadPushNotificationsMobile(mobile, callBack)
+
+        fun loadPushNotificationsEmail(mobile: String, callBack: ((List<NotificationItem>) -> Unit)?)
+        = NotificationAPI.loadPushNotificationsEmail(mobile, callBack)
 
     }
 
@@ -591,7 +605,7 @@ class Pam {
             headers = mapOf(),
             queryString = mapOf(),
             data = body
-        ) { text, err ->
+        ) { text, _ ->
             if (enableLog) {
                 Log.d("PAM", "track response is $text\n")
             }
