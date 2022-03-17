@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("ai.pams.android.kotlin", appContext.packageName)
+        assertEquals("ai.pams.android.kotlin.test", appContext.packageName)
     }
 }
