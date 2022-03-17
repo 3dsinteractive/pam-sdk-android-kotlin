@@ -1,23 +1,20 @@
 package ai.pams.android.kotlin.api
 
-import ai.pams.android.kotlin.NullableTypAdapterFactory
+import ai.pams.android.kotlin.NullableTypeAdapterFactory
 import ai.pams.android.kotlin.Pam
-import ai.pams.android.kotlin.consent.UserConsentPermissions
 import ai.pams.android.kotlin.http.Http
 import ai.pams.android.kotlin.models.notification.NotificationItem
 import ai.pams.android.kotlin.models.notification.NotificationList
-import android.util.Log
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 class NotificationAPI {
     companion object {
 
         private fun createGson() = GsonBuilder()
-            .registerTypeAdapterFactory(NullableTypAdapterFactory())
+            .registerTypeAdapterFactory(NullableTypeAdapterFactory())
             .create()
 
         fun loadPushNotificationsFromCustomerID(

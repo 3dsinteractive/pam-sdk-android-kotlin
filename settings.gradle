@@ -12,6 +12,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "pam-sdk-android-kotlin"
+rootProject.name = "My Application"
 include ':app'
 include ':pam-android-kotlin'

@@ -4,7 +4,6 @@ import ai.pams.android.kotlin.dialogs.ContactConsentRequestDialog
 import ai.pams.android.kotlin.http.Http
 import ai.pams.android.kotlin.models.consent.contact.ContactConsentModel
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Lifecycle
 import com.google.gson.Gson
 
 typealias OnStatusChanged = (Map<String, Boolean>)->Unit

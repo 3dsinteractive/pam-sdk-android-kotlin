@@ -1,7 +1,7 @@
 package ai.pams.android.kotlin.api
 
 import ai.pams.android.kotlin.Pam
-import ai.pams.android.kotlin.consent.*
+import ai.pams.android.kotlin.consent.UserConsentPermissions
 import ai.pams.android.kotlin.consent.models.AllowConsentResult
 import ai.pams.android.kotlin.consent.models.BaseConsentMessage
 import ai.pams.android.kotlin.consent.models.ConsentMessage

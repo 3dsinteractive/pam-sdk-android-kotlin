@@ -2,7 +2,7 @@ package ai.pams.android.kotlin
 
 import ai.pams.android.kotlin.api.ConsentAPI
 import ai.pams.android.kotlin.api.NotificationAPI
-import ai.pams.android.kotlin.consent.*
+import ai.pams.android.kotlin.consent.UserConsentPermissions
 import ai.pams.android.kotlin.consent.models.AllowConsentResult
 import ai.pams.android.kotlin.consent.models.BaseConsentMessage
 import ai.pams.android.kotlin.consent.models.ConsentMessage
@@ -22,7 +22,9 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
 data class PamResponse(
@@ -581,7 +583,7 @@ class Pam {
     }
 
     private fun createGson() = GsonBuilder()
-            .registerTypeAdapterFactory(NullableTypAdapterFactory())
+            .registerTypeAdapterFactory(NullableTypeAdapterFactory())
             .create()
 
 
