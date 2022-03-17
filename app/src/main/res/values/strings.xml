@@ -1,4 +1,3 @@
 <resources>
-    <string name="buy_now">Buy Now</string>
-    <string name="add_to_cart">Add To Cart</string>
+    <string name="app_name">My Application</string>
 </resources>

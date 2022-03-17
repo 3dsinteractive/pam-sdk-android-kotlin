@@ -1,61 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="pams.ai.demo">
-
-    <uses-permission android:name="android.permission.INTERNET" />
+    package="ai.pams.android.kotlin.demo">
 
     <application
-        android:name=".MainApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="Pam Demo"
-        android:roundIcon="@mipmap/ic_logo_round"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PamDemo">
-
-        <meta-data
-            android:name="pam-server"
-            android:value="https://stgx.pams.ai" />
-        <meta-data
-            android:name="public-db-alias"
-            android:value="3digits-public" />
-        <meta-data
-            android:name="login-db-alias"
-            android:value="3digits-login" />
-        <meta-data
-            android:name="pam-enable-log"
-            android:value="true" />
-
-        <meta-data
-            android:name="pam-tracking-consent-message-id"
-            android:value="1qDQOyMeBv64LYnXi6dJOcZp2YQ" />
-
-
-        <meta-data
-            android:name="pam-tracking-consent-message-interval"
-            android:value="300" /> <!-- 300 second = 5 minute -->
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/logo_3digits" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/primary" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="pam" />
-
+        android:theme="@style/Theme.MyApplication">
         <activity
-            android:exported="true"
-            android:name=".LaunchScreen"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait">
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>

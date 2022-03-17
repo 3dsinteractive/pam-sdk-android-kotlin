@@ -6,15 +6,14 @@ import ai.pams.android.kotlin.models.consent.contact.ContactConsentModel
 import ai.pams.android.kotlin.models.consent.tracking.message.ConsentOption
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
-import android.text.Html
 import android.text.Spanned
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -133,13 +132,11 @@ class ContactConsentRequestDialog(
         }
     }
 
-    @SuppressWarnings("deprecation")
     private fun fromHtml(source: String?): Spanned? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(source, Html.FROM_HTML_MODE_LEGACY)
-        } else {
-            Html.fromHtml(source)
+        source?.let{
+            HtmlCompat.fromHtml(it, HtmlCompat.FROM_HTML_MODE_LEGACY)
         }
+        return null
     }
 
     private fun showFullVersion(text:String){
