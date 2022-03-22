@@ -210,14 +210,14 @@ class Pam {
 
         fun setPushNotificationToken(token: String) = shared.setPushNotificationToken(token)
 
-        fun loadPushNotificationsFromCustomerID(customerID: String, callBack: ((List<NotificationItem>) -> Unit)?)
-        = NotificationAPI.loadPushNotificationsFromCustomerID(customerID, callBack)
+        fun loadPushNotificationsFromCustomerID(context: Context,customerID: String, callBack: ((List<NotificationItem>) -> Unit)?)
+        = NotificationAPI.loadPushNotificationsFromCustomerID(context, customerID, callBack)
 
-        fun loadPushNotificationsMobile(mobile: String, callBack: ((List<NotificationItem>) -> Unit)?)
-        = NotificationAPI.loadPushNotificationsMobile(mobile, callBack)
+        fun loadPushNotificationsMobile(context: Context, mobile: String, callBack: ((List<NotificationItem>) -> Unit)?)
+        = NotificationAPI.loadPushNotificationsMobile(context, mobile, callBack)
 
-        fun loadPushNotificationsEmail(mobile: String, callBack: ((List<NotificationItem>) -> Unit)?)
-        = NotificationAPI.loadPushNotificationsEmail(mobile, callBack)
+        fun loadPushNotificationsEmail(context: Context, email: String, callBack: ((List<NotificationItem>) -> Unit)?)
+        = NotificationAPI.loadPushNotificationsEmail(context, email, callBack)
 
     }
 
