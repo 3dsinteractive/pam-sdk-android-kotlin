@@ -1,7 +1,10 @@
 package ai.pams.android.kotlin.models.notification
 
 
+import ai.pams.android.kotlin.flex.parser.FlexParser
+import ai.pams.android.kotlin.flex.parser.PImage
 import ai.pams.android.kotlin.http.Http
+import android.content.Context
 import com.google.gson.annotations.SerializedName
 
 data class NotificationItem(
@@ -26,6 +29,18 @@ data class NotificationItem(
     @SerializedName("url")
     val url: String? = null
 ){
+    var bannerUrl: String? = null
+
+    fun parseFlex(context: Context){
+        flex?.let{
+            val parser = FlexParser(context)
+            val flexView = parser.parse(flex)
+            (flexView?.childs?.get(0) as? PImage)?.let{
+                bannerUrl = it.props["src"]
+            }
+        }
+    }
+
     fun trackOpen(){
         pixel?.let{
             Http.getInstance().get(it)

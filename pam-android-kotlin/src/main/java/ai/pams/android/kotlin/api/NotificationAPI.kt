@@ -5,6 +5,7 @@ import ai.pams.android.kotlin.Pam
 import ai.pams.android.kotlin.http.Http
 import ai.pams.android.kotlin.models.notification.NotificationItem
 import ai.pams.android.kotlin.models.notification.NotificationList
+import android.content.Context
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +18,7 @@ class NotificationAPI {
             .registerTypeAdapterFactory(NullableTypeAdapterFactory())
             .create()
 
-        fun loadPushNotificationsFromCustomerID(
+        fun loadPushNotificationsFromCustomerID(context: Context,
             customerID: String,
             callBack: ((List<NotificationItem>) -> Unit)?
         ) {
@@ -31,13 +32,16 @@ class NotificationAPI {
             Http.getInstance()
                 .get(endpoint) { result, _ ->
                     val model = createGson().fromJson(result, NotificationList::class.java)
+                    model.items?.forEach {
+                        it.parseFlex(context)
+                    }
                     CoroutineScope(Dispatchers.Main).launch {
                         callBack?.invoke(model.items ?: listOf())
                     }
                 }
         }
 
-        fun loadPushNotificationsMobile(
+        fun loadPushNotificationsMobile(context: Context,
             mobile: String,
             callBack: ((List<NotificationItem>) -> Unit)?
         ) {
@@ -51,13 +55,16 @@ class NotificationAPI {
             Http.getInstance()
                 .get(endpoint) { result, _ ->
                     val model = createGson().fromJson(result, NotificationList::class.java)
+                    model.items?.forEach {
+                        it.parseFlex(context)
+                    }
                     CoroutineScope(Dispatchers.Main).launch {
                         callBack?.invoke(model.items ?: listOf())
                     }
                 }
         }
 
-        fun loadPushNotificationsEmail(
+        fun loadPushNotificationsEmail(context: Context,
             email: String,
             callBack: ((List<NotificationItem>) -> Unit)?
         ) {
@@ -71,12 +78,14 @@ class NotificationAPI {
             Http.getInstance()
                 .get(endpoint) { result, _ ->
                     val model = createGson().fromJson(result, NotificationList::class.java)
+                    model.items?.forEach {
+                        it.parseFlex(context)
+                    }
                     CoroutineScope(Dispatchers.Main).launch {
                         callBack?.invoke(model.items ?: listOf())
                     }
                 }
         }
     }
-
 
 }
