@@ -458,9 +458,9 @@ class Pam {
             url = url,
             queryString = query
         ) { result, _ ->
-            val model = createGson().fromJson(result, NotificationList::class.java)
+            val model = parseJSON(result, NotificationList::class.java)
             CoroutineScope(Dispatchers.Main).launch {
-                callBack.invoke(model.items)
+                callBack.invoke(model?.items ?: listOf())
             }
         }
     }
@@ -586,6 +586,12 @@ class Pam {
             .registerTypeAdapterFactory(NullableTypeAdapterFactory())
             .create()
 
+    private fun <T> parseJSON(json: String?, classOfT: Class<T>): T? {
+        if (json == null) {
+            return null
+        }
+        return createGson().fromJson(json, classOfT)
+    }
 
     private fun postTracker(
         eventName: String,
@@ -613,7 +619,7 @@ class Pam {
             }
 
             try {
-                val response = createGson().fromJson(text, PamResponse::class.java)
+                val response = parseJSON(text, PamResponse::class.java)
 
                 response?.contactID?.let{ contactID ->
                     if (isUserLoggedin()) {
@@ -627,7 +633,9 @@ class Pam {
 
                 val task = CoroutineScope(Dispatchers.Main)
                 task.launch {
-                    trackerCallBack?.invoke(response)
+                    response?.let{
+                        trackerCallBack?.invoke(it)
+                    }
                     queueTrackerManager.next()
                 }
             } catch (e: JsonSyntaxException) {
