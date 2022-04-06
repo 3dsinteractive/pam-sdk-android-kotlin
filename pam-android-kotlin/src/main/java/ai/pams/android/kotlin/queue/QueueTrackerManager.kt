@@ -17,11 +17,11 @@ class QueueTrackerManager() {
     fun enqueue(eventName: String, payload: Map<String, Any>? = null, trackerCallback:TrackerCallback? = null) {
         val tracking = TrackingQueue(eventName, payload, trackerCallback)
         this.queue.add(tracking)
-        if(Pam.shared.enableLog){
+        if(Pam.shared.isLogEnable){
             Log.d("PAM", "1.Track = $eventName   isProcessing=$isProcessing")
         }
         if (!this.isProcessing) {
-            if(Pam.shared.enableLog){
+            if(Pam.shared.isLogEnable){
                 Log.d("PAM", "2.Track = $eventName")
             }
             this.next()
@@ -33,13 +33,13 @@ class QueueTrackerManager() {
         if (queue.size > 0) {
             this.isProcessing = true
             val task = queue.removeFirst()
-            if(Pam.shared.enableLog){
+            if(Pam.shared.isLogEnable){
                 Log.d("PAM", "Queue = ${queue.size}")
             }
             onNext?.invoke(task.eventName, task.payload, task.trackerCallback)
         } else {
             this.isProcessing = false
-            if(Pam.shared.enableLog){
+            if(Pam.shared.isLogEnable){
                 Log.d("PAM", "Reset isProcessing to false : $this.isProcessing")
             }
         }

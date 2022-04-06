@@ -67,7 +67,7 @@ class Http {
 
         sharedHttpClient().newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                if(Pam.shared.enableLog){
+                if(Pam.shared.isLogEnable){
                     Log.d("HTTP!", ">> ${e.localizedMessage}")
                 }
                 callBack?.invoke(null, e)
@@ -76,7 +76,7 @@ class Http {
             override fun onResponse(call: Call, response: Response) {
                 response.use { res ->
                     val bodyResult = res.body!!.string()
-                    if(Pam.shared.enableLog){
+                    if(Pam.shared.isLogEnable){
                         Log.d("HTTP!", ">> $bodyResult")
                     }
                     callBack?.invoke(bodyResult, null)
@@ -108,7 +108,7 @@ class Http {
 
         sharedHttpClient().newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                if(Pam.shared.enableLog){
+                if(Pam.shared.isLogEnable){
                     Log.d("PAM-HTTP!", "ERROR >> ${e.localizedMessage}")
                 }
                 callBack?.invoke(null, e)
@@ -117,7 +117,7 @@ class Http {
             override fun onResponse(call: Call, response: Response) {
                 response.use { res ->
                     val bodyResult = res.body!!.string()
-                    if(Pam.shared.enableLog){
+                    if(Pam.shared.isLogEnable){
                         Log.d("PAM-HTTP!", "${res.code} >> $bodyResult")
                     }
                     callBack?.invoke(bodyResult, null)
