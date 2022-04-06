@@ -237,7 +237,6 @@ class Pam {
     var app: Application? = null
     var options: PamOption? = null
     private val queueTrackerManager = QueueTrackerManager()
-    var enableLog = false
     var isAppReady = false
 
     var onTokenListener = mutableListOf<ListenerFunction>()
@@ -614,7 +613,7 @@ class Pam {
             queryString = mapOf(),
             data = body
         ) { text, _ ->
-            if (enableLog) {
+            if (isLogEnable) {
                 Log.d("PAM", "track response is $text\n")
             }
 
