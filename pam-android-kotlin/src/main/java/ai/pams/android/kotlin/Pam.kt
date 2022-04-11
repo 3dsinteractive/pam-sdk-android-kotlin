@@ -61,6 +61,7 @@ class Pam {
         fun getDeviceUUID() = shared.getDeviceUUID()
         fun getContactID() = shared.getContactID()
         fun isUserLoggedin() = shared.isUserLoggedin()
+
         fun loadConsentPermissions(
             consentMessageIds: List<String>,
             onLoad: (Map<String, UserConsentPermissions>) -> Unit
@@ -134,8 +135,6 @@ class Pam {
                 }
             }
         }
-
-
 
         fun cleanEverything() {
             shared.removeValue(SaveKey.PushKey)
@@ -252,11 +251,11 @@ class Pam {
 
     private var cacheDeviceUUID: String? = null
 
-    var allowTracking = false
-        set(value) {
-            field = value
-            saveValue(SaveKey.AllowTracking, value)
-        }
+    var allowTracking: Boolean = false
+    set(value){
+        field = value
+        saveValue(SaveKey.AllowTracking, value)
+    }
 
     private var sharedPreferences: SharedPreferences? = null
 
@@ -489,7 +488,7 @@ class Pam {
 
     }
 
-    fun setDeviceToken(deviceToken: String) {
+    private fun setDeviceToken(deviceToken: String) {
         track(
             "save_push", mapOf(
                 "android_notification" to deviceToken
@@ -504,14 +503,23 @@ class Pam {
         trackerCallback: TrackerCallback?
     ) {
 
-//        if(eventName != "login" && eventName != "save_push" && eventName != "allow_consent") {
-//            if (!allowTracking) {
-//                Log.d("PAM", "🤡 NOTRACKING $eventName")
-//                return
-//            }
-//        }
+        val contactID = Pam.getContactID() ?: ""
+        if(eventName == "allow_consent" || eventName == "save_push"){
+            this.queueTrackerManager.enqueue(eventName, payload, trackerCallback)
+            return
+        }else if(contactID != "" && allowTracking){
+            this.queueTrackerManager.enqueue(eventName, payload, trackerCallback)
+            return
+        }
 
-        this.queueTrackerManager.enqueue(eventName, payload, trackerCallback)
+        if(isLogEnable) {
+            if(contactID == ""){
+                Log.d("PAM", "🤡 No Track Event $eventName. Because of no contact id yet.")
+            }
+            if(!allowTracking){
+                Log.d("PAM", "🤡 No Track Event $eventName. Because of usr not yet allow Preferences cookies.")
+            }
+        }
     }
 
     fun isUserLoggedin(): Boolean {

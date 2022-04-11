@@ -1,6 +1,7 @@
 package ai.pams.android.kotlin.api
 
 import ai.pams.android.kotlin.Pam
+import ai.pams.android.kotlin.consent.ConsentPermissionName
 import ai.pams.android.kotlin.consent.UserConsentPermissions
 import ai.pams.android.kotlin.consent.models.AllowConsentResult
 import ai.pams.android.kotlin.consent.models.BaseConsentMessage
@@ -129,7 +130,10 @@ class ConsentAPI {
         }
 
         val consentMessageID = consentMessagesIdQueue?.get(index) ?: ""
-        Log.d("PAMHTTP","consentMessageID=$consentMessageID" )
+
+        if(Pam.shared.isLogEnable) {
+            Log.d("PAMHTTP", "consentMessageID=$consentMessageID")
+        }
 
         index++
         if(consentMessageID == ""){
@@ -151,6 +155,16 @@ class ConsentAPI {
                         val json = JSONObject(result)
                         val userConsent = UserConsentPermissions.parse(json)
                         resultUserConsentLoad?.put(consentMessageID, userConsent)
+
+                        Pam.shared.options?.trackingConsentMessageID?.let{ trackingConsentMessageID ->
+                            if(consentMessageID == trackingConsentMessageID){
+                                userConsent.permissions?.forEach { permission ->
+                                    if(permission.name == ConsentPermissionName.PreferencesCookies ){
+                                        Pam.shared.allowTracking = permission.allow
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 startLoadPermissions()
