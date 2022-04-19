@@ -209,15 +209,29 @@ class Pam {
 
         fun setPushNotificationToken(token: String) = shared.setPushNotificationToken(token)
 
+        /**
+         * Find push notification from customer id
+         */
         fun loadPushNotificationsFromCustomerID(context: Context,customerID: String, callBack: ((List<NotificationItem>) -> Unit)?)
-        = NotificationAPI.loadPushNotificationsFromCustomerID(context, customerID, callBack)
+        = NotificationAPI.loadPushNotifications(context=context, customerID=customerID, callBack=callBack)
 
-        fun loadPushNotificationsMobile(context: Context, mobile: String, callBack: ((List<NotificationItem>) -> Unit)?)
-        = NotificationAPI.loadPushNotificationsMobile(context, mobile, callBack)
+        /**
+         * Find push notification from mobile
+         */
+        fun loadPushNotificationsFromMobile(context: Context, mobile: String, callBack: ((List<NotificationItem>) -> Unit)?)
+        = NotificationAPI.loadPushNotifications(context=context, mobile=mobile, callBack=callBack)
 
-        fun loadPushNotificationsEmail(context: Context, email: String, callBack: ((List<NotificationItem>) -> Unit)?)
-        = NotificationAPI.loadPushNotificationsEmail(context, email, callBack)
+        /**
+         * Find push notification from email
+         */
+        fun loadPushNotificationsFromEmail(context: Context, email: String, callBack: ((List<NotificationItem>) -> Unit)?)
+        = NotificationAPI.loadPushNotifications(context=context, email=email, callBack=callBack)
 
+        /**
+         * Find push notification from PAM contact id
+         */
+        fun loadPushNotifications(context: Context, callBack: ((List<NotificationItem>) -> Unit)?)
+                = NotificationAPI.loadPushNotifications(context=context, callBack=callBack)
     }
 
     enum class SaveKey(val keyName: String) {
