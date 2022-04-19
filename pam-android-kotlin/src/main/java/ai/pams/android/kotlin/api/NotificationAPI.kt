@@ -22,15 +22,24 @@ class NotificationAPI {
             customerID: String,
             callBack: ((List<NotificationItem>) -> Unit)?
         ) {
-            val db = Pam.getDatabaseAlias()
+            val db = Pam.getDatabaseAlias() ?: ""
             val contactID = Pam.getContactID() ?: "-"
             val pamServerURL = Pam.shared.options?.pamServer ?: "-"
 
             val endpoint =
-                "${pamServerURL}/api/app-notifications/?_database=${db}&_contact_id=${contactID}&customer=${customerID}"
+                "${pamServerURL}/api/app-notifications/"
+
+            val queryString = mapOf(
+                "_database" to db,
+                "_contact_id" to contactID,
+                "customer" to customerID
+            )
 
             Http.getInstance()
-                .get(endpoint) { result, _ ->
+                .get(
+                    url=endpoint,
+                    queryString = queryString
+                ) { result, _ ->
                     val model = createGson().fromJson(result, NotificationList::class.java)
                     model.items?.forEach {
                         it.parseFlex(context)
@@ -45,15 +54,23 @@ class NotificationAPI {
             mobile: String,
             callBack: ((List<NotificationItem>) -> Unit)?
         ) {
-            val db = Pam.getDatabaseAlias()
+            val db = Pam.getDatabaseAlias() ?: ""
             val contactID = Pam.getContactID() ?: "-"
             val pamServerURL = Pam.shared.options?.pamServer ?: "-"
 
             val endpoint =
-                "${pamServerURL}/api/app-notifications/?_database=${db}&_contact_id=${contactID}&sms=${mobile}"
+                "${pamServerURL}/api/app-notifications/"
+
+            val queryString = mapOf(
+                "_database" to db,
+                "_contact_id" to contactID,
+                "sms" to mobile
+            )
 
             Http.getInstance()
-                .get(endpoint) { result, _ ->
+                .get(url=endpoint,
+                    queryString = queryString
+                ) { result, _ ->
                     val model = createGson().fromJson(result, NotificationList::class.java)
                     model.items?.forEach {
                         it.parseFlex(context)
@@ -68,15 +85,24 @@ class NotificationAPI {
             email: String,
             callBack: ((List<NotificationItem>) -> Unit)?
         ) {
-            val db = Pam.getDatabaseAlias()
+            val db = Pam.getDatabaseAlias() ?: ""
             val contactID = Pam.getContactID() ?: "-"
             val pamServerURL = Pam.shared.options?.pamServer ?: "-"
 
             val endpoint =
-                "${pamServerURL}/api/app-notifications/?_database=${db}&_contact_id=${contactID}&email=${email}"
+                "${pamServerURL}/api/app-notifications/"
+
+            val queryString = mapOf(
+                "_database" to db,
+                "_contact_id" to contactID,
+                "email" to email
+            )
 
             Http.getInstance()
-                .get(endpoint) { result, _ ->
+                .get(
+                    url=endpoint,
+                    queryString = queryString
+                ) { result, _ ->
                     val model = createGson().fromJson(result, NotificationList::class.java)
                     model.items?.forEach {
                         it.parseFlex(context)
