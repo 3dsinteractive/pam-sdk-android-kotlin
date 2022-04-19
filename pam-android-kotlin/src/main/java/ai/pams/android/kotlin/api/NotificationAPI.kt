@@ -18,89 +18,49 @@ class NotificationAPI {
             .registerTypeAdapterFactory(NullableTypeAdapterFactory())
             .create()
 
-        fun loadPushNotificationsFromCustomerID(context: Context,
-            customerID: String,
+        fun loadPushNotifications(
+            context: Context,
+            mobile: String? = null,
+            email: String? = null,
+            customerID: String? = null,
+            contactID: String? = null,
             callBack: ((List<NotificationItem>) -> Unit)?
         ) {
-            val db = Pam.getDatabaseAlias() ?: ""
-            val contactID = Pam.getContactID() ?: "-"
+
             val pamServerURL = Pam.shared.options?.pamServer ?: "-"
 
             val endpoint =
                 "${pamServerURL}/api/app-notifications/"
 
-            val queryString = mapOf(
-                "_database" to db,
-                "_contact_id" to contactID,
-                "customer" to customerID
-            )
+            val queryString = mutableMapOf<String,String>()
+
+            Pam.getDatabaseAlias()?.let{
+                queryString["_database"] = it
+            }
+
+            val contact = when (contactID) {
+                null -> Pam.getContactID()
+                else -> contactID
+            }
+            contact?.let {
+                queryString["_contact_id"] = it
+            }
+
+            customerID?.let {
+                queryString["customer"] = it
+            }
+
+            mobile?.let {
+                queryString["sms"] = it
+            }
+
+            email?.let {
+                queryString["email"] = it
+            }
 
             Http.getInstance()
                 .get(
-                    url=endpoint,
-                    queryString = queryString
-                ) { result, _ ->
-                    val model = createGson().fromJson(result, NotificationList::class.java)
-                    model.items?.forEach {
-                        it.parseFlex(context)
-                    }
-                    CoroutineScope(Dispatchers.Main).launch {
-                        callBack?.invoke(model.items ?: listOf())
-                    }
-                }
-        }
-
-        fun loadPushNotificationsMobile(context: Context,
-            mobile: String,
-            callBack: ((List<NotificationItem>) -> Unit)?
-        ) {
-            val db = Pam.getDatabaseAlias() ?: ""
-            val contactID = Pam.getContactID() ?: "-"
-            val pamServerURL = Pam.shared.options?.pamServer ?: "-"
-
-            val endpoint =
-                "${pamServerURL}/api/app-notifications/"
-
-            val queryString = mapOf(
-                "_database" to db,
-                "_contact_id" to contactID,
-                "sms" to mobile
-            )
-
-            Http.getInstance()
-                .get(url=endpoint,
-                    queryString = queryString
-                ) { result, _ ->
-                    val model = createGson().fromJson(result, NotificationList::class.java)
-                    model.items?.forEach {
-                        it.parseFlex(context)
-                    }
-                    CoroutineScope(Dispatchers.Main).launch {
-                        callBack?.invoke(model.items ?: listOf())
-                    }
-                }
-        }
-
-        fun loadPushNotificationsEmail(context: Context,
-            email: String,
-            callBack: ((List<NotificationItem>) -> Unit)?
-        ) {
-            val db = Pam.getDatabaseAlias() ?: ""
-            val contactID = Pam.getContactID() ?: "-"
-            val pamServerURL = Pam.shared.options?.pamServer ?: "-"
-
-            val endpoint =
-                "${pamServerURL}/api/app-notifications/"
-
-            val queryString = mapOf(
-                "_database" to db,
-                "_contact_id" to contactID,
-                "email" to email
-            )
-
-            Http.getInstance()
-                .get(
-                    url=endpoint,
+                    url = endpoint,
                     queryString = queryString
                 ) { result, _ ->
                     val model = createGson().fromJson(result, NotificationList::class.java)
