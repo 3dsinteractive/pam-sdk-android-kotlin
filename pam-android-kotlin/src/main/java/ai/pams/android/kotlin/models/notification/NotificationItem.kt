@@ -27,22 +27,24 @@ data class NotificationItem(
     @SerializedName("title")
     val title: String? = null,
     @SerializedName("url")
-    val url: String? = null
-){
+    val url: String? = null,
+    @SerializedName("popupType")
+    val popupType: String? = null,
+) {
     var bannerUrl: String? = null
 
-    fun parseFlex(context: Context){
-        flex?.let{
+    fun parseFlex(context: Context) {
+        flex?.let {
             val parser = FlexParser(context)
             val flexView = parser.parse(flex)
-            (flexView?.childs?.get(0) as? PImage)?.let{
+            (flexView?.childs?.get(0) as? PImage)?.let {
                 bannerUrl = it.props["src"]
             }
         }
     }
 
-    fun trackOpen(){
-        pixel?.let{
+    fun trackOpen() {
+        pixel?.let {
             Http.getInstance().get(it)
         }
     }
