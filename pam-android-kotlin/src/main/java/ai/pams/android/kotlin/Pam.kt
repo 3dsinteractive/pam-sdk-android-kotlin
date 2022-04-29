@@ -604,6 +604,7 @@ class Pam {
     }
 
     private fun createGson() = GsonBuilder()
+            .setDateFormat("yyyy-MM-dd HH:mm:ss")
             .registerTypeAdapterFactory(NullableTypeAdapterFactory())
             .create()
 
