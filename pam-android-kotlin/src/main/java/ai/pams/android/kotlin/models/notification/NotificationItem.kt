@@ -6,10 +6,11 @@ import ai.pams.android.kotlin.flex.parser.PImage
 import ai.pams.android.kotlin.http.Http
 import android.content.Context
 import com.google.gson.annotations.SerializedName
+import java.util.*
 
 data class NotificationItem(
     @SerializedName("created_date")
-    val createdDate: String? = null,
+    val date: Date? = null,
     @SerializedName("deliver_id")
     val deliverId: String? = null,
     @SerializedName("description")
@@ -32,6 +33,10 @@ data class NotificationItem(
     val popupType: String? = null,
 ) {
     var bannerUrl: String? = null
+
+    @Deprecated("createdDate is deprecated use date instead.", ReplaceWith("date"))
+    val createdDate: Date?
+        get() = date
 
     fun parseFlex(context: Context) {
         flex?.let {
