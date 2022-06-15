@@ -30,7 +30,7 @@ class NotificationAPI {
             val pamServerURL = Pam.shared.options?.pamServer ?: "-"
 
             val endpoint =
-                "${pamServerURL}/api/app-notifications/"
+                "${pamServerURL}/api/app-notifications"
 
             val queryString = mutableMapOf<String,String>()
 
