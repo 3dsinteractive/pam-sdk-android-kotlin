@@ -9,27 +9,16 @@ import com.google.gson.annotations.SerializedName
 import java.util.*
 
 data class NotificationItem(
-    @SerializedName("created_date")
-    val date: Date? = null,
-    @SerializedName("deliver_id")
+    var date: Date? = null,
     val deliverId: String? = null,
-    @SerializedName("description")
     val description: String? = null,
-    @SerializedName("flex")
     val flex: String? = null,
-    @SerializedName("is_open")
     val isOpen: Boolean? = null,
-    @SerializedName("json_data")
-    val payload: Payload? = null,
-    @SerializedName("pixel")
+    val payload: Map<String, Any>? = null,
     val pixel: String? = null,
-    @SerializedName("thumbnail_url")
     val thumbnailUrl: String? = null,
-    @SerializedName("title")
     val title: String? = null,
-    @SerializedName("url")
     val url: String? = null,
-    @SerializedName("popupType")
     val popupType: String? = null,
 ) {
     var bannerUrl: String? = null
