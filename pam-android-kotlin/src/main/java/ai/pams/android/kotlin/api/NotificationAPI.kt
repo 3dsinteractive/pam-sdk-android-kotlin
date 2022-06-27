@@ -63,10 +63,7 @@ class NotificationAPI {
                     url = endpoint,
                     queryString = queryString
                 ) { result, _ ->
-                    val model = createGson().fromJson(result, NotificationList::class.java)
-                    model.items?.forEach {
-                        it.parseFlex(context)
-                    }
+                    val model = NotificationList.parse(result, context);
                     CoroutineScope(Dispatchers.Main).launch {
                         callBack?.invoke(model.items ?: listOf())
                     }
