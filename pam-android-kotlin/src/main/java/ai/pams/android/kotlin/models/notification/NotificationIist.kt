@@ -64,7 +64,7 @@ class NotificationList(
                         pixel = jsonItem.optString("pixel"),
                         thumbnailUrl = jsonItem.optString("thumbnail_url"),
                         title = jsonItem.optString("title"),
-                        url = jsonItem.optString("title"),
+                        url = jsonItem.optString("url"),
                         popupType = jsonPayload?.optString("popupType")
                     )
                     item.parseFlex(context)
