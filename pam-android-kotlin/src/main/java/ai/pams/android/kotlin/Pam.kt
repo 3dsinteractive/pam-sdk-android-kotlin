@@ -22,9 +22,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 
 data class PamResponse(
@@ -274,8 +272,8 @@ class Pam {
     private var sharedPreferences: SharedPreferences? = null
 
     init {
-        queueTrackerManager.onNext = { eventName, payload, trackerCallback ->
-            postTracker(eventName, payload, trackerCallback)
+        queueTrackerManager.onNext = { eventName, delayAfterPost, payload, trackerCallback ->
+            postTracker(eventName, delayAfterPost, payload, trackerCallback)
         }
     }
 
@@ -478,26 +476,54 @@ class Pam {
     }
 
     fun userLogin(customerID: String, callBack: (() -> Unit)? = null) {
+        val delay = 3000L
+
+        val deleteMedia = mapOf(
+            "_delete_media" to mapOf(
+                "android_notification" to ""
+            )
+        )
+        track("delete_media",deleteMedia, delay, null)
+
         custID = customerID
         saveValue(SaveKey.CustomerID, customerID)
-        track("login") {
+        track("login", null, delayAfterPost = 2000L) {
             callBack?.invoke()
+        }
+
+        readValue(SaveKey.PushKey)?.let{ deviceToken->
+            track(
+                "save_push", mapOf(
+                    "android_notification" to deviceToken
+                )
+            )
         }
     }
 
     fun userLogout(callBack: (() -> Unit)? = null) {
-        val payload = mapOf(
+
+        val deleteMediaPayload = mapOf(
             "_delete_media" to mapOf(
                 "android_notification" to ""
             )
         )
 
-        track("logout", payload) {
+        val delay = 3000L
+
+        track("logout", deleteMediaPayload,delay) {
             this.custID = null
             this.loginContactID = null
             this.removeValue(SaveKey.CustomerID)
             this.removeValue(SaveKey.LoginContactID)
             callBack?.invoke()
+        }
+
+        readValue(SaveKey.PushKey)?.let{ deviceToken->
+            track(
+                "save_push", mapOf(
+                    "android_notification" to deviceToken
+                )
+            )
         }
 
     }
@@ -514,15 +540,15 @@ class Pam {
     fun track(
         eventName: String,
         payload: Map<String, Any>? = null,
+        delayAfterPost: Long,
         trackerCallback: TrackerCallback?
     ) {
-
         val contactID = Pam.getContactID() ?: ""
         if(eventName == "allow_consent" || eventName == "save_push"){
-            this.queueTrackerManager.enqueue(eventName, payload, trackerCallback)
+            this.queueTrackerManager.enqueue(eventName, payload, delayAfterPost, trackerCallback)
             return
         }else if(contactID != "" && allowTracking){
-            this.queueTrackerManager.enqueue(eventName, payload, trackerCallback)
+            this.queueTrackerManager.enqueue(eventName, payload, delayAfterPost, trackerCallback)
             return
         }
 
@@ -534,6 +560,14 @@ class Pam {
                 Log.d("PAM", "🤡 No Track Event $eventName. Because of usr not yet allow Preferences cookies.")
             }
         }
+    }
+
+    fun track(
+        eventName: String,
+        payload: Map<String, Any>? = null,
+        trackerCallback: TrackerCallback?
+    ) {
+        track(eventName, payload, 0L ,trackerCallback)
     }
 
     fun isUserLoggedin(): Boolean {
@@ -617,6 +651,7 @@ class Pam {
 
     private fun postTracker(
         eventName: String,
+        delayAfterPost: Long,
         payload: Map<String, Any>?,
         trackerCallBack: TrackerCallback? = null
     ) {
@@ -653,13 +688,24 @@ class Pam {
                     }
                 }
 
-                val task = CoroutineScope(Dispatchers.Main)
-                task.launch {
+                CoroutineScope(Dispatchers.Default).launch {
+
                     response?.let{
-                        trackerCallBack?.invoke(it)
+                        withContext(Dispatchers.Main){
+                            trackerCallBack?.invoke(it)
+                        }
                     }
-                    queueTrackerManager.next()
+
+                    if(delayAfterPost > 0L) {
+                        delay(delayAfterPost)
+                    }
+
+                    withContext(Dispatchers.Main){
+                        queueTrackerManager.next()
+                    }
+
                 }
+
             } catch (e: JsonSyntaxException) {
 
             }
