@@ -1,5 +1,6 @@
 package ai.pams.android.kotlin.models.notification
 
+import ai.pams.android.kotlin.utils.DateUtils
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -7,22 +8,13 @@ import org.json.JSONObject
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class NotificationList(
     var items: List<NotificationItem>? = null
 ){
     companion object{
-
-        private fun stringToDate(dateString: String): Date? {
-            val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
-            try {
-                return format.parse(dateString)
-            } catch (e: ParseException) {
-                e.printStackTrace()
-            }
-            return null
-        }
 
         fun parse(jsonString: String?, context: Context): NotificationList{
             if(jsonString == null){
@@ -55,7 +47,7 @@ class NotificationList(
                     }
 
                     val item = NotificationItem(
-                        date = stringToDate(createdDate),
+                        date = DateUtils.localDateTimeFromString(createdDate),
                         deliverId = jsonItem.optString("deliver_id"),
                         description = jsonItem.optString("description"),
                         flex = jsonItem.optString("flex"),
