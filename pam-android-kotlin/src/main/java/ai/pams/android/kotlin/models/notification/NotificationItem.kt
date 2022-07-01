@@ -5,9 +5,7 @@ import ai.pams.android.kotlin.flex.parser.FlexParser
 import ai.pams.android.kotlin.flex.parser.PImage
 import ai.pams.android.kotlin.http.Http
 import android.content.Context
-import com.google.gson.annotations.SerializedName
 import org.threeten.bp.LocalDateTime
-import java.util.*
 
 data class NotificationItem(
     var date: LocalDateTime? = null,

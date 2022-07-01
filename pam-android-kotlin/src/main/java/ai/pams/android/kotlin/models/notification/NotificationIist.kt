@@ -2,14 +2,7 @@ package ai.pams.android.kotlin.models.notification
 
 import ai.pams.android.kotlin.utils.DateUtils
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import org.json.JSONObject
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 class NotificationList(
     var items: List<NotificationItem>? = null
