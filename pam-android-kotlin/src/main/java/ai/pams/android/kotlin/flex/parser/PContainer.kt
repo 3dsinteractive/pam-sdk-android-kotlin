@@ -1,7 +1,6 @@
 package ai.pams.android.kotlin.flex.parser
 
 import android.view.View
-import android.widget.LinearLayout
 
 class PContainer: PView() {
 
