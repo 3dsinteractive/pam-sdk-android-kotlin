@@ -36,7 +36,12 @@ data class NotificationItem(
         }
     }
 
+    @Deprecated("use read() instead of trackOpen()")
     fun trackOpen() {
+        read()
+    }
+
+    fun read() {
         pixel?.let {
             Http.getInstance().get(it)
         }
