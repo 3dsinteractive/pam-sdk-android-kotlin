@@ -7,7 +7,7 @@ import org.threeten.bp.format.DateTimeFormatter
 class DateUtils {
     companion object {
 
-        fun getDateFormat() = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        fun getDateFormat() = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("GMT0"))
 
         fun hourFromGMT(): Int {
             val now = LocalDateTime.now()
