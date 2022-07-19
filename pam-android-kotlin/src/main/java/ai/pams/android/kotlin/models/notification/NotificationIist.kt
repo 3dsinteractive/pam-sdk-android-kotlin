@@ -2,6 +2,7 @@ package ai.pams.android.kotlin.models.notification
 
 import ai.pams.android.kotlin.utils.DateUtils
 import android.content.Context
+import org.json.JSONException
 import org.json.JSONObject
 
 class NotificationList(
@@ -19,7 +20,14 @@ class NotificationList(
             val noti = NotificationList();
             val list = mutableListOf<NotificationItem>()
 
-            val json = JSONObject(jsonString)
+            var json:JSONObject?
+            try {
+                json = JSONObject(jsonString)
+            }catch(e: JSONException){
+                noti.items = listOf()
+                return noti
+            }
+
             val itemsArray = json.optJSONArray("items")
             val count = itemsArray?.length() ?: 0
             for(i in 0 until count){
@@ -34,7 +42,7 @@ class NotificationList(
                     val iterator = jsonPayload?.keys()
                     while(iterator?.hasNext() == true){
                         val key = iterator.next()
-                        jsonPayload?.get(key)?.let{ data ->
+                        jsonPayload?.opt(key)?.let{ data->
                             payload[key] = data
                         }
                     }
