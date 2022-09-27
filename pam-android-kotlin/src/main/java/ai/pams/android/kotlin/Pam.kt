@@ -161,7 +161,9 @@ class Pam {
 
             var pamServer = config.metaData.get("pam-server").toString()
             if (pamServer.endsWith("/")) {
-                pamServer = pamServer.replaceFirst(".$", "")
+                while(pamServer.endsWith("/")){
+                    pamServer = pamServer.dropLast(1)
+                }
             }
 
             config.metaData.get("pam-tracking-consent-message-id")
