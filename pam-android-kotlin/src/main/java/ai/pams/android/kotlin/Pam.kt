@@ -454,7 +454,7 @@ class Pam {
 
         val url = "${options?.pamServer!!}/api/app-notifications"
 
-        val query = mutableMapOf<String, String>(
+        val query = mutableMapOf(
             "_database" to (getDatabaseAlias() ?: "")
         )
 
