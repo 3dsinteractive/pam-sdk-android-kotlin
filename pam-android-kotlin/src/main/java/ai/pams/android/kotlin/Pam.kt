@@ -22,6 +22,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
+import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -149,6 +150,8 @@ class Pam {
         }
 
         fun initialize(application: Application, enableLog: Boolean = false) {
+            AndroidThreeTen.init(application)
+
             shared.allowTracking = shared.readBoolValue(SaveKey.AllowTracking) ?: false
 
             shared.isLogEnable = enableLog
