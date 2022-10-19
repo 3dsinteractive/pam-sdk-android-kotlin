@@ -55,6 +55,12 @@ class DateUtils {
             return formatter.format(zdt)
         }
 
+        fun localDateToServerFormat(date: LocalDateTime): String {
+            val zdt = ZonedDateTime.of(date.toLocalDate(), LocalTime.MIDNIGHT, ZoneId.of("GMT0"))
+            val formatter = getDateFormat()
+            return formatter.format(zdt)
+        }
+
         fun convertGMT0StringToLocalDateTime(dateTimeString: String?): LocalDateTime? {
             if (dateTimeString == null || dateTimeString == "") {
                 return null
