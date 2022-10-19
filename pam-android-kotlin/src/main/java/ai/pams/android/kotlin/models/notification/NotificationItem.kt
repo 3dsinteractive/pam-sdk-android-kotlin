@@ -8,18 +8,21 @@ import ai.pams.android.kotlin.utils.DateUtils
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
+import kotlinx.parcelize.IgnoredOnParcel
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 
-
+@Parcelize
 data class NotificationItem(
     var date: Date? = null,
     val deliverId: String? = null,
     val description: String? = null,
     val flex: String? = null,
     val isOpen: Boolean? = null,
-    val payload: Map<String, Any>? = null,
+    val payload: @RawValue Map<String, Any>? = null,
     val pixel: String? = null,
     val thumbnailUrl: String? = null,
     val title: String? = null,
@@ -53,100 +56,4 @@ data class NotificationItem(
         }
     }
 
-
-    //PARCEL IMPLEMENTATION
-    constructor(parcel: Parcel) : this(
-        //date
-        convertStringToDate(parcel.readString() ),
-        //deliverId
-        parcel.readString(),
-        //description
-        parcel.readString(),
-        //flex
-        parcel.readString(),
-        //isOpen
-        parcel.readValue(Boolean::class.java.classLoader) as? Boolean,
-        //payload
-        jsonToMap( parcel.readString()),
-        //pixel
-        parcel.readString(),
-        //thumbnailUrl
-        parcel.readString(),
-        //title
-        parcel.readString(),
-        //url
-        parcel.readString(),
-        //popupType
-        parcel.readString()
-    ) {
-        bannerUrl = parcel.readString()
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        //date
-        if( date != null ){
-            var dateStr = ""
-            date?.let{
-                val dateFormat = SimpleDateFormat("yyyy-mm-dd hh:mm:ss")
-                dateStr = dateFormat.format(it)
-            }
-            parcel.writeString(dateStr)
-        }else{
-            parcel.writeString("-")
-        }
-
-        parcel.writeString(deliverId)
-        parcel.writeString(description)
-        parcel.writeString(flex)
-        parcel.writeValue(isOpen)
-        parcel.writeValue(payload)
-        parcel.writeString(pixel)
-        parcel.writeString(thumbnailUrl)
-        parcel.writeString(title)
-        parcel.writeString(url)
-        parcel.writeString(popupType)
-        parcel.writeString(bannerUrl)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<NotificationItem> {
-        override fun createFromParcel(parcel: Parcel): NotificationItem {
-            return NotificationItem(parcel)
-        }
-
-        override fun newArray(size: Int): Array<NotificationItem?> {
-            return arrayOfNulls(size)
-        }
-
-        fun jsonToMap(jsonStr: String?): Map<String, Any>? {
-            if(jsonStr == null){
-                return null
-            }
-            val json = JSONObject(jsonStr)
-            val m = mutableMapOf<String, Any>()
-            json.keys().forEach {
-                if(json.get(it) is Int ){
-                    m[it] = json.optInt(it)
-                }else if(json.get(it) is String){
-                    m[it] = json.optString(it)
-                }else if(json.get(it) is Boolean){
-                    m[it] = json.optBoolean(it)
-                }else if(json.get(it) is Double){
-                    m[it] = json.optDouble(it)
-                }else{
-                    m[it] = json.get(it)
-                }
-            }
-            return m.toMap()
-        }
-        fun convertStringToDate(str: String?): Date?{
-            str?.let {
-                return@convertStringToDate SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(it)
-            }
-            return null
-        }
-    }
 }
