@@ -1,17 +1,25 @@
 package ai.pams.android.kotlin.utils
 
 import ai.pams.android.kotlin.models.notification.NotificationItem
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import com.google.firebase.messaging.RemoteMessage
 import org.json.JSONObject
 import org.threeten.bp.LocalDateTime
+import java.util.*
 
 class PAMUtils {
     companion object{
         fun isPamNotification(message: RemoteMessage): Boolean{
             return message.data.containsKey("pam")
+        }
+
+         fun convertToJavaDate(ld: LocalDateTime): Date {
+            val cal: Calendar = Calendar.getInstance()
+            cal.set(Calendar.YEAR, ld.year)
+            cal.set(Calendar.MONTH,ld.month.value-1)
+            cal.set(Calendar.DAY_OF_MONTH, ld.dayOfMonth)
+            return cal.time
         }
 
         fun convertRemoteMessageToPam(remoteMessage: RemoteMessage, context: Context): NotificationItem?{
@@ -33,8 +41,10 @@ class PAMUtils {
                         else-> DateUtils.localDateTimeFromString(pamObj.getString("created_date"))
                     }
 
+                    val date = convertToJavaDate(createdDate)
+
                     NotificationItem(
-                        createdDate,
+                        date,
                         null,
                         remoteMessage.notification?.body,
                         pamObj.getString("flex"),
@@ -60,7 +70,7 @@ class PAMUtils {
                     val title = intent.extras?.getString("title")
                     val message = intent.extras?.getString("message")
 
-                    val pam = intent.extras?.getString("pam")
+                    val pam = intent.extras?.getString("pam") ?: "{}"
                     val pamObj = JSONObject(pam)
 
                     val payload = mutableMapOf<String, Any>()
@@ -76,7 +86,7 @@ class PAMUtils {
                     }
 
                     NotificationItem(
-                        createdDate,
+                        convertToJavaDate(createdDate),
                         null,
                         message,
                         pamObj.getString("flex"),
