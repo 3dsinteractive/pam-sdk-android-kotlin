@@ -1,6 +1,7 @@
 package ai.pams.android.kotlin.models.notification
 
 import ai.pams.android.kotlin.utils.DateUtils
+import ai.pams.android.kotlin.utils.PAMUtils
 import android.content.Context
 import org.json.JSONException
 import org.json.JSONObject
@@ -47,8 +48,10 @@ class NotificationList(
                         }
                     }
 
+                    val date = PAMUtils.convertToJavaDate(DateUtils.localDateTimeFromString(createdDate))
+
                     val item = NotificationItem(
-                        date = DateUtils.localDateTimeFromString(createdDate),
+                        date = date,
                         deliverId = jsonItem.optString("deliver_id"),
                         description = jsonItem.optString("description"),
                         flex = jsonItem.optString("flex"),

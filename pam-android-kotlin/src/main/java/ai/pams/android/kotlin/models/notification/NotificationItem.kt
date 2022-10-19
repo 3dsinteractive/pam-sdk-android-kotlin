@@ -9,12 +9,12 @@ import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import org.json.JSONObject
-import org.threeten.bp.LocalDateTime
-
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 data class NotificationItem(
-    var date: LocalDateTime? = null,
+    var date: Date? = null,
     val deliverId: String? = null,
     val description: String? = null,
     val flex: String? = null,
@@ -29,7 +29,7 @@ data class NotificationItem(
     var bannerUrl: String? = null
 
     @Deprecated("createdDate is deprecated use date instead.", ReplaceWith("date"))
-    val createdDate: LocalDateTime?
+    val createdDate: Date?
         get() = date
 
     fun parseFlex(context: Context) {
@@ -87,7 +87,8 @@ data class NotificationItem(
         if( date != null ){
             var dateStr = ""
             date?.let{
-                dateStr = DateUtils.localDateToServerFormat(it)
+                val dateFormat = SimpleDateFormat("yyyy-mm-dd hh:mm:ss")
+                dateStr = dateFormat.format(it)
             }
             parcel.writeString(dateStr)
         }else{
@@ -141,9 +142,9 @@ data class NotificationItem(
             }
             return m.toMap()
         }
-        fun convertStringToDate(str: String?): LocalDateTime?{
-            str?.let{
-                return@convertStringToDate DateUtils.localDateTimeFromString(str)
+        fun convertStringToDate(str: String?): Date?{
+            str?.let {
+                return@convertStringToDate SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(it)
             }
             return null
         }
