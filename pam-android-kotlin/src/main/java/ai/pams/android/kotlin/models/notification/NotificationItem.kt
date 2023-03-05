@@ -4,16 +4,12 @@ package ai.pams.android.kotlin.models.notification
 import ai.pams.android.kotlin.flex.parser.FlexParser
 import ai.pams.android.kotlin.flex.parser.PImage
 import ai.pams.android.kotlin.http.Http
-import ai.pams.android.kotlin.utils.DateUtils
 import android.content.Context
-import android.os.Parcel
 import android.os.Parcelable
 import kotlinx.parcelize.IgnoredOnParcel
-import org.json.JSONObject
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
+import java.util.*
 
 @Parcelize
 data class NotificationItem(
@@ -29,7 +25,7 @@ data class NotificationItem(
     val url: String? = null,
     val popupType: String? = null,
 ): Parcelable {
-    var bannerUrl: String? = null
+    @IgnoredOnParcel var bannerUrl: String? = null
 
     @Deprecated("createdDate is deprecated use date instead.", ReplaceWith("date"))
     val createdDate: Date?

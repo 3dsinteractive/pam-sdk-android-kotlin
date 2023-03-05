@@ -3,6 +3,7 @@ package ai.pams.android.kotlin.models.notification
 import ai.pams.android.kotlin.utils.DateUtils
 import ai.pams.android.kotlin.utils.PAMUtils
 import android.content.Context
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -29,10 +30,10 @@ class NotificationList(
                 return noti
             }
 
-            val itemsArray = json.optJSONArray("items")
-            val count = itemsArray?.length() ?: 0
+            val itemsArray = json.optJSONArray("items") ?: JSONArray()
+            val count = itemsArray.length()
             for(i in 0 until count){
-                itemsArray?.getJSONObject(i)?.let{  jsonItem->
+                itemsArray.getJSONObject(i)?.let{  jsonItem->
 
                     val createdDate = jsonItem.optString("created_date")
 

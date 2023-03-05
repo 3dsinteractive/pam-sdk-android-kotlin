@@ -25,8 +25,8 @@ public class FlexParser(val context: Context?) {
         return textSize[sizeName.name] ?: 6
     }
 
-    public fun parse(flex: String): PContainer? {
-        val flex = removingWhitespaces(flex)
+    public fun parse(flexString: String): PContainer? {
+        val flex = removingWhitespaces(flexString)
         var buffer = ""
         var root: PContainer? = null
         var currentElement: PView? = null

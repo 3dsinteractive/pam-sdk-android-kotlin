@@ -26,6 +26,13 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import kotlinx.coroutines.*
 import java.util.*
 
+
+data class AppVersionInfo(
+    val platformVersion: String?,
+    val appVersion: String?,
+    val osVersion: String?
+)
+
 data class PamResponse(
     @SerializedName("code") val code: String? = null,
     @SerializedName("message") val message: String? = null,
@@ -149,43 +156,37 @@ class Pam {
             shared.allowTracking = false
         }
 
-        fun initialize(application: Application, enableLog: Boolean = false) {
-            AndroidThreeTen.init(application)
-
-            shared.allowTracking = shared.readBoolValue(SaveKey.AllowTracking) ?: false
-
-            shared.isLogEnable = enableLog
-            shared.app = application
-
-            val config = application.packageManager.getApplicationInfo(
-                application.packageName,
-                PackageManager.GET_META_DATA
-            )
-
-            var pamServer = config.metaData.get("pam-server").toString()
-            if (pamServer.endsWith("/")) {
-                while(pamServer.endsWith("/")){
-                    pamServer = pamServer.dropLast(1)
-                }
+        private  fun getPamOption(application: Application):PamOption {
+            val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val flag = PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA.toLong())
+                application.packageManager.getApplicationInfo(application.packageName, flag).metaData
+            } else {
+                @Suppress("DEPRECATION") application.packageManager.getApplicationInfo(application.packageName, PackageManager.GET_META_DATA).metaData
             }
 
-            config.metaData.get("pam-tracking-consent-message-id")
+            val pamServer = info.getString("pam-server") ?: ""
+            val trackingConsentMessageID = info.getString( "pam-tracking-consent-message-id") ?: ""
+            val publicDBAlias = info.getString("public-db-alias") ?: ""
+            val loginDBAlias = info.getString("login-db-alias") ?: ""
+            val trackingConsentMessageInterval = info.getString("pam-tracking-consent-message-interval")
 
-            val publicDBAlias = config.metaData.get("public-db-alias").toString()
-            val loginDBAlias = config.metaData.get("login-db-alias").toString()
-            val teckingConsentMessageID =
-                config.metaData.get("pam-tracking-consent-message-id").toString()
-            val trackingConsentInterval = (config.metaData.get("pam-tracking-consent-message-interval") ?: "150").toString().toLong()
+            val interval =  trackingConsentMessageInterval?.toLong() ?: 20000
 
-
-            shared.options = PamOption(
-                pamServer = pamServer,
-                publicDbAlias = publicDBAlias,
-                loginDbAlias = loginDBAlias,
-                trackingConsentMessageID = teckingConsentMessageID,
-                trackingConsentInterval = trackingConsentInterval
+            return PamOption(
+                pamServer=pamServer,
+                publicDbAlias=publicDBAlias,
+                loginDbAlias=loginDBAlias,
+                trackingConsentMessageID= trackingConsentMessageID,
+                trackingConsentInterval=interval,
             )
+        }
 
+        fun initialize(application: Application, enableLog: Boolean = false) {
+            AndroidThreeTen.init(application)
+            shared.allowTracking = shared.readBoolValue(SaveKey.AllowTracking) ?: false
+            shared.isLogEnable = enableLog
+            shared.app = application
+            shared.options = Pam.getPamOption(application)
         }
 
         fun track(
@@ -259,9 +260,8 @@ class Pam {
     var onMessageListener = mutableListOf<ListenerFunction>()
     var pendingMessage = mutableListOf<Map<String, Any>>()
 
-    private var platformVersionCache: String? = null
-    private var osVersionCache: String? = null
-    private var appVersionCache: String? = null
+    private var appVersionInfoCache: AppVersionInfo? = null
+
     private var publicContactID: String? = null
     private var loginContactID: String? = null
     private var custID: String? = null
@@ -582,30 +582,58 @@ class Pam {
         return custID != null
     }
 
+
+    private  fun getAppVersion(application: Application?): AppVersionInfo? {
+        if(application == null){
+            return null
+        }
+
+        if ( appVersionInfoCache != null) {
+            return appVersionInfoCache
+        }
+
+        val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val flag = PackageManager.PackageInfoFlags.of(0)
+            application.packageManager.getPackageInfo(application.packageName, flag)
+        } else {
+            @Suppress("DEPRECATION") application.packageManager.getPackageInfo(application.packageName, 0)
+        }
+
+        val packageName = application.packageName ?: ""
+        val appVersion = "$packageName (${info?.versionName ?: ""})"
+        val osVersion = "Android: ${Build.VERSION.SDK_INT}"
+
+        val platformVersion =
+            "Android: ${Build.VERSION.SDK_INT} (${Build.VERSION.RELEASE}), $packageName: $appVersion"
+
+        appVersionInfoCache = AppVersionInfo(
+            platformVersion=platformVersion,
+            appVersion = appVersion,
+            osVersion = osVersion
+        )
+
+        return appVersionInfoCache
+    }
+
     private fun buildPayload(
         eventName: String,
         payload: Map<String, Any>? = null,
         trackingConsentMessageID: String? = null
     ): Map<String, Any> {
 
-        if (platformVersionCache == null) {
-            val pInfo = app?.packageManager?.getPackageInfo(app?.packageName ?: "", 0)
-            val packageName = app?.packageName ?: ""
-            appVersionCache = "$packageName (${pInfo?.versionName ?: ""})"
-            osVersionCache = "Android: ${Build.VERSION.SDK_INT}"
-
-            platformVersionCache =
-                "Android: ${Build.VERSION.SDK_INT} (${Build.VERSION.RELEASE}), $packageName: $appVersionCache"
-        }
+        val appVersionInfo = getAppVersion(app)
+        val platformVersion = appVersionInfo?.platformVersion ?: ""
+        val osVersion = appVersionInfo?.osVersion ?: ""
+        val appVersion = appVersionInfo?.appVersion ?: ""
 
         val body = mutableMapOf<String, Any>(
             "event" to eventName,
-            "platform" to (platformVersionCache ?: ""),
+            "platform" to platformVersion,
         )
 
         val formField = mutableMapOf<String, Any>(
-            "os_version" to (osVersionCache ?: ""),
-            "app_version" to (appVersionCache ?: ""),
+            "os_version" to osVersion ,
+            "app_version" to appVersion ,
             "_session_id" to getSessionID()
         )
 
