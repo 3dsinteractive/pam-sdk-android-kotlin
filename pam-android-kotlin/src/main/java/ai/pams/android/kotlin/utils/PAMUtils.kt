@@ -1,9 +1,12 @@
 package ai.pams.android.kotlin.utils
 
+import ai.pams.android.kotlin.Pam
 import ai.pams.android.kotlin.models.notification.NotificationItem
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.google.firebase.messaging.RemoteMessage
+import org.json.JSONException
 import org.json.JSONObject
 import org.threeten.bp.LocalDateTime
 import java.util.*
@@ -27,7 +30,15 @@ class PAMUtils {
             return when(remoteMessage.data.containsKey("pam")){
                 true-> {
                     val pam = remoteMessage.data["pam"] ?: "{}"
-                    val pamObj = JSONObject(pam)
+
+                    val pamObj = try{
+                        JSONObject(pam)
+                    }catch (e: JSONException){
+                        if(Pam.shared.isLogEnable) {
+                            Log.d("PAMHTTP", e.localizedMessage ?: "")
+                        }
+                        JSONObject("{}")
+                    }
 
                     val payload = mutableMapOf<String, Any>()
                     pamObj.keys().forEach { key->
@@ -71,7 +82,12 @@ class PAMUtils {
                     val message = intent.extras?.getString("message")
 
                     val pam = intent.extras?.getString("pam") ?: "{}"
-                    val pamObj = JSONObject(pam)
+
+                    val pamObj = try {
+                        JSONObject(pam)
+                    }catch (e: JSONException){
+                        return@readPamNotificationFromIntent null
+                    }
 
                     val payload = mutableMapOf<String, Any>()
                     pamObj.keys().forEach { key->

@@ -12,6 +12,7 @@ import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONException
 import org.json.JSONObject
 
 typealias OnLoadConsentMessage = (messages: Map<String, BaseConsentMessage>)->Unit
@@ -143,26 +144,40 @@ class ConsentAPI {
 
         isLoading = true
         val pamServerURL = Pam.shared.options?.pamServer ?: ""
+
         val contactID = Pam.shared.getContactID() ?: ""
 
-        Log.d("PAMHTTP","${pamServerURL}/contacts/$contactID/consents/$consentMessageID" )
+        if(contactID == ""){
+            startLoadPermissions()
+            return
+        }
+
+        if(Pam.shared.isLogEnable) {
+            Log.d("PAMHTTP", "${pamServerURL}/contacts/$contactID/consents/$consentMessageID")
+        }
 
         Http.getInstance()
             .get("${pamServerURL}/contacts/$contactID/consents/$consentMessageID") { result, error ->
                 Log.d("PAMHTTP","$result" )
                 if (error == null) {
                     if(result != null) {
-                        val json = JSONObject(result)
-                        val userConsent = UserConsentPermissions.parse(json)
-                        resultUserConsentLoad?.put(consentMessageID, userConsent)
+                        try {
+                            val json = JSONObject(result)
+                            val userConsent = UserConsentPermissions.parse(json)
+                            resultUserConsentLoad?.put(consentMessageID, userConsent)
 
-                        Pam.shared.options?.trackingConsentMessageID?.let{ trackingConsentMessageID ->
-                            if(consentMessageID == trackingConsentMessageID){
-                                userConsent.permissions?.forEach { permission ->
-                                    if(permission.name == ConsentPermissionName.PreferencesCookies ){
-                                        Pam.shared.allowTracking = permission.allow
+                            Pam.shared.options?.trackingConsentMessageID?.let { trackingConsentMessageID ->
+                                if (consentMessageID == trackingConsentMessageID) {
+                                    userConsent.permissions?.forEach { permission ->
+                                        if (permission.name == ConsentPermissionName.PreferencesCookies) {
+                                            Pam.shared.allowTracking = permission.allow
+                                        }
                                     }
                                 }
+                            }
+                        }catch (e: JSONException){
+                            if(Pam.shared.isLogEnable) {
+                                Log.d("PAMHTTP", e.localizedMessage ?: "")
                             }
                         }
                     }
@@ -197,9 +212,15 @@ class ConsentAPI {
             .get("${pamServerURL}/consent-message/$consentMessageID") { result, error ->
                 if (error == null) {
                     if(result != null) {
-                        val json = JSONObject(result)
-                        val consentMessage = ConsentMessage.parse(json)
-                        resultMessages?.put(consentMessageID, consentMessage)
+                        try{
+                            val json = JSONObject(result)
+                            val consentMessage = ConsentMessage.parse(json)
+                            resultMessages?.put(consentMessageID, consentMessage)
+                        }catch (e: JSONException){
+                            if(Pam.shared.isLogEnable) {
+                                Log.d("PAMHTTP", e.localizedMessage ?: "")
+                            }
+                        }
                     }else{
                         val msg = ConsentMessageError(
                             errorMessage = "Empty Response From Server.",
