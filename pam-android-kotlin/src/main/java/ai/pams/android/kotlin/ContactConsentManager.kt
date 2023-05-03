@@ -35,7 +35,8 @@ class ContactConsentManager(private val consentMessageID:String, private val fra
     private fun loadConsentMessage() {
         val pamServerURL = Pam.shared.options?.pamServer
         Http.getInstance()
-            .get("${pamServerURL ?: ""}/consent-message/$consentMessageID") { result, error ->
+            .get("${pamServerURL ?: ""}/consent-message/$consentMessageID"
+            ) { result, error ->
                 if (error == null) {
                     consentMessage = Gson().fromJson(result, ContactConsentModel::class.java)
                     ready = true
