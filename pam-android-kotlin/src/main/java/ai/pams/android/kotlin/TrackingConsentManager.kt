@@ -70,7 +70,8 @@ class TrackingConsentManager{
         consentMessageID = Pam.shared.options?.trackingConsentMessageID
         pamServerURL = Pam.shared.options?.pamServer
         Http.getInstance()
-            .get("${pamServerURL ?: ""}/consent-message/$consentMessageID") { result, error ->
+            .get("${pamServerURL ?: ""}/consent-message/$consentMessageID"
+            ) { result, error ->
                 if (error == null) {
                     trackingConsentMessageConfigurations = Gson().fromJson(result, TrackingConsentMessageConfigurations::class.java)
                     checkConsentPermission()

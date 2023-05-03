@@ -58,6 +58,7 @@ class Http {
         for ((k, v) in headers) {
             requestBuilder.addHeader(k, v)
         }
+        requestBuilder.addHeader("platform", "android")
 
         val jsonString = JSONObject(data).toString()
         val requestBody = jsonString.toRequestBody()
@@ -103,6 +104,7 @@ class Http {
         for ((k, v) in headers) {
             requestBuilder.addHeader(k, v)
         }
+        requestBuilder.addHeader("platform", "android")
 
         val request = requestBuilder.build()
 
